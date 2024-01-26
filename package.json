@@ -1,0 +1,21 @@
+{
+  "name": "fs-explorer",
+  "version": "1.0.0",
+  "description": "## Back",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc",
+    "test": "test"
+  },
+  "scripts": {
+    "release": "shadow-cljs release app",
+    "watch-app": "shadow-cljs watch app",
+    "watch-test": "shadow-cljs watch test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "shadow-cljs": "^2.27.1"
+  }
+}
