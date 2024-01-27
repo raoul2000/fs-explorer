@@ -17,9 +17,9 @@
  {:dev   {:extra-deps {djblue/portal {:mvn/version "0.19.0"}}
           :extra-paths ["src/dev"]}
   
-  :run-m {:main-opts  ["-m" "core"]}
+  :run-m {:main-opts  ["-m" "system"]}
 
-  :run-x {:ns-default core
+  :run-x {:ns-default system
           :exec-fn    start
           :exec-args  {:name "Clojure"}}
 

@@ -4,7 +4,7 @@
 
 (def lib 'raoul2000/fs-explorer)
 (def version "0.0.0")
-(def main 'core)
+(def main 'system)
 
 (defn test "Run the tests." [opts]
   (bb/run-tests opts))

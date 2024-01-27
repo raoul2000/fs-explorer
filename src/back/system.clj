@@ -1,21 +1,11 @@
 (ns system
   (:require [integrant.core :as ig]
             [io.pedestal.http :as http]
-            [io.pedestal.http.route :as route]))
-
-
-
-(defn create-greet-handler [{:keys [polite?] :as options}]
-  (fn [request]
-    {:status 200 :body (if polite? "Good morning " "Hi")}))
-
-(defn create-routes [options]
-  (tap> options)
-  #{["/greet" :get
-     (create-greet-handler options)
-     :route-name :greet]})
+            [server.routes :as server-routes])
+  (:gen-class))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (def config
   ;; the default configuration - can be over written by user config
   {:app/config      {:param1                   "value1"
@@ -39,9 +29,7 @@
 
 (defmethod ig/init-key :server/routes
   [_ {:keys [config]}]
-  (-> config
-      create-routes
-      route/expand-routes))
+  (server-routes/create config))
 
 (defmethod ig/init-key  :server/server
   [_ service-map]
@@ -60,3 +48,8 @@
   (ig/halt! system)
   ;;
   )
+
+(defn -main []
+  (-> config
+      (assoc-in [:app/config :polite?] true)
+      ig/init))
