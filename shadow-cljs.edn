@@ -3,12 +3,15 @@
  :source-paths ["src/front"
                 "src/shared"
                 "test/front"]
- 
- :dev-http     {8000 "resources/public"}
 
- :builds       {:app {:target        :browser
-                      :output-dir    "resources/public/js"
-                      :asset-path    "/js"
-                      :modules       {:main  {:entries   [app]
-                                              :init-fn   app/run}
-                                      }}}}
+ :dev-http     {8000 "resources/public"
+                8021 "out/test"}
+
+ :builds       {:app  {:target        :browser
+                       :output-dir    "resources/public/js"
+                       :asset-path    "/js"
+                       :modules       {:main  {:entries   [app]
+                                               :init-fn   app/run}}}
+
+                :test {:target    :browser-test
+                       :test-dir  "out/test"}}}
