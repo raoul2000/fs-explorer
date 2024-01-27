@@ -1,0 +1,4 @@
+@baseUrl = http://localhost:8890
+
+## GET /hello
+GET {{baseUrl}}/greet
