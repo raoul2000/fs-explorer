@@ -2,7 +2,8 @@
   (:require [portal.api :as p]
             [clojure.tools.namespace.repl :refer (refresh refresh-all)]
             [integrant.core :as ig]
-            [system :refer (config)]))
+            [system :refer (config)]
+            [clojure.test :as test]))
 
 (comment
 
@@ -34,6 +35,15 @@
   ;; stop the system
   (ig/halt! system)
 
+  ;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  (require 'server.routes-test
+           'server.handler.greet-test :reload-all)
+
+  (test/run-tests 'server.routes-test
+                  'server.handler.greet-test)
+
+  (test/run-all-tests)
 
   ;;
   )
