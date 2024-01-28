@@ -30,7 +30,8 @@
   ;; system ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   ;; start the system
-  (def system (ig/init config))
+  (def system (ig/init (-> config
+                           (assoc-in [:app/config :polite?] true))))
 
   ;; stop the system
   (ig/halt! system)
