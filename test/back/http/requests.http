@@ -1,4 +1,21 @@
 @baseUrl = http://localhost:8890
 
-## GET /hello
+### GET /hello
 GET {{baseUrl}}/greet
+
+### GET /hello
+
+GET {{baseUrl}}/greet?name=bob
+Accept: application/json
+
+
+### GET /hello
+
+GET {{baseUrl}}/greet
+Accept: application/edn
+
+
+### GET /info
+
+GET {{baseUrl}}/info
+
