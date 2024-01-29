@@ -18,6 +18,7 @@
    :server/routes    {:config                  (ig/ref :app/config)}
 
    :server/server    {::http/routes            (ig/ref :server/routes)
+                       ::http/secure-headers   {:content-security-policy-settings {:object-src "none"}}
                       ::http/resource-path     "/public"
                       ::http/type              :jetty
                       ::http/port              8890

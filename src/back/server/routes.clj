@@ -4,7 +4,8 @@
             [server.response :as response]
             [server.handler.greet :as greet-handler]
             [server.handler.info :as info-handler]
-            [server.handler.download :as download-handler]))
+            [server.handler.download :as download-handler]
+            [server.handler.home :as home-handler]))
 
 (defn interceptor-chain [handler]
   [response/coerce-body
@@ -14,8 +15,9 @@
 (defn create [options]
   (tap> options)
   (route/expand-routes
-   #{["/greet" :get  (interceptor-chain (greet-handler/create options))   :route-name    :greet]
-     ["/info"  :get  (interceptor-chain (info-handler/create options))    :route-name    :info]
+   #{["/"             :get  (home-handler/create options)                        :route-name    :home]
+     ["/greet"        :get  (interceptor-chain (greet-handler/create options))   :route-name    :greet]
+     ["/info"         :get  (interceptor-chain (info-handler/create options))    :route-name    :info]
 
      ["/download"     :get   [;; file-info interceptor will set the content-type of the response
                               ;; based on the extension of the file to download.
