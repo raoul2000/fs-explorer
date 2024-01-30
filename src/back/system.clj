@@ -22,7 +22,7 @@
                       ::http/resource-path     "/public"
                       ::http/type              :jetty
                       ::http/port              8890
-                      ::http/join?             false}})
+                      ::http/join?             true}})
 
 (defmethod ig/init-key :app/config
   [_ config]
