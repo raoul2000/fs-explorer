@@ -7,6 +7,9 @@
             [io.pedestal.http :as http]
             [babashka.fs :as fs]))
 
+  ;; avoid reloading of dev ns
+(set-refresh-dirs (str (fs/path (fs/cwd) "src" "back")))
+
 (comment
 
   ;; portal ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -24,9 +27,8 @@
 
   ;; see https://github.com/clojure/tools.namespace/
   ;; see https://cognitect.com/blog/2013/06/04/clojure-workflow-reloaded
-  
-  ;; avoid reloading of dev ns
-  (set-refresh-dirs (str (fs/path (fs/cwd) "src" "back")))
+
+  ;; NOTE : set-refresh-dirs above
   (refresh)
   (refresh-all)
 

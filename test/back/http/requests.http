@@ -18,4 +18,5 @@ Accept: application/edn
 ### GET /info
 
 GET {{baseUrl}}/info
+Accept: application/json
 
