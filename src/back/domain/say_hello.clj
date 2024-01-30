@@ -3,5 +3,5 @@
 
 (defn say-hello [name polite?]
   (format (if polite?
-            "Good morning %s "
-            "Hi %s") name))
+            "Good morning %s !"
+            "Hi %s !") name))
