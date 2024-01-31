@@ -13,15 +13,16 @@
                                                 :nested-p2 12
                                                 :nested-p3 "some string"}
                      :polite?                  false
-                     :nice-goodbye?            false}
+                     :nice-goodbye?            false
+                     :port                     8890}
 
    :server/routes    {:config                  (ig/ref :app/config)}
 
-   :server/server    {::http/routes            (ig/ref :server/routes) 
+   :server/server    {:config                  (ig/ref :app/config)
+                      ::http/routes            (ig/ref :server/routes)
                       ::http/secure-headers    {:content-security-policy-settings {:object-src "none"}}
                       ::http/resource-path     "/public"
                       ::http/type              :jetty
-                      ::http/port              8890
                       ::http/join?             true}})
 
 (defmethod ig/init-key :app/config
@@ -35,7 +36,11 @@
 (defmethod ig/init-key  :server/server
   [_ service-map]
   (print "starting server ...")
-  (http/start (http/create-server service-map)))
+  (-> service-map
+      (assoc  ::http/port (get-in service-map [:config :port]))
+      (dissoc :config)
+      http/create-server
+      http/start))
 
 (defmethod ig/halt-key! :server/server [_ server]
   (print "halting server ...")
