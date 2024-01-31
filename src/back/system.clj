@@ -17,8 +17,8 @@
 
    :server/routes    {:config                  (ig/ref :app/config)}
 
-   :server/server    {::http/routes            (ig/ref :server/routes)
-                       ::http/secure-headers   {:content-security-policy-settings {:object-src "none"}}
+   :server/server    {::http/routes            (ig/ref :server/routes) 
+                      ::http/secure-headers    {:content-security-policy-settings {:object-src "none"}}
                       ::http/resource-path     "/public"
                       ::http/type              :jetty
                       ::http/port              8890
@@ -53,4 +53,5 @@
 (defn -main []
   (-> config
       (assoc-in [:app/config :polite?] true)
+      (assoc-in [:server/server ::http/port] 8890)
       ig/init))
