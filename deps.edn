@@ -18,7 +18,7 @@
                        org.clojure/tools.namespace {:mvn/version "1.4.5"}}
           :extra-paths ["src/dev"]}
   
-  :run-m {:main-opts  ["-m" "system"]}
+  :run-m {:main-opts  ["-m" "core"]}
 
   :run-x {:ns-default system
           :exec-fn    start

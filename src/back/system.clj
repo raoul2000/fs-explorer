@@ -6,9 +6,11 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def config
-  ;; the default configuration - can be over written by user config
-  {:app/config      {:param1                   "value1"
+(def config 
+  {:app/user-config {:user-config              {}} 
+  
+   ;; the default configuration - can be over written by user config
+   :app/config      {:param1                   "value1"
                      :param2                   {:nested-p1 true
                                                 :nested-p2 12
                                                 :nested-p3 "some string"}
@@ -55,8 +57,4 @@
   ;;
   )
 
-(defn -main []
-  (-> config
-      (assoc-in [:app/config :polite?] true)
-      (assoc-in [:server/server ::http/port] 8890)
-      ig/init))
+(def init ig/init)
