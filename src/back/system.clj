@@ -1,15 +1,15 @@
 (ns system
+  "Integrant system definition"
   (:require [integrant.core :as ig]
             [io.pedestal.http :as http]
-            [server.routes :as server-routes])
-  )
+            [server.routes :as server-routes]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def config
   {:app/user-config {:user-config              {}}
 
-   ;; the default configuration - can be over written by user config
+   ;; the default configuration - some parameters can be over written by user-config
    :app/config      {:user-config              (ig/ref :app/user-config)
                      :param1                   "value1"
                      :param2                   {:nested-p1 true
@@ -33,7 +33,8 @@
   user-config)
 
 (defn init-app-config
-  "Create the config map from the given map *m*"
+  "Create the config map from the given map *m*. 
+   In particular merges user-config with default config"
   [m]
   (let [user-config (:user-config m)]
     (-> m

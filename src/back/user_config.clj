@@ -1,10 +1,11 @@
 (ns user-config
+  "User configuration loading and validation"
   (:require [babashka.fs :as fs]
             [clojure.data.json :as json]
             [clojure.spec.alpha :as s]))
 
 (s/def ::server-port (s/and int? #(< 0 % 65353)))
-(s/def ::config  (s/keys :opt [::server-port]))
+(s/def ::config      (s/keys :opt [::server-port]))
 
 (comment
   (s/valid? ::server-port 112)

@@ -1,4 +1,5 @@
 (ns core
+  "Main namespace. Include the application entry point function"
   (:require [system :as  sys]
             [user-config :as user-config])
   (:gen-class))
