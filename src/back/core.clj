@@ -1,16 +1,25 @@
 (ns core
-  (:require [system :refer [config init]]
-            [user-config :as user-config]))
+  (:require [system :as  sys]
+            [user-config :as user-config])
+  (:gen-class))
 
-
-(defn -main [file-path & _args]
+(defn -main [& args]
   (try
-    (let [user-config (if file-path (user-config/load file-path)  {})]
+    (let [file-path   (first args)
+          user-config (when file-path (user-config/load-from-file file-path))]
 
-      (-> config
-          (assoc-in [:app/user-config  :user-config] user-config)
+      (-> sys/config
+          (assoc    :app/user-config   (or user-config {}))
           (assoc-in [:app/config       :polite?]     true)
-          #_init))
+          sys/init))
 
     (catch Exception e
       (println (format "Error : %s - cause : %s" (.getMessage e) (ex-data e))))))
+
+(comment
+
+  (-main "")
+  (-main "test/back/fixture/config-ok.json")
+  (-main "test/back/fixture/config-invalid-port.json")
+  ;;
+  )

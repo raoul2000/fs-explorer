@@ -2,15 +2,16 @@
   (:require [integrant.core :as ig]
             [io.pedestal.http :as http]
             [server.routes :as server-routes])
-  (:gen-class))
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def config 
-  {:app/user-config {:user-config              {}} 
-  
+(def config
+  {:app/user-config {:user-config              {}}
+
    ;; the default configuration - can be over written by user config
-   :app/config      {:param1                   "value1"
+   :app/config      {:user-config              (ig/ref :app/user-config)
+                     :param1                   "value1"
                      :param2                   {:nested-p1 true
                                                 :nested-p2 12
                                                 :nested-p3 "some string"}
@@ -27,9 +28,21 @@
                       ::http/type              :jetty
                       ::http/join?             true}})
 
+(defmethod ig/init-key :app/user-config
+  [_ user-config]
+  user-config)
+
+(defn init-app-config
+  "Create the config map from the given map *m*"
+  [m]
+  (let [user-config (:user-config m)]
+    (-> m
+        (dissoc :user-config)
+        (update :port #(or (:user-config/server-port user-config) %)))))
+
 (defmethod ig/init-key :app/config
   [_ config]
-  config)
+  (init-app-config config))
 
 (defmethod ig/init-key :server/routes
   [_ {:keys [config]}]
