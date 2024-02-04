@@ -5,4 +5,7 @@
 (defn create [{:keys [polite?] :as options}]
   (fn [request]
     (let [name (get-in request [:params :name])]
-      (response/ok {:response (say-hello name polite?)}))))
+      (try
+        (response/ok {:response (say-hello name polite?)})
+        (catch Exception ex
+          (response/error-SERVER_ERROR {:error (ex-message ex)}))))))

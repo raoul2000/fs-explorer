@@ -2,6 +2,7 @@
   (:require [clojure.data.json :as json]
             [io.pedestal.http.content-negotiation :as conneg]))
 
+(def default-content-type "application/json")
 (defn- response [status body & {:as headers}]
   {:status status :body body :headers headers})
 
@@ -16,9 +17,9 @@
 
 
 (defn accepted-type
-  "returns the accepted content type from the context map or `text/plain` if not set"
+  "returns the accepted content type from the context map or `default-content-type` if not set"
   [context]
-  (get-in context [:request :accept :field] "text/plain"))
+  (get-in context [:request :accept :field] default-content-type))
 
 (defn transform-content
   "Converts and returns *body* into the given *content-type*"

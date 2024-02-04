@@ -2,6 +2,8 @@
 
 
 (defn say-hello [name polite?]
-  (format (if polite?
-            "Good morning %s !"
-            "Hi %s !") name))
+  (if (= "bob" name)
+    (throw (ex-info "user not allowed" {:name name}))
+    (format (if polite?
+              "Good morning %s !"
+              "Hi %s !") (or name "stranger"))))

@@ -1,17 +1,33 @@
 (ns server.routes
   (:require [io.pedestal.http.route :as route]
             [io.pedestal.http.ring-middlewares :as ring-mw]
+            [io.pedestal.interceptor.error :refer (error-dispatch)]
             [server.response :as response]
             [server.handler.greet :as greet-handler]
             [server.handler.info :as info-handler]
             [server.handler.download :as download-handler]
             [server.handler.home :as home-handler]
-            [server.handler.config :as config-handler]
-            ))
+            [server.handler.config :as config-handler]))
+
+;; TODO: finish implementation
+(def service-error-handler
+  (error-dispatch [ctx ex]
+                  [{:exception-type :java.lang.ArithmeticException :interceptor ::another-bad-one}]
+                  (assoc ctx :response {:status 400 :body "Another bad one"})
+
+                  [{:exception-type :clojure.lang.ExceptionInfo}]
+                  (do
+                    (tap> (ex-data ex))
+                    (assoc ctx :response {:status 400 :body {:message (ex-message ex)
+                                                             :info    "info"}}))
+
+                  :else
+                  (assoc ctx :io.pedestal.interceptor.chain/error ex)))
 
 (defn interceptor-chain [handler]
   [response/coerce-body
    response/content-neg-intc
+   service-error-handler
    handler])
 
 (defn create [options]

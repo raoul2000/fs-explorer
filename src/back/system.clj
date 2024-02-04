@@ -60,6 +60,8 @@
       http/create-server
       http/start))
 
+(defn init-server-routes [config]
+  (server-routes/create config))
 
 ;; integrant Key initializer ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -73,7 +75,7 @@
 
 (defmethod ig/init-key :server/routes
   [_ {:keys [config]}]
-  (server-routes/create config))
+  (init-server-routes config))
 
 (defmethod ig/init-key  :server/server
   [_ service-map]
