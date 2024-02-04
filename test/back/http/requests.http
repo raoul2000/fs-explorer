@@ -20,3 +20,8 @@ Accept: application/edn
 GET {{baseUrl}}/info
 Accept: application/json
 
+### GET /config
+
+GET {{baseUrl}}/config
+Accept: application/json
+
