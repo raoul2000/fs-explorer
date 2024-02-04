@@ -2,9 +2,13 @@
   "Integrant system definition"
   (:require [integrant.core :as ig]
             [io.pedestal.http :as http]
-            [server.routes :as server-routes]))
+            [server.routes :as server-routes]
+            [clojure.java.browse :refer [browse-url]]))
 
 ;; system config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def default-server-port 8890)
+(def default-browse-url (format "http://localhost:%d/" default-server-port))
 
 (def config
   {:app/user-config {:user-config              {}}
@@ -17,7 +21,9 @@
                                                 :nested-p3 "some string"}
                      :polite?                  false
                      :nice-goodbye?            false
-                     :port                     8890}
+                     :open-browser?            true
+                     :browse-url               default-browse-url
+                     :port                     default-server-port}
 
    :server/routes    {:config                  (ig/ref :app/config)}
 
@@ -28,20 +34,29 @@
                       ::http/type              :jetty
                       ::http/join?             true}})
 
+
 ;; key initializers function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn init-app-config
   "Create the config map from the given map *m*. 
    In particular merges user-config with default config"
-  [{:keys [user-config] :or {user-config {}} :as m}]
-  (-> m
+  [{:keys [user-config] :or {user-config {}} :as config-map}]
+  (tap> config-map)
+  (-> config-map
       (dissoc :user-config)
-      (update :port #(get user-config :user-config/server-port %))))
+      (update :port           #(get user-config :user-config/server-port   %))
+      (update :open-browser?  #(get user-config :user-config/open-browser  %))
+      (update :browse-url     #(get user-config :user-config/browse-url    %))))
 
 (defn init-server [{:keys [config] :as service-map}]
+
+  (tap> config)
+  (when (:open-browser? config)
+    (browse-url (:browse-url config)))
+
   (-> service-map
-      (assoc  ::http/port (:port config))
       (dissoc :config)
+      (assoc  ::http/port (:port config))
       http/create-server
       http/start))
 

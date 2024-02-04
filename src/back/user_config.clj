@@ -4,10 +4,30 @@
             [clojure.data.json :as json]
             [clojure.spec.alpha :as s]))
 
-(s/def ::server-port (s/and int? #(< 0 % 65353)))
-(s/def ::config      (s/keys :opt [::server-port]))
+
+(defn server-port? [n]
+  (s/and int? #(< 0 n 65353)))
+
+(defn url? [s]
+  (s/and string?
+         #(try
+            (new java.net.URL s)
+            (catch Throwable _t false))))
+
+(s/def ::server-port    server-port?)
+(s/def ::open-browser   boolean?)
+(s/def ::browse-url     url?)
+
+(s/def ::config         (s/keys :opt [::server-port
+                                      ::open-browser
+                                      ::browse-url]))
 
 (comment
+  (new java.net.URI "http:dd.com:888")
+
+  (s/valid? ::browse-url "https://rlo.caelhost:8808/?ee=zz")
+  (s/valid? ::browse-url "")
+  (s/explain-data ::browse-url "http://localhost:8808")
   (s/valid? ::server-port 112)
   (s/conform ::server-port 112)
   (s/conform ::server-port "112")
@@ -25,7 +45,7 @@
   "Converts the given JSON string into a map with namespaced keywords. Throws
    when invalid JSON"
   [s]
-  
+
   (json/read-str s :key-fn #(keyword #_(str *ns*)  "user-config" %)))
 
 (comment

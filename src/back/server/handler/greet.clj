@@ -4,6 +4,5 @@
 
 (defn create [{:keys [polite?] :as options}]
   (fn [request]
-    (tap> request)
     (let [name (get-in request [:params :name])]
       (response/ok {:response (say-hello name polite?)}))))

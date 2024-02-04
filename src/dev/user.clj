@@ -2,7 +2,7 @@
   (:require [portal.api :as p]
             [clojure.tools.namespace.repl :refer (refresh refresh-all set-refresh-dirs)]
             [integrant.core :as ig]
-            [system :refer (config)]
+            [system :as sys]
             [clojure.test :as test]
             [io.pedestal.http :as http]
             [babashka.fs :as fs]))
@@ -35,12 +35,13 @@
   ;; system ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   ;; start the system
-  (def system (ig/init (-> config
+  (def system (ig/init (-> sys/config
                            (assoc-in [:app/config :polite?]          true)
                            (assoc-in [:server/server ::http/join?]   false))))
 
   ;; stop the system
   (ig/halt! system)
+  
 
   ;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

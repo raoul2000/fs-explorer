@@ -13,7 +13,6 @@
    handler])
 
 (defn create [options]
-  (tap> options)
   (route/expand-routes
    #{["/"             :get  (home-handler/create options)                        :route-name    :home]
      ["/greet"        :get  (interceptor-chain (greet-handler/create options))   :route-name    :greet]
