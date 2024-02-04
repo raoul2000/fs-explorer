@@ -4,19 +4,12 @@
             [clojure.data.json :as json]
             [clojure.spec.alpha :as s]))
 
-
-(defn server-port? [n]
-  (s/and int? #(< 0 n 65353)))
-
-(defn url? [s]
-  (s/and string?
-         #(try
-            (new java.net.URL s)
-            (catch Throwable _t false))))
-
-(s/def ::server-port    server-port?)
+(s/def ::server-port    (s/and int? #(< 0 % 65353)))
 (s/def ::open-browser   boolean?)
-(s/def ::browse-url     url?)
+(s/def ::browse-url     (s/and string?
+                               #(try
+                                  (new java.net.URL %)
+                                  (catch Throwable _t false))))
 
 (s/def ::config         (s/keys :opt [::server-port
                                       ::open-browser
@@ -29,6 +22,7 @@
   (s/valid? ::browse-url "")
   (s/explain-data ::browse-url "http://localhost:8808")
   (s/valid? ::server-port 112)
+  (s/valid? ::server-port -112)
   (s/conform ::server-port 112)
   (s/conform ::server-port "112")
   (s/explain ::server-port "112")
@@ -106,7 +100,7 @@
 (comment
   (s/conform ::config (read-from-file "test/back/fixture/config-ok.json"))
   (try
-    (load-from-file "test/back/fixture/config-ok.json")
+    (load-from-file "test/back/fixture/config-invalid-port.json")
     (catch Exception e
       (println (format "Error : %s - cause : %s" (.getMessage e) (ex-data e)))))
 
