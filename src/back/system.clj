@@ -4,7 +4,7 @@
             [io.pedestal.http :as http]
             [server.routes :as server-routes]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; system config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def config
   {:app/user-config {:user-config              {}}
@@ -28,18 +28,29 @@
                       ::http/type              :jetty
                       ::http/join?             true}})
 
-(defmethod ig/init-key :app/user-config
-  [_ user-config]
-  user-config)
+;; key initializers function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn init-app-config
   "Create the config map from the given map *m*. 
    In particular merges user-config with default config"
-  [m]
-  (let [user-config (:user-config m)]
-    (-> m
-        (dissoc :user-config)
-        (update :port #(or (:user-config/server-port user-config) %)))))
+  [{:keys [user-config] :or {user-config {}} :as m}]
+  (-> m
+      (dissoc :user-config)
+      (update :port #(get user-config :user-config/server-port %))))
+
+(defn init-server [{:keys [config] :as service-map}]
+  (-> service-map
+      (assoc  ::http/port (:port config))
+      (dissoc :config)
+      http/create-server
+      http/start))
+
+
+;; integrant Key initializer ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmethod ig/init-key :app/user-config
+  [_ user-config]
+  user-config)
 
 (defmethod ig/init-key :app/config
   [_ config]
@@ -51,15 +62,9 @@
 
 (defmethod ig/init-key  :server/server
   [_ service-map]
-  (print "starting server ...")
-  (-> service-map
-      (assoc  ::http/port (get-in service-map [:config :port]))
-      (dissoc :config)
-      http/create-server
-      http/start))
+  (init-server service-map))
 
 (defmethod ig/halt-key! :server/server [_ server]
-  (print "halting server ...")
   (http/stop server))
 
 (comment
