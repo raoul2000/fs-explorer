@@ -6,12 +6,11 @@
 (def greet-handler-default (greet/create {}))
 
 (deftest greet-handler-test
-  (testing "the /gret handler"
+  (testing "the /greet handler"
 
     (is (= 200
            (:status (greet-handler-polite {:params {:name "joe"}})))
         "respond with success status")
 
-    (is (= 500
-           (:status (greet-handler-polite {:params {:name "bob"}})))
-        "responds with error status"))) 
+    (is (thrown? clojure.lang.ExceptionInfo (greet-handler-polite {:params {:name "bob"}})) 
+        "throws for bob"))) 

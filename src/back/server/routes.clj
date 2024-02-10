@@ -9,20 +9,23 @@
             [server.handler.home :as home-handler]
             [server.handler.config :as config-handler]))
 
-;; TODO: finish implementation
 (def service-error-handler
+  "Error handler based on http://pedestal.io/pedestal/0.6/reference/error-handling.html"
   (error-dispatch [ctx ex]
-                  [{:exception-type :java.lang.ArithmeticException :interceptor ::another-bad-one}]
-                  (assoc ctx :response {:status 400 :body "Another bad one"})
-
                   [{:exception-type :clojure.lang.ExceptionInfo}]
                   (do
-                    (tap> (ex-data ex))
-                    (assoc ctx :response {:status 400 :body {:message (ex-message ex)
-                                                             :info    "info"}}))
+                    (tap> {:ex-data    (ex-data ex)
+                           :ex-message (ex-message ex)
+                           :ex-cause   (ex-cause ex)})
+                    (if-let [ex-from-logic (ex-cause ex)]
+                      ;; extract the first cause in the chain which is the ex-info thrown by the logic layer
+                      (assoc ctx :response {:status 400 :body {:error {:message (ex-message ex-from-logic)
+                                                                       :info    (ex-data ex-from-logic)}}})
+                      (assoc ctx :response {:status 400 :body {:error {:message (ex-message ex)}}})))
 
                   :else
                   (assoc ctx :io.pedestal.interceptor.chain/error ex)))
+
 
 (defn interceptor-chain [handler]
   [response/coerce-body

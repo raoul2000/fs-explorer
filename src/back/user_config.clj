@@ -39,7 +39,6 @@
   "Converts the given JSON string into a map with namespaced keywords. Throws
    when invalid JSON"
   [s]
-
   (json/read-str s :key-fn #(keyword #_(str *ns*)  "user-config" %)))
 
 (comment

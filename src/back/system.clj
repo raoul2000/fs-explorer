@@ -49,8 +49,6 @@
       (update :browse-url     #(get user-config :user-config/browse-url    %))))
 
 (defn init-server [{:keys [config] :as service-map}]
-
-  (tap> config)
   (when (:open-browser? config)
     (browse-url (:browse-url config)))
 

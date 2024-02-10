@@ -5,7 +5,8 @@
             [io.pedestal.test :refer [response-for]]
             [server.routes :as server-routes]
             [server.response :refer (default-content-type)]
-            [system :as sys]))
+            [system :as sys]
+            [clojure.data.json :as json]))
 
 
 ;; helper functions -------------------------------------------------------------
@@ -83,7 +84,10 @@
 
   (testing "error response for bob"
     (let [response (response-for service :get (url-for :greet :query-params {:name "bob"}))]
-      (is (= 500 (:status response))
-          "error response")))) 
+      (is (= 400 (:status response))
+          "logic error returns code 400")
+      (is (= {"error" {"message" "user not allowed",
+                       "info"    {"name" "bob"}}} (json/read-str (:body response)))
+          "logic error returns json body with logic message and info")))) 
 
 
