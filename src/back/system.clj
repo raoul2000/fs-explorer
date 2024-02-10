@@ -7,9 +7,6 @@
 
 ;; system config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def default-server-port 8890)
-(def default-browse-url (format "http://localhost:%d/" default-server-port))
-
 (def config
   {:app/user-config {:user-config              {}}
 
@@ -22,8 +19,8 @@
                      :polite?                  false
                      :nice-goodbye?            false
                      :open-browser?            true
-                     :browse-url               default-browse-url
-                     :port                     default-server-port}
+                     :browse-url               ""
+                     :port                     8890}
 
    :server/routes    {:config                  (ig/ref :app/config)}
 
@@ -42,11 +39,13 @@
    In particular merges user-config with default config"
   [{:keys [user-config] :or {user-config {}} :as config-map}]
   (tap> config-map)
-  (-> config-map
-      (dissoc :user-config)
-      (update :port           #(get user-config :user-config/server-port   %))
-      (update :open-browser?  #(get user-config :user-config/open-browser  %))
-      (update :browse-url     #(get user-config :user-config/browse-url    %))))
+  (let [port       (get user-config :user-config/server-port  (:port config-map))
+        browse-url (get user-config :user-config/browse-url   (format "http://localhost:%d/" port))]
+    (-> config-map
+        (dissoc :user-config)
+        (assoc  :port           port)
+        (assoc  :browse-url     browse-url)
+        (update :open-browser?  #(get user-config :user-config/open-browser  %)))))
 
 (defn init-server [{:keys [config] :as service-map}]
   (when (:open-browser? config)
