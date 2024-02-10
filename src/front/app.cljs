@@ -1,7 +1,11 @@
-(ns app)
+(ns app
+  (:require [timer :as timer]))
+
+
 
 (defn run []
-  (js/console.log "boo !"))
+  (js/console.log "boo !")
+  (timer/render "root"))
 
 ;;  Lifecycle Hooks =================================
 ;; see https://shadow-cljs.github.io/docs/UsersGuide.html#_lifecycle_hooks
