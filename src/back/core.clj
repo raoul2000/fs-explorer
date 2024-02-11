@@ -10,8 +10,8 @@
           user-config (when file-path (user-config/load-from-file file-path))]
 
       (-> sys/config
-          (assoc    :app/user-config   (or user-config {}))
-          (assoc-in [:app/config       :polite?]     true)
+          (assoc    :app-1/user-config   (or user-config {}))
+          (assoc-in [:app-1/config       :polite?]     true)
           sys/init))
 
     (catch Exception e
