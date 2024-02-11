@@ -2,8 +2,7 @@
   (:require [reagent.dom :as rdom]
             [re-frame.core :as re-frame]
             [routes :as routes]
-            [reitit.core :as r]
-            [reitit.frontend.easy :as rfe]))
+            [reitit.core :as r]))
 
 (re-frame/reg-event-db ::initialize-db
                        (fn [db _]
@@ -11,23 +10,7 @@
                            db
                            {:current-route nil})))
 
-(defn href
-  "Return relative url for given route. Url can be used in HTML links.
-   Usage :
-   ```
-   [:a {:href (href ::page-1)}  \"Go to page 1\"]
-   [:a {:href (href ::username-page {:username \"bob\"})}  \"Go to Bob page\"]
-
-   ```
-   "
-  ([k]
-   (href k nil nil))
-  ([k params]
-   (href k params nil))
-  ([k params query]
-   (rfe/href k params query)))
-
-(defn nav 
+(defn nav
   "The navigation bar component"
   [{:keys [router current-route]}]
   [:ul
@@ -38,7 +21,7 @@
       (when (= route-name (-> current-route :data :name))
         "> ")
       ;; Create a normal links that user can click
-      [:a {:href (href route-name)} text]])])
+      [:a {:href (routes/href route-name)} text]])])
 
 
 (defn main-page []
