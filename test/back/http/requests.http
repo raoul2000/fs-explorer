@@ -23,5 +23,10 @@ Accept: application/json
 ### GET /config
 
 GET {{baseUrl}}/config
+
+
+### GET /explore
+
+GET {{baseUrl}}/explore
 Accept: application/json
 

@@ -10,10 +10,12 @@
                                #(try
                                   (new java.net.URL %)
                                   (catch Throwable _t false))))
+(s/def ::root-dir-path  string?)
 
 (s/def ::config         (s/keys :opt [::server-port
                                       ::open-browser
-                                      ::browse-url]))
+                                      ::browse-url
+                                      ::root-dir-path]))
 
 (comment
   (new java.net.URI "http:dd.com:888")

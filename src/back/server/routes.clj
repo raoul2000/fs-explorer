@@ -7,7 +7,10 @@
             [server.handler.info :as info-handler]
             [server.handler.download :as download-handler]
             [server.handler.home :as home-handler]
-            [server.handler.config :as config-handler]))
+            [server.handler.config :as config-handler]
+            [server.handler.explorer :as explorer-handler]
+            
+            ))
 
 (def service-error-handler
   "Error handler based on http://pedestal.io/pedestal/0.6/reference/error-handling.html"
@@ -39,6 +42,8 @@
      ["/greet"        :get  (interceptor-chain (greet-handler/create options))   :route-name    :greet]
      ["/info"         :get  (interceptor-chain (info-handler/create options))    :route-name    :info]
      ["/config"       :get  (interceptor-chain (config-handler/create options))    :route-name    :config]
+
+     ["/explore"      :get  (interceptor-chain (explorer-handler/create options))    :route-name    :explorer]
 
      ["/download"     :get   [;; file-info interceptor will set the content-type of the response
                               ;; based on the extension of the file to download.
