@@ -1,13 +1,14 @@
 (ns server.handler.explorer
   (:require [server.response :as response]
-            [babashka.fs :as fs]
             [domain.explorer :as exp]))
 
-(defn create 
+(defn create
   [{:keys [root-dir-path]}]
-  (fn [path]
-    (response/ok (exp/explore (or path "c:\\tmp")))))
+  (fn [_request]
+    (response/ok (exp/explore "c:\\tmp")))) 
 
 (comment
+  ((create {:a 1}) nil)
+  (response/ok (exp/explore "c:\\tmp"))
   ;;
   )

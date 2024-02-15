@@ -8,7 +8,6 @@
             [system :as sys]
             [clojure.data.json :as json]))
 
-
 ;; helper functions -------------------------------------------------------------
 
 ;; Use this function is test so to refer to a route by its name better than
