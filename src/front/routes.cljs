@@ -4,7 +4,9 @@
             [reitit.coercion.spec :as rss]
             [reitit.frontend :as rf]
             [reitit.frontend.controllers :as rfc]
-            [reitit.frontend.easy :as rfe]))
+            [reitit.frontend.easy :as rfe]
+            [page.home :refer (home-page)]
+            [page.explore :refer (explore-page)]))
 
 ;;; Effects ;;;
 
@@ -34,13 +36,7 @@
 
 ;;; Views ;;;
 
-(defn home-page []
-  [:div
-   [:h1 "This is home page"]
-   [:button
-    ;; Dispatch navigate event that triggers a (side)effect.
-    {:on-click #(re-frame/dispatch [::push-state ::sub-page2])}
-    "Go to sub-page 2"]])
+
 
 (defn sub-page1 []
   [:div
@@ -70,13 +66,11 @@
 
 ;;; Routes ;;;
 
-
-
 (def routes
   ["/"
    [""
     {:name      ::home
-     :view      home-page
+     :view       home-page
      :link-text "Home"
      :controllers
      [{;; Do whatever initialization needed for home page
@@ -84,6 +78,10 @@
        :start (fn [& params] (js/console.log "Entering home page"))
        ;; Teardown can be done here.
        :stop  (fn [& params] (js/console.log "Leaving home page"))}]}]
+   ["explore"
+    {:name ::explore
+     :view explore-page
+     :link-text "Explore"}]
    ["sub-page1"
     {:name      ::sub-page1
      :view      sub-page1

@@ -8,7 +8,8 @@
                        (fn [db _]
                          (if db
                            db
-                           {:current-route nil})))
+                           {:current-route nil
+                            :explore       nil})))
 
 (defn nav
   "The navigation bar component"
@@ -28,6 +29,7 @@
   (let [current-route @(re-frame/subscribe [:routes/current-route])]
     [:div
      [nav {:router routes/router :current-route current-route}]
+     [:hr]
      (when current-route
        [(-> current-route :data :view)])]))
 
