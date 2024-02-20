@@ -27,6 +27,6 @@ GET {{baseUrl}}/config
 
 ### GET /explore
 
-GET {{baseUrl}}/explore
+GET {{baseUrl}}/explore/c:/tmp/
 Accept: application/json
 

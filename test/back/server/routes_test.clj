@@ -36,6 +36,7 @@
 
 
   (url-for :greet :request {:headers {:content-type "application/json"}})
+  (url-for :explorer :path-params {:path "folder"})
 
   ;;
   )

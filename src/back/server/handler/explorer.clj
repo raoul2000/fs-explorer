@@ -4,8 +4,9 @@
 
 (defn create
   [{:keys [root-dir-path]}]
-  (fn [_request]
-    (response/ok (exp/explore "c:\\tmp")))) 
+  (fn [request]
+    (let [dir-path (get-in request [:path-params :path])]
+      (response/ok (exp/explore dir-path)))))
 
 (comment
   ((create {:a 1}) nil)

@@ -38,14 +38,14 @@
 
 (defn create [options]
   (route/expand-routes
-   #{["/"             :get  (home-handler/create options)                        :route-name    :home]
-     ["/greet"        :get  (interceptor-chain (greet-handler/create options))   :route-name    :greet]
-     ["/info"         :get  (interceptor-chain (info-handler/create options))    :route-name    :info]
-     ["/config"       :get  (interceptor-chain (config-handler/create options))    :route-name    :config]
+   #{["/"              :get  (home-handler/create options)                        :route-name    :home]
+     ["/greet"         :get  (interceptor-chain (greet-handler/create options))   :route-name    :greet]
+     ["/info"          :get  (interceptor-chain (info-handler/create options))    :route-name    :info]
+     ["/config"        :get  (interceptor-chain (config-handler/create options))    :route-name    :config]
 
-     ["/explore"      :get  (interceptor-chain (explorer-handler/create options))    :route-name    :explorer]
+     ["/explore/*path" :get  (interceptor-chain (explorer-handler/create options))    :route-name    :explorer]
 
-     ["/download"     :get   [;; file-info interceptor will set the content-type of the response
+     ["/download"      :get   [;; file-info interceptor will set the content-type of the response
                               ;; based on the extension of the file to download.
                               ;; If not set, content-type defaults to application/octet-stream
                               (ring-mw/file-info)
