@@ -1,5 +1,7 @@
 (ns page.explore
   (:require [re-frame.core :as re-frame]
+            [clojure.string :as s]
+            [reagent.core :as r]
             [ajax.core :as ajax]
             [ajax.edn :refer [edn-response-format edn-request-format]]
             [day8.re-frame.http-fx]))
@@ -22,9 +24,10 @@
 
 (re-frame/reg-event-fx
  ::ls
- (fn [{db :db} _]
+ (fn [{db :db} [_event-id path]]
+   (tap> path)
    {:http-xhrio {:method          :get
-                 :uri             "/explore"
+                 :uri             (str "/explore/" path)
                  :format          (edn-request-format)
                  :response-format (edn-response-format)
                  :on-success      [::ls-success]
@@ -36,8 +39,8 @@
  (fn [db [_ event-arg]]
    (assoc db :explore ["a" "b"])))
 
-(defn >explore []
-  (re-frame/dispatch [::ls]))
+(defn >explore [path]
+  (re-frame/dispatch [::ls path]))
 
 (re-frame/reg-sub
  ::explore
@@ -69,13 +72,25 @@
       (map view-item list-items)]]
     [:div "empty"]))
 
+(defn toolbar []
+
+  (let [loading?          (<loading?)
+        path              (r/atom "")
+        update-input-path #(reset! path (-> % .-target .-value))]
+    (fn []
+      [:div
+       [:button
+        {:disabled (or loading? (s/blank? @path))
+         :on-click #(>explore @path)}
+        (if loading? "loading..." "explore")]
+       [:input {:type "text"
+                :placeholder "enter path"
+                :value @path
+                :on-change update-input-path}]])))
+
 
 (defn explore-page []
   [:div
    [:h1.title "FS Explorer"]
-   (let [loading? (<loading?)]
-     [:button
-      {:disabled loading?
-       :on-click #(>explore)}
-      (if loading? "loading..." "explore")])
+   [toolbar]
    [explorer-view]])
