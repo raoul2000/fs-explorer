@@ -36,7 +36,7 @@
 
   ;; start the system
   (def system (ig/init (-> sys/config
-                           (assoc-in [:app-1/config :open-browser?]    false)
+                           (assoc-in [:app-1/config :open-browser?]    true)
                            (assoc-in [:app-1/config :polite?]          true)
                            (assoc-in [:server/server ::http/join?]   false))))
 

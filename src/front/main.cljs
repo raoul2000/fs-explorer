@@ -9,7 +9,8 @@
                          (if db
                            db
                            {:current-route nil
-                            :explore       nil})))
+                            :explore       nil
+                            :loading?      false})))
 
 (defn nav
   "The navigation bar component"
