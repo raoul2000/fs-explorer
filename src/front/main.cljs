@@ -2,15 +2,15 @@
   (:require [reagent.dom :as rdom]
             [re-frame.core :as re-frame]
             [routes :as routes]
-            [reitit.core :as r]))
+            [reitit.core :as r]
+            [db :refer [default-db]]))
+
 
 (re-frame/reg-event-db ::initialize-db
                        (fn [db _]
                          (if db
                            db
-                           {:current-route nil
-                            :explore       nil
-                            :loading?      false})))
+                           default-db)))
 
 (defn nav
   "The navigation bar component"

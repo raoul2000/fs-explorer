@@ -4,11 +4,13 @@
             [reagent.core :as r]
             [ajax.core :as ajax]
             [ajax.edn :refer [edn-response-format edn-request-format]]
-            [day8.re-frame.http-fx]))
+            [day8.re-frame.http-fx]
+            [db :refer [check-spec-interceptor]]))
 
 
 (re-frame/reg-event-db
  ::ls-success
+ [check-spec-interceptor]
  (fn [db [_ success-response]]
    (tap> success-response)
    (-> db
@@ -17,9 +19,10 @@
 
 (re-frame/reg-event-db
  ::ls-failure
+ [check-spec-interceptor]
  (fn [db [_ error-response]]
    (-> db
-       (assoc :explore nil)
+       (assoc :explore [])
        (assoc :loading? false))))
 
 (re-frame/reg-event-fx
