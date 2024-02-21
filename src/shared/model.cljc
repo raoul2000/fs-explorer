@@ -1,9 +1,14 @@
 (ns model
   (:require [clojure.spec.alpha :as s]))
 
+(s/def :file/name string?)
+(s/def :file/dir? boolean?)
+(s/def :file/path string?)
+(s/def :file/info (s/keys :req [:file/name :file/dir? :file/path]))
 
-(s/def ::path string?)
-(s/def ::content (s/coll-of ::path))
+(s/def ::content (s/coll-of :file/info))
+
+
 (s/def ::read-result (s/keys :req [::content]))
 
 

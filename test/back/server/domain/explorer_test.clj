@@ -26,8 +26,12 @@
 
 (deftest explore-test
   (testing "explore a file system tree"
-
-    (is (= {:model/content  [(str (fs/path fixture-base-path "dir1"))
-                             (str (fs/path fixture-base-path "dir2"))]}
+    (is (= #:model{:content
+            [#:file{:name "dir1",
+                    :dir? true,
+                    :path (str (fs/path fixture-base-path "dir1"))}
+             #:file{:name "dir2",
+                    :dir? true,
+                    :path (str (fs/path fixture-base-path "dir2"))}]}
            (explore fixture-base-path))
         "returns 2 absolute path")))
