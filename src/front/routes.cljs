@@ -5,8 +5,10 @@
             [reitit.frontend :as rf]
             [reitit.frontend.controllers :as rfc]
             [reitit.frontend.easy :as rfe]
+            [reitit.core :as rc]
             [page.home :refer (home-page)]
-            [page.explore :refer (explore-page)]))
+            [page.explore :refer (explore-page)]
+            [reagent.core :as r]))
 
 ;;; Effects ;;;
 
@@ -34,9 +36,9 @@
                   (fn [db]
                     (:current-route db)))
 
+
+
 ;;; Views ;;;
-
-
 
 (defn sub-page1 []
   [:div
@@ -47,26 +49,73 @@
    [:h1 "This is sub-page 2"]])
 
 
-(defn href
-  "Return relative url for given route. Url can be used in HTML links.
-   Usage :
-   ```
-   [:a {:href (href ::page-1)}  \"Go to page 1\"]
-   [:a {:href (href ::username-page {:username \"bob\"})}  \"Go to Bob page\"]
-
-   ```
-   "
-  ([k]
-   (href k nil nil))
-  ([k params]
-   (href k params nil))
-  ([k params query]
-   (rfe/href k params query)))
-
-
 ;;; Routes ;;;
 
+(defn about-handler []
+  (print "about route handler"))
+
 (def routes
+  [;; by default, keyword ::home is expanded to {:name ::home}
+   ["/"               ::home]
+   ;; by default function is expanded into {:handler the-function}
+   ["/about"          about-handler]
+   ["/explore/*path"  ::explore]
+   ["/item/:id"       {:name       ::item
+                       :handler    #(print "the item route handler")
+                       :parameters {:path {:id int?}}}]
+   ["/greet"          {:name       ::greet}]])
+
+(defn create-router [routes-definitions]
+  (rf/router  routes-definitions))
+
+(comment
+  (def router (create-router routes))
+
+  (rc/router-name router)
+  (rc/routes router)
+
+  (rc/route-names router)
+
+  (for [route-name (rc/route-names router)
+        :let [route (rc/match-by-name router route-name)]]
+    #_(prn route-name)
+    (rfe/href route-name {:id 2} {:foo "bar"})
+    )
+  
+  (rc/match-by-name router ::home)
+  (rc/match-by-path router "/")
+
+  (rc/match-by-path router "/explore/dirname/file")
+  (rc/match-by-name router ::explore {:path "dirname/filename"})
+
+  (-> router
+      (rc/match-by-name ::explore {:path "some-path/dirname"})
+      (rc/match->path {:param1 "value1"}))
+
+  (rc/match-by-path router "/greet")
+
+  (defonce match (r/atom nil))
+  @match
+
+
+  (rfe/start!
+   (rf/router routes {:data {:coercion rss/coercion}})
+   (fn [m] (reset! match m))
+      ;; set to false to enable HistoryAPI
+   {:use-fragment true})
+
+
+  (rfe/href ::item {:id 2})
+  (rfe/href ::explore {:path "somepath/folder"} {:foo "bar"})
+  ;; => "#/explore/somepath%2Ffolder?foo=bar"
+
+  (rc/match-by-path router "/explore/somepath%2Ffolder?foo=bar")
+
+  ;;
+  )
+
+
+(def routes-1
   ["/"
    [""
     {:name      ::home

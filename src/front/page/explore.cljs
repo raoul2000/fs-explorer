@@ -1,5 +1,6 @@
 (ns page.explore
   (:require [re-frame.core :as re-frame]
+            [utils :refer [href]]
             [clojure.string :as s]
             [reagent.core :as r]
             [ajax.core :as ajax]
@@ -65,14 +66,16 @@
 ;; view ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn view-item [item]
-  [:li {:key item} item])
+  [:tr  {:key (:file/path item)}
+   [:td (if (:file/dir? item) "dir" "file")]
+   [:td
+    [:a {:on-click #(>explore (:file/path item))} (:file/name item)]]])
 
 (defn explorer-view []
   [:div "explorer view"]
   (if-let [list-items (<explore)]
-    [:div
-     [:ul
-      (map view-item list-items)]]
+    [:table.table.is-hoverable.is-fullwidth.is-striped
+     (map view-item list-items)]
     [:div "empty"]))
 
 (defn toolbar []
@@ -90,7 +93,6 @@
                 :placeholder "enter path"
                 :value @path
                 :on-change update-input-path}]])))
-
 
 (defn explore-page []
   [:div

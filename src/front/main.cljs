@@ -2,6 +2,7 @@
   (:require [reagent.dom :as rdom]
             [re-frame.core :as re-frame]
             [routes :as routes]
+            [utils :refer [href]]
             [reitit.core :as r]
             [db :refer [default-db]]))
 
@@ -23,7 +24,7 @@
       (when (= route-name (-> current-route :data :name))
         "> ")
       ;; Create a normal links that user can click
-      [:a {:href (routes/href route-name)} text]])])
+      [:a {:href (href route-name)} text]])])
 
 
 (defn main-page []
