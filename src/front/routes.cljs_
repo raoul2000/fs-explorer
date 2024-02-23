@@ -8,7 +8,8 @@
             [reitit.core :as rc]
             [page.home :refer (home-page)]
             [page.explore :refer (explore-page)]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [utils :as utils]))
 
 ;;; Effects ;;;
 
@@ -52,18 +53,48 @@
 ;;; Routes ;;;
 
 (defn about-handler []
-  (print "about route handler"))
+  (print "about route handler")
+  [:div.title "About"
+   [:button {:on-click #(re-frame/dispatch [::push-state ::home])}
+    "go to homepage"]])
+
+(defn home-handler []
+  (print "home  handler")
+  [:div.title "Home"])
+
+(defn explore-handler [parameters]
+  (let [path-val (->  parameters :path :path)] ;; {:path {:path "another-path"}, :query {}, :fragment nil}
+    (print "explore  handler")
+    (tap> parameters)
+    [:div.title (str "Explore 2 : " path-val " param = " (get-in parameters [:query :qparam]))
+     [:hr]
+     [:div 
+      [:a {:href (utils/href ::explore {:path "another-path"})}  "visit another path"]
+      [:br]
+      [:a {:href (utils/href ::explore {:path "third-path"} {:qparam "param2"})}  "visit a third  path"]]]))
+
+(defn explore-handler_v1 [data]
+  (let [current-route @(re-frame/subscribe [:routes/current-route])
+        path-val (get-in  current-route [:path-params :path])]
+    (print "explore  handler")
+    (tap> path-val)
+    [:div.title (str "Explore : " path-val)
+     [:hr]
+     [:div [:a {:href (utils/href ::explore {:path "another-path"})}  "visit another path"]]]))
 
 (def routes
   [;; by default, keyword ::home is expanded to {:name ::home}
-   ["/"               ::home]
+   ["/"               {:name ::home
+                       :view  home-handler}]
    ;; by default function is expanded into {:handler the-function}
-   ["/about"          about-handler]
-   ["/explore/*path"  ::explore]
-   ["/item/:id"       {:name       ::item
-                       :handler    #(print "the item route handler")
-                       :parameters {:path {:id int?}}}]
-   ["/greet"          {:name       ::greet}]])
+   ["/about"          {:name ::about
+                       :view about-handler}]
+   ["/explore/*path"  {:name ::explore
+                       :view explore-handler}]
+   #_["/item/:id"       {:name       ::item
+                         :handler    #(print "the item route handler")
+                         :parameters {:path {:id int?}}}]
+   #_["/greet"          {:name       ::greet}]])
 
 (defn create-router [routes-definitions]
   (rf/router  routes-definitions))
@@ -79,9 +110,8 @@
   (for [route-name (rc/route-names router)
         :let [route (rc/match-by-name router route-name)]]
     #_(prn route-name)
-    (rfe/href route-name {:id 2} {:foo "bar"})
-    )
-  
+    (rfe/href route-name {:id 2} {:foo "bar"}))
+
   (rc/match-by-name router ::home)
   (rc/match-by-path router "/")
 

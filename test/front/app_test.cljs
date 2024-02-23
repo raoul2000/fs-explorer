@@ -1,7 +1,7 @@
 (ns app-test
   (:require [cljs.test :refer (deftest is testing)]
-            [utils :refer [href]]
-            [routes :refer [init-routes!]]))
+            #_[utils :refer [href]]
+            #_[routes :refer [init-routes!]]))
 
 
 #_(init-routes!)

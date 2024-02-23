@@ -2,6 +2,7 @@
   (:require [cljs.reader]
             [re-frame.core :refer [after]]
             [cljs.spec.alpha :as s]
+            [re-frame.core :as re-frame]
             [model :as model]))
 
 ;; spec db -------------------------------------------------------------------------------
@@ -26,3 +27,14 @@
 
 ;; now we create an interceptor using `after`
 (def check-spec-interceptor (after (partial check-and-throw ::db)))
+
+;; event ---------------------------------------------------------------------------------
+
+(re-frame/reg-event-db ::initialize
+                       (fn [db _]
+                         (if db
+                           db
+                           default-db)))
+
+(defn >initialize-db []
+  (re-frame/dispatch-sync [::initialize]))

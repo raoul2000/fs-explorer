@@ -1,39 +1,34 @@
 (ns main
   (:require [reagent.dom :as rdom]
             [re-frame.core :as re-frame]
-            [routes :as routes]
-            [utils :refer [href]]
+            #_[routes :as routes]
+            [route.core :as route]
+            [route.helper :refer [href]]
+            [route.subs :refer [<current-route ]]
+            [page.about.route :as about-route]
+            [page.home.route :as home-route]
+            [page.explore.route :as explore-route]
             [reitit.core :as r]
-            [db :refer [default-db]]))
-
-
-(re-frame/reg-event-db ::initialize-db
-                       (fn [db _]
-                         (if db
-                           db
-                           default-db)))
+            [db :refer [>initialize-db]]))
 
 (defn nav
   "The navigation bar component"
-  [{:keys [router current-route]}]
-  [:ul
-   (for [route-name (r/route-names router)
-         :let       [route (r/match-by-name router route-name)
-                     text (-> route :data :link-text)]]
-     [:li {:key route-name}
-      (when (= route-name (-> current-route :data :name))
-        "> ")
-      ;; Create a normal links that user can click
-      [:a {:href (href route-name)} text]])])
-
+  [current-route]
+  (let [route-name (-> current-route :data :name)]
+    [:div.title "navbar "
+     [:ul
+      [:li (when (home-route/is? route-name)    ">") [:a {:href (href home-route/route-id)}  "home"]]
+      [:li (when (about-route/is? route-name)   ">") [:a {:href (href about-route/route-id)} "about"]]
+      [:li (when (explore-route/is? route-name) ">") [:a {:href (href explore-route/route-id {:path "dir1/dir2"} {:qparam "queryp"})} "Explore"]]]]))
 
 (defn main-page []
-  (let [current-route @(re-frame/subscribe [:routes/current-route])]
+  (let [current-route (<current-route )]
     [:div
-     [nav {:router routes/router :current-route current-route}]
+     [nav current-route]
      [:hr]
      (when current-route
-       [(-> current-route :data :view)])]))
+       #_(tap> current-route)
+       [#((-> current-route :data :view) (:parameters current-route))])]))
 
 (def debug? ^boolean goog.DEBUG)
 
@@ -44,9 +39,9 @@
 
 (defn run []
   (re-frame/clear-subscription-cache!)
-  (re-frame/dispatch-sync [::initialize-db])
+  (>initialize-db)
   (dev-setup)
-  (routes/init-routes!)
+  (route/init-routes!)
   (rdom/render [main-page] (.getElementById js/document "app")))
 
 

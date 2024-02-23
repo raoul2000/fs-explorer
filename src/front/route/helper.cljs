@@ -1,6 +1,5 @@
-(ns utils
+(ns route.helper
   (:require [reitit.frontend.easy :as rfe]))
-
 
 (defn href
   "Return relative url for given route. Url can be used in HTML links.
@@ -17,5 +16,3 @@
    (href k params nil))
   ([k params query]
    (rfe/href k params query)))
-
-
