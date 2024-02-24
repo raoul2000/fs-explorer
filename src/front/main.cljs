@@ -3,9 +3,6 @@
             [re-frame.core :as re-frame] 
             [route.core :refer [init-routes!]] 
             [route.subs :refer [<current-route]]
-            [page.about.route   :as about-route]
-            [page.home.route    :as home-route]
-            [page.explore.route :as explore-route]
             [route.helper :as route-helper]
             [db :refer [>initialize-db]]))
 
@@ -15,9 +12,9 @@
   (let [route-name (-> current-route :data :name)]
     [:div.title "navbar "
      [:ul
-      [:li (when (home-route/is? route-name)    ">") [:a {:href (route-helper/create-url-home)}  "home"]]
-      [:li (when (about-route/is? route-name)   ">") [:a {:href (route-helper/create-url-about)} "about"]]
-      [:li (when (explore-route/is? route-name) ">") [:a {:href (route-helper/create-url-explore "dir1/dir3")} "Explore"]]]]))
+      [:li (when (route-helper/home-route? route-name)    ">") [:a {:href (route-helper/create-url-home)}  "home"]]
+      [:li (when (route-helper/about-route? route-name)   ">") [:a {:href (route-helper/create-url-about)} "about"]]
+      [:li (when (route-helper/explore-route? route-name) ">") [:a {:href (route-helper/create-url-explore "dir1/dir3")} "Explore"]]]]))
 
 (defn main-page []
   (let [current-route (<current-route)]

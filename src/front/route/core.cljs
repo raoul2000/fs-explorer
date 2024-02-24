@@ -9,10 +9,22 @@
             [route.event :as event-to-load]))
 
 
-(def routes
-  [(about/create-route)
-   (explore/create-route)
-   (home/create-route)])
+(def routes [["/about"
+              {:name        :route/about
+               :view        about/page}]
+
+             ["/explore/*path"
+              {:name        :route/explore
+               :view        explore/page
+               :controllers [{:parameters {:path [:path]}
+                              :start      (fn [params]
+                                            (js/console.log "Entering page explorer path = " (-> params :path :path)))
+                                                                     ;; Teardown can be done here.
+                              :stop       (fn [& params] (js/console.log "Leaving home page"))}]}]
+
+             ["/"
+              {:name       :route/home
+               :view       home/page}]])
 
 (defn on-navigate [new-match]
   (when new-match

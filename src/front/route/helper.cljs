@@ -1,9 +1,6 @@
 (ns route.helper
   (:require [reitit.frontend.easy :as rfe]
-            [re-frame.core :as rfc]
-            [page.about.route :as about]
-            [page.home.route :as home]
-            [page.explore.route :as explore]))
+            [re-frame.core :as rfc]))
 
 (defn href
   "Return relative url for given route. Url can be used in HTML links.
@@ -26,28 +23,34 @@
 (defn >navigate-to-home
   "navigate to the Home' view"
   []
-  (rfc/dispatch [:route.event/push-state home/route-id]))
+  (rfc/dispatch [:route.event/push-state :route/home]))
 
 (defn create-url-home []
-  (href home/route-id))
+  (href :route/home))
+
+(def home-route? (partial = :route/home))
+
 
 ;; About ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn >navigate-to-about
   "navigate to the 'About' view"
   []
-  (rfc/dispatch [:route.event/push-state about/route-id]))
+  (rfc/dispatch [:route.event/push-state :route/about]))
 
 (defn create-url-about []
-  (href about/route-id))
+  (href :route/about))
 
-;; Explore ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def about-route? (partial = :route/about))
+
+;; Explore ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn >navigate-to-explore
   "navigate to the 'explore' view for the given dir-path"
   [dir-path]
-  (rfc/dispatch [:route.event/push-state explore/route-id {:path dir-path} {:other-qparam "value"}]))
+  (rfc/dispatch [:route.event/push-state :route/explore {:path dir-path} {:other-qparam "value"}]))
 
 (defn create-url-explore [dir-path]
-  (href explore/route-id {:path dir-path} {:extra-query-param "any value"}))
+  (href :route/explore {:path dir-path} {:extra-query-param "any value"}))
 
+(def explore-route? (partial = :route/explore))

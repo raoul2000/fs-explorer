@@ -1,6 +1,5 @@
 (ns page.explore.view
   (:require [page.explore.event :refer [>explore]]
-            [page.explore.route :refer [route]]
             [page.explore.subs :refer [<explore <loading?]]
             [clojure.string :as s]
             [reagent.core :as r]))
@@ -42,10 +41,3 @@
    [:div (-> params :path :path)]
    [toolbar]
    [explorer-view]])
-
-;; navigation and route ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn create-route []
-  (let [[path options] route]
-    (vector path (-> options
-                     (assoc :view page)))))
