@@ -30,7 +30,9 @@
                  :response-format (edn-response-format)
                  :on-success      [::ls-success]
                  :on-failure      [::ls-failure]}
-    :db  (assoc db :loading? true)}))
+    :db  (-> db
+             (assoc :loading?    true)
+             (assoc :current-dir path))}))
 
 (re-frame/reg-event-db
  ::explore

@@ -18,3 +18,11 @@
 (defn <loading? []
   @(re-frame/subscribe [::loading?]))
 
+(re-frame/reg-sub 
+ ::current-dir
+ (fn [db _]
+   (:current-dir db)))
+
+(defn <current-dir []
+  @(re-frame/subscribe [::current-dir]))
+

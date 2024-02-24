@@ -6,7 +6,7 @@
             [page.about.view :as about]
             [page.explore.view :as explore]
             [page.home.view :as home]
-            [route.event :as event-to-load]))
+            [route.event :as route-event]))
 
 
 (def routes [["/about"
