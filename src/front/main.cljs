@@ -1,14 +1,11 @@
 (ns main
   (:require [reagent.dom :as rdom]
-            [re-frame.core :as re-frame]
-            #_[routes :as routes]
-            [route.core :as route]
-            [route.helper :refer [href]]
-            [route.subs :refer [<current-route ]]
-            [page.about.route :as about-route]
-            [page.home.route :as home-route]
+            [re-frame.core :as re-frame] 
+            [route.core :refer [init-routes!]] 
+            [route.subs :refer [<current-route]]
+            [page.about.route   :as about-route]
+            [page.home.route    :as home-route]
             [page.explore.route :as explore-route]
-            [reitit.core :as r]
             [db :refer [>initialize-db]]))
 
 (defn nav
@@ -17,12 +14,12 @@
   (let [route-name (-> current-route :data :name)]
     [:div.title "navbar "
      [:ul
-      [:li (when (home-route/is? route-name)    ">") [:a {:href (href home-route/route-id)}  "home"]]
-      [:li (when (about-route/is? route-name)   ">") [:a {:href (href about-route/route-id)} "about"]]
-      [:li (when (explore-route/is? route-name) ">") [:a {:href (href explore-route/route-id {:path "dir1/dir2"} {:qparam "queryp"})} "Explore"]]]]))
+      [:li (when (home-route/is? route-name)    ">") [:a {:href (home-route/create-url)}  "home"]]
+      [:li (when (about-route/is? route-name)   ">") [:a {:href (about-route/create-url)} "about"]]
+      [:li (when (explore-route/is? route-name) ">") [:a {:href (explore-route/create-url "dir1/dir3")} "Explore"]]]]))
 
 (defn main-page []
-  (let [current-route (<current-route )]
+  (let [current-route (<current-route)]
     [:div
      [nav current-route]
      [:hr]
@@ -41,7 +38,7 @@
   (re-frame/clear-subscription-cache!)
   (>initialize-db)
   (dev-setup)
-  (route/init-routes!)
+  (init-routes!)
   (rdom/render [main-page] (.getElementById js/document "app")))
 
 
