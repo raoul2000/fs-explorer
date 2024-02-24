@@ -24,7 +24,7 @@
      [nav current-route]
      [:hr]
      (when current-route
-       #_(tap> current-route)
+       (tap> current-route)
        [#((-> current-route :data :view) (:parameters current-route))])]))
 
 (def debug? ^boolean goog.DEBUG)

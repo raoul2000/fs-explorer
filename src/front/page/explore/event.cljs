@@ -9,7 +9,6 @@
  ::ls-success
  [check-spec-interceptor]
  (fn [db [_ success-response]]
-   (tap> success-response)
    (-> db
        (assoc :explore (:model/content success-response))
        (assoc :loading? false))))
@@ -25,7 +24,6 @@
 (re-frame/reg-event-fx
  ::ls
  (fn [{db :db} [_event-id path]]
-   (tap> path)
    {:http-xhrio {:method          :get
                  :uri             (str "/explore/" path)
                  :format          (edn-request-format)

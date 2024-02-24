@@ -34,7 +34,7 @@
                 :on-change update-input-path}]])))
 
 (defn page [params]
-  (tap> params)
+  #_(tap> params)
   [:div
    [:div.title "Explorer"]
    [:br]
