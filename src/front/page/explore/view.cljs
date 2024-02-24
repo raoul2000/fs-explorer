@@ -1,9 +1,10 @@
 (ns page.explore.view
-  (:require [re-frame.core :as re-frame]
-            [page.explore.event :refer [>explore]]
+  (:require [page.explore.event :refer [>explore]]
+            [page.explore.route :refer [route]]
             [page.explore.subs :refer [<explore <loading?]]
             [clojure.string :as s]
             [reagent.core :as r]))
+
 
 (defn view-item [item]
   [:tr  {:key (:file/path item)}
@@ -41,3 +42,10 @@
    [:div (-> params :path :path)]
    [toolbar]
    [explorer-view]])
+
+;; navigation and route ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn create-route []
+  (let [[path options] route]
+    (vector path (-> options
+                     (assoc :view page)))))

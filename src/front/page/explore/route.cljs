@@ -1,6 +1,4 @@
-(ns page.explore.route
-  (:require [page.explore.view :as explore]
-            [route.helper :refer [href]]))
+(ns page.explore.route)
 
 (def route-id ::explore)
 
@@ -15,8 +13,7 @@
                           :stop       (fn [& params] (js/console.log "Leaving home page"))}])
 
 (def route ["/explore/*path" {:name        route-id
-                              :view        explore/page
                               :controllers route-controllers}])
 
-(defn create-url [dir-path]
-  (href route-id {:path dir-path} {:extra-query-param "any value"}))
+
+
