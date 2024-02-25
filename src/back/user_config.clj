@@ -4,13 +4,17 @@
             [clojure.data.json :as json]
             [clojure.spec.alpha :as s]))
 
+;; server port number
 (s/def ::server-port    (s/and int? #(< 0 % 65353)))
+;; open the browser on startup ?
 (s/def ::open-browser   boolean?)
+;; what URL open in the browser
 (s/def ::browse-url     (s/and string?
                                #(try
                                   (new java.net.URL %)
                                   (catch Throwable _t false))))
-(s/def ::root-dir-path  string?)
+;; path to the root folder for all relatives path 
+(s/def ::root-dir-path  (s/and string? fs/directory?))
 
 (s/def ::config         (s/keys :opt [::server-port
                                       ::open-browser
@@ -34,6 +38,7 @@
   (s/valid? ::config {:server-port -11})
   (s/valid? ::config {::server-port "XX"})
   (s/explain-data  ::config {::server-port "XX"})
+
   ;;
   )
 
@@ -92,7 +97,17 @@
 
 (defn load-from-file
   "Read user config from the given *file-path* and validate it. Returns
-   the user config map or throws."
+   the user config map or throws.
+   
+   All keys in the returned map are namespaced in 'user-config'. 
+   Example : 
+   ```
+   {
+      :user-config/open-browser true
+      :user-config/server-port  8001
+   }
+   ```
+   "
   [file-path]
   (->> file-path
        read-from-file

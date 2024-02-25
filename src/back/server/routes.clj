@@ -17,7 +17,7 @@
   (error-dispatch [ctx ex]
                   [{:exception-type :clojure.lang.ExceptionInfo}]
                   (do
-                    (tap> {:ex-data    (ex-data ex)
+                    #_(tap> {:ex-data    (ex-data ex)
                            :ex-message (ex-message ex)
                            :ex-cause   (ex-cause ex)})
                     (if-let [ex-from-logic (ex-cause ex)]
@@ -37,11 +37,12 @@
    handler])
 
 (defn create [options]
+  (tap> {:create-route-options options})
   (route/expand-routes
-   #{["/"              :get  (home-handler/create options)                        :route-name    :home]
-     ["/greet"         :get  (interceptor-chain (greet-handler/create options))   :route-name    :greet]
-     ["/info"          :get  (interceptor-chain (info-handler/create options))    :route-name    :info]
-     ["/config"        :get  (interceptor-chain (config-handler/create options))    :route-name    :config]
+   #{["/"              :get  (home-handler/create options)                            :route-name    :home]
+     ["/greet"         :get  (interceptor-chain (greet-handler/create options))       :route-name    :greet]
+     ["/info"          :get  (interceptor-chain (info-handler/create options))        :route-name    :info]
+     ["/config"        :get  (interceptor-chain (config-handler/create options))      :route-name    :config]
 
      ["/explore/*path" :get  (interceptor-chain (explorer-handler/create options))    :route-name    :explorer]
 
@@ -49,4 +50,6 @@
                               ;; based on the extension of the file to download.
                               ;; If not set, content-type defaults to application/octet-stream
                               (ring-mw/file-info)
-                              (download-handler/create options)]           :route-name :get-download]}))
+                              (download-handler/create options)]                      :route-name    :get-download]}))
+
+

@@ -3,12 +3,14 @@
   (:require [integrant.core :as ig]
             [io.pedestal.http :as http]
             [server.routes :as server-routes]
-            [clojure.java.browse :refer [browse-url]]))
+            [clojure.java.browse :refer [browse-url]]
+            [babashka.fs :as fs]))
 
 ;; system config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def config
-  {:app/user-config {:user-config              {}}
+  ;; set when the application starts, before initialising the system
+  {:app/user-config {}
 
    ;; the default configuration - some parameters can be over written by user-config
    :app/config      {:user-config              (ig/ref :app/user-config)
@@ -20,7 +22,8 @@
                      :nice-goodbye?            false
                      :open-browser?            true
                      :browse-url               ""
-                     :port                     8890}
+                     :port                     8890
+                     :root-dir-path            (str (fs/home))}
 
    :server/routes    {:config                  (ig/ref :app/config)}
 
@@ -38,14 +41,14 @@
   "Create the config map from the given map *m*. 
    In particular merges user-config with default config"
   [{:keys [user-config] :or {user-config {}} :as config-map}]
-  (tap> config-map)
   (let [port       (get user-config :user-config/server-port  (:port config-map))
         browse-url (get user-config :user-config/browse-url   (format "http://localhost:%d/" port))]
     (-> config-map
         (dissoc :user-config)
         (assoc  :port           port)
         (assoc  :browse-url     browse-url)
-        (update :open-browser?  #(get user-config :user-config/open-browser  %)))))
+        (update :open-browser?  #(get user-config :user-config/open-browser  %))
+        (update :root-dir-path  #(get user-config :user-config/root-dir-path  %)))))
 
 (defn init-server [{:keys [config] :as service-map}]
   (when (:open-browser? config)

@@ -10,7 +10,8 @@
           user-config (when file-path (user-config/load-from-file file-path))]
 
       (-> sys/config
-          (assoc    :app/user-config   (or user-config {}))
+          (assoc    :app/user-config   (or user-config {}))          
+          ;; late hard coded config overwrite
           (assoc-in [:app/config       :polite?]     true)
           sys/init))
 

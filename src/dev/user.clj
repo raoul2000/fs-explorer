@@ -34,15 +34,20 @@
 
   ;; system ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+  ;; the system configuration
+  (def system-config (-> sys/config
+                         (assoc :app/user-config {:user-config/root-dir-path "c:/tmp"
+                                                  :user-config/open-browser  false})
+                         #_(assoc-in [:app/config    :open-browser?]    false)
+                         #_(assoc-in [:app/config    :polite?]          true)
+                         (assoc-in [:server/server ::http/join?]   false)))
+
   ;; start the system
-  (def system (ig/init (-> sys/config
-                           (assoc-in [:app-1/config :open-browser?]    true)
-                           (assoc-in [:app-1/config :polite?]          true)
-                           (assoc-in [:server/server ::http/join?]   false))))
+  (def system (ig/init system-config))
 
   ;; stop the system
   (ig/halt! system)
-  
+
 
   ;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
