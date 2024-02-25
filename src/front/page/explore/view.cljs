@@ -11,20 +11,16 @@
    [:td
     [:a {:on-click #(>navigate-to-explore (:file/path item))} (:file/name item)]]])
 
-(defn explorer-view [dir-path]
+(defn explorer-view []
   (let [loading? (<loading?)]
     [:div "explorer view"
      [:br]
      (when-not loading?
-       (let [current-dir (<current-dir)]
-         (if-not (= current-dir dir-path)
-           (>explore dir-path)
-           (let [list-items (<explore)]
-             (if-not  (zero? (count list-items))
-               [:table.table.is-hoverable.is-fullwidth.is-striped
-                (map view-item list-items)]
-               [:div "empty"])))))]))
-
+       (let [list-items (<explore)]
+         (if-not  (zero? (count list-items))
+           [:table.table.is-hoverable.is-fullwidth.is-striped
+            (map view-item list-items)]
+           [:div "empty"])))]))
 
 (defn toolbar []
   (let [path              (r/atom "")
@@ -45,4 +41,4 @@
      [:div.title (str "Explorer - " dir-path)]
      [:br]
      [toolbar]
-     [explorer-view dir-path]]))
+     [explorer-view]]))

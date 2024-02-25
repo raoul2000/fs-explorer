@@ -6,7 +6,8 @@
             [page.about.view :as about]
             [page.explore.view :as explore]
             [page.home.view :as home]
-            [route.event :as route-event]))
+            [route.event :as route-event] ;; required
+            [page.explore.event :refer [>explore]]))
 
 
 (def routes [["/about"
@@ -18,9 +19,10 @@
                :view        explore/page
                :controllers [{:parameters {:path [:path]}
                               :start      (fn [params]
-                                            (js/console.log "Entering page explorer path = " (-> params :path :path)))
-                                                                     ;; Teardown can be done here.
-                              :stop       (fn [& params] (js/console.log "Leaving home page"))}]}]
+                                            (js/console.log "[explorer] -->>  path = " (-> params :path :path))
+                                            (>explore (-> params :path :path)))
+                              ;; Teardown can be done here.
+                              :stop       (fn [params] (js/console.log "[explorer] <<-- path = " (-> params :path :path)))}]}]
 
              ["/"
               {:name       :route/home
