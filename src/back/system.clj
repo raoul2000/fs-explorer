@@ -8,10 +8,10 @@
 ;; system config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def config
-  {:app-1/user-config {:user-config              {}}
+  {:app/user-config {:user-config              {}}
 
    ;; the default configuration - some parameters can be over written by user-config
-   :app-1/config      {:user-config              (ig/ref :app-1/user-config)
+   :app/config      {:user-config              (ig/ref :app/user-config)
                      :param1                   "value1"
                      :param2                   {:nested-p1 true
                                                 :nested-p2 12
@@ -22,9 +22,9 @@
                      :browse-url               ""
                      :port                     8890}
 
-   :server/routes    {:config                  (ig/ref :app-1/config)}
+   :server/routes    {:config                  (ig/ref :app/config)}
 
-   :server/server    {:config                  (ig/ref :app-1/config)
+   :server/server    {:config                  (ig/ref :app/config)
                       ::http/routes            (ig/ref :server/routes)
                       ::http/secure-headers    {:content-security-policy-settings {:object-src "none"}}
                       ::http/resource-path     "/public"
@@ -62,11 +62,11 @@
 
 ;; integrant Key initializer ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod ig/init-key :app-1/user-config
+(defmethod ig/init-key :app/user-config
   [_ user-config]
   user-config)
 
-(defmethod ig/init-key :app-1/config
+(defmethod ig/init-key :app/config
   [_ config]
   (init-app-config config))
 
