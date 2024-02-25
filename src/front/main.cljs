@@ -1,9 +1,9 @@
 (ns main
   (:require [reagent.dom :as rdom]
-            [re-frame.core :as re-frame] 
-            [route.core :refer [init-routes!]] 
+            [re-frame.core :as re-frame]
+            [route.core :refer [init-routes!]]
             [route.subs :refer [<current-route]]
-            [route.helper :as route-helper]
+            [route.helper :refer [home-route? about-route? explore-route? create-url-about create-url-explore create-url-home]]
             [db :refer [>initialize-db]]))
 
 (defn nav
@@ -12,9 +12,9 @@
   (let [route-name (-> current-route :data :name)]
     [:div.title "navbar "
      [:ul
-      [:li (when (route-helper/home-route? route-name)    ">") [:a {:href (route-helper/create-url-home)}  "home"]]
-      [:li (when (route-helper/about-route? route-name)   ">") [:a {:href (route-helper/create-url-about)} "about"]]
-      [:li (when (route-helper/explore-route? route-name) ">") [:a {:href (route-helper/create-url-explore "dir1/dir3")} "Explore"]]]]))
+      [:li (when (home-route? route-name)    ">") [:a {:href (create-url-home)}  "home"]]
+      [:li (when (about-route? route-name)   ">") [:a {:href (create-url-about)} "about"]]
+      [:li (when (explore-route? route-name) ">") [:a {:href (create-url-explore "dir1/dir3")} "Explore"]]]]))
 
 (defn main-page []
   (let [current-route (<current-route)]
@@ -22,7 +22,6 @@
      [nav current-route]
      [:hr]
      (when current-route
-       (tap> current-route)
        [#((-> current-route :data :view) (:parameters current-route))])]))
 
 (def debug? ^boolean goog.DEBUG)

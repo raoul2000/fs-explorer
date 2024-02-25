@@ -1,6 +1,5 @@
 (ns page.explore.view
-  (:require [page.explore.event :refer [>explore]]
-            [page.explore.subs :refer [<explore <loading? <current-dir]]
+  (:require [page.explore.subs :refer [<explore <loading? <current-dir]]
             [clojure.string :as s]
             [route.helper :refer [>navigate-to-explore]]
             [reagent.core :as r]))
@@ -36,7 +35,6 @@
 
 (defn page [params]
   (let [dir-path (-> params :path :path)]
-    #_(tap> params)
     [:div
      [:div.title (str "Explorer - " dir-path)]
      [:br]
