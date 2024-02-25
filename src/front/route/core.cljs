@@ -19,8 +19,9 @@
                :view        explore/page
                :controllers [{:parameters {:path [:path]}
                               :start      (fn [params]
-                                            (js/console.log "[explorer] -->>  path = " (-> params :path :path))
-                                            (>explore (-> params :path :path)))
+                                            (let [dir-path-to-explore (-> params :path :path)]
+                                              (js/console.log "[explorer] -->>  path = " dir-path-to-explore)
+                                              (>explore dir-path-to-explore)))
                               ;; Teardown can be done here.
                               :stop       (fn [params] (js/console.log "[explorer] <<-- path = " (-> params :path :path)))}]}]
 
