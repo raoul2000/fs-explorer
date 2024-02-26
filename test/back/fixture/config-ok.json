@@ -1,4 +1,5 @@
 {
     "param1" : "value1",
-    "server-port": 8882
+    "server-port": 8882,
+    "root-dir-path" : "c:/toto"
 }

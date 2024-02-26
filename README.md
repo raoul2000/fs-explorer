@@ -88,7 +88,7 @@ $ java -jar target/fs-explorer-X.X.X.jar
 
 - **first** build the frontend app
 ```shell
-$ shadow-cljs release app
+$ npx shadow-cljs release app
 or
 $ npm run release
 ```

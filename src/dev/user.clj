@@ -38,7 +38,7 @@
 
   ;; the system configuration
   (def system-config (-> sys/config
-                         (assoc :app/user-config {:user-config/root-dir-path "c:/tmp"
+                         (assoc :app/user-config {:user-config/root-dir-path "c:\\tmp"
                                                   :user-config/open-browser  false})
                          #_(assoc-in [:app/config    :open-browser?]    false)
                          #_(assoc-in [:app/config    :polite?]          true)
