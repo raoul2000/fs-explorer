@@ -33,5 +33,5 @@
              #:file{:name "dir2",
                     :dir? true,
                     :path (str (fs/path fixture-base-path "dir2"))}]}
-           (explore fixture-base-path))
+           (explore (str fixture-base-path) {:root-dir-path fixture-base-path}))
         "returns 2 absolute path")))
