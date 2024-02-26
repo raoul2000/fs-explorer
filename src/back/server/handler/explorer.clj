@@ -6,10 +6,10 @@
   [{:keys [root-dir-path]}]
   (fn [request]
     (let [dir-path (get-in request [:path-params :path])]
-      (response/ok (exp/explore dir-path)))))
+      (response/ok (exp/explore (or dir-path "/") {:root-dir-path root-dir-path})))))
 
 (comment
   ((create {:a 1}) nil)
-  (response/ok (exp/explore "c:\\tmp"))
+  (response/ok (exp/explore "tmp" {:root-dir-path "c:"}))
   ;;
   )
