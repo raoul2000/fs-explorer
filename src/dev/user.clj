@@ -5,7 +5,9 @@
             [system :as sys]
             [clojure.test :as test]
             [io.pedestal.http :as http]
-            [babashka.fs :as fs]))
+            [babashka.fs :as fs]
+            [clojure.spec.alpha :as s]
+            [user-config :as user-conf]))
 
   ;; avoid reloading of dev ns
 (set-refresh-dirs (str (fs/path (fs/cwd) "src" "back")))
@@ -41,6 +43,11 @@
                          #_(assoc-in [:app/config    :open-browser?]    false)
                          #_(assoc-in [:app/config    :polite?]          true)
                          (assoc-in [:server/server ::http/join?]   false)))
+  
+  (s/valid? :user-config/config {:user-config/root-dir-path "tmp"
+                                  :user-config/open-browser  false})
+  (s/explain :user-config/config {:user-config/root-dir-path "./test"
+                                 :user-config/open-browser  false})
 
   ;; start the system
   (def system (ig/init system-config))

@@ -14,7 +14,7 @@
                                   (new java.net.URL %)
                                   (catch Throwable _t false))))
 ;; path to the root folder for all relatives path 
-(s/def ::root-dir-path  (s/and string? fs/directory?))
+(s/def ::root-dir-path  (s/and string? fs/directory? fs/absolute?))
 
 (s/def ::config         (s/keys :opt [::server-port
                                       ::open-browser
