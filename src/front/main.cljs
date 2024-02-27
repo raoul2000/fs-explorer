@@ -12,9 +12,9 @@
   (let [route-name (-> current-route :data :name)]
     [:div.title "navbar "
      [:ul
-      [:li (when (home-route? route-name)    ">") [:a {:href (create-url-home)}  "home"]]
-      [:li (when (about-route? route-name)   ">") [:a {:href (create-url-about)} "about"]]
-      [:li (when (explore-route? route-name) ">") [:a {:href (create-url-explore "dir1/dir3")} "Explore"]]]]))
+      [:li (when (home-route? route-name)    ">") [:a {:href (create-url-home)}       "home"]]
+      [:li (when (about-route? route-name)   ">") [:a {:href (create-url-about)}      "about"]]
+      [:li (when (explore-route? route-name) ">") [:a {:href (create-url-explore "")} "Explore"]]]]))
 
 (defn main-page []
   (let [current-route (<current-route)]

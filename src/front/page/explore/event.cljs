@@ -25,19 +25,22 @@
  ::ls
  (fn [{db :db} [_event-id path]]
    {:http-xhrio {:method          :get
-                 :uri             (str "/explore/" path)
+                 :uri             (str "/explore/" (:current-dir db))
                  :format          (edn-request-format)
                  :response-format (edn-response-format)
                  :on-success      [::ls-success]
                  :on-failure      [::ls-failure]}
     :db  (-> db
-             (assoc :loading?    true)
-             (assoc :current-dir path))}))
-
-(re-frame/reg-event-db
- ::explore
- (fn [db [_ event-arg]]
-   (assoc db :explore ["a" "b"])))
+             (assoc :loading?    true))}))
 
 (defn >explore [path]
   (re-frame/dispatch [::ls path]))
+
+(re-frame/reg-event-db
+ ::select-dir
+ (fn [db [_ dir]]
+   (assoc db :current-dir dir)))
+
+(defn >select-dir [path]
+  (re-frame/dispatch [::select-dir path]))
+

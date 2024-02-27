@@ -7,14 +7,16 @@
 
 ;; spec db -------------------------------------------------------------------------------
 
-(s/def ::explore   :model/content)
-(s/def ::loading?  boolean?)
-(s/def ::db        (s/keys :req-un [::loading? ::explore]))
+(s/def ::explore     :model/content)
+(s/def ::current-dir string?)
+(s/def ::loading?    boolean?)
+(s/def ::db          (s/keys :req-un [::loading? ::explore ::current-dir]))
 
 ;; Default db ----------------------------------------------------------------------------
 
 (def default-db {:current-route nil
                  :explore       []
+                 :current-dir   ""
                  :loading?      false})
 
 ;; spec interceptor -----------------------------------------------------------------------
@@ -23,7 +25,7 @@
   "Throws an exception if `db` doesn't match the Spec `a-spec`."
   [a-spec db]
   (when-not (s/valid? a-spec db)
-    (throw (ex-info (str "spec check failed: " (s/explain-str a-spec db)) {}))))
+    (throw (ex-info (str "spec check failed: " {:cause (s/explain-data a-spec db)}) {}))))
 
 ;; now we create an interceptor using `after`
 (def check-spec-interceptor (after (partial check-and-throw ::db)))
@@ -32,9 +34,8 @@
 
 (re-frame/reg-event-db ::initialize
                        (fn [db _]
-                         (if db
-                           db
-                           default-db)))
+                         (tap> db)
+                         default-db))
 
 (defn >initialize-db []
   (re-frame/dispatch-sync [::initialize]))

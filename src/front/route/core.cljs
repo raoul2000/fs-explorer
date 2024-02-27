@@ -7,7 +7,7 @@
             [page.explore.view :as explore]
             [page.home.view :as home]
             [route.event :as route-event] ;; required
-            [page.explore.event :refer [>explore]]))
+            [page.explore.event :refer [>explore >select-dir]]))
 
 
 (def routes [["/about"
@@ -21,7 +21,9 @@
                               :start      (fn [params]
                                             (let [dir-path-to-explore (-> params :path :path)]
                                               (js/console.log "[explorer] -->>  path = " dir-path-to-explore)
-                                              (>explore dir-path-to-explore)))
+                                              (>select-dir dir-path-to-explore)
+                                              #_(>explore dir-path-to-explore)
+                                              ))
                               ;; Teardown can be done here.
                               :stop       (fn [params] (js/console.log "[explorer] <<-- path = " (-> params :path :path)))}]}]
 
