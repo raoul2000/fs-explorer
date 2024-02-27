@@ -25,8 +25,13 @@ Accept: application/json
 GET {{baseUrl}}/config
 
 
-### GET /explore
+### GET /explore (default)
 
 GET {{baseUrl}}/explore
+Accept: application/edn
+
+### GET /explore
+
+GET {{baseUrl}}/explore?dir=barcode/home/
 Accept: application/edn
 

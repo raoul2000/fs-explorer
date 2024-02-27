@@ -5,7 +5,7 @@
 (defn create
   [{:keys [root-dir-path]}]
   (fn [request]
-    (let [dir-path (get-in request [:path-params :path])]
+    (let [dir-path (get-in request [:params :dir])]
       (response/ok (exp/explore (or dir-path "/") {:root-dir-path root-dir-path})))))
 
 (comment

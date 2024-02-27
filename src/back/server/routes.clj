@@ -45,8 +45,7 @@
      ["/config"        :get  (interceptor-chain (config-handler/create options))      :route-name    :config]
 
      ;; note: route'/explore/' is NOT valid
-     ["/explore/*path" :get  (interceptor-chain (explorer-handler/create options))    :route-name    :explorer]
-     ["/explore"       :get  (interceptor-chain (explorer-handler/create options))    :route-name    :explorer-root]
+     ["/explore"       :get  (interceptor-chain (explorer-handler/create options))    :route-name    :explorer]
 
      ["/download"      :get   [;; file-info interceptor will set the content-type of the response
                               ;; based on the extension of the file to download.
