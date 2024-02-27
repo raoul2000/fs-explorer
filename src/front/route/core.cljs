@@ -14,18 +14,17 @@
               {:name        :route/about
                :view        about/page}]
 
-             ["/explore/*path"
+             ["/explore"
               {:name        :route/explore
                :view        explore/page
-               :controllers [{:parameters {:path [:path]}
+               :controllers [{:parameters {:query [:dir]}
                               :start      (fn [params]
-                                            (let [dir-path-to-explore (-> params :path :path)]
+                                            (let [dir-path-to-explore (-> params :query :dir)]
                                               (js/console.log "[explorer] -->>  path = " dir-path-to-explore)
-                                              (>select-dir dir-path-to-explore)
-                                              #_(>explore dir-path-to-explore)
-                                              ))
+                                              (>select-dir (or dir-path-to-explore "/"))))
                               ;; Teardown can be done here.
-                              :stop       (fn [params] (js/console.log "[explorer] <<-- path = " (-> params :path :path)))}]}]
+                              :stop       (fn [params]
+                                            (js/console.log "[explorer] <<-- path = " (-> params :query :dir)))}]}]
 
              ["/"
               {:name       :route/home
@@ -46,6 +45,14 @@
    router
    on-navigate
    {:use-fragment true}))
+
+(comment
+  (init-routes!)
+  (rfe/href :route/explore {} {:dir "some/dir"})
+
+  ;;
+  )
+
 
 
 

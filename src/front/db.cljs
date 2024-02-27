@@ -16,7 +16,7 @@
 
 (def default-db {:current-route nil
                  :explore       []
-                 :current-dir   ""
+                 :current-dir   nil
                  :loading?      false})
 
 ;; spec interceptor -----------------------------------------------------------------------
@@ -34,7 +34,6 @@
 
 (re-frame/reg-event-db ::initialize
                        (fn [db _]
-                         (tap> db)
                          default-db))
 
 (defn >initialize-db []

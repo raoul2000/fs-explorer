@@ -1,14 +1,15 @@
 (ns page.explore.view
   (:require [page.explore.subs :refer [<explore <loading? <current-dir]]
+            [page.explore.event :refer [>select-dir]]
             [clojure.string :as s]
-            [route.helper :refer [>navigate-to-explore]]
+            [route.helper :refer [>navigate-to-explore create-url-explore]]
             [reagent.core :as r]))
 
 (defn view-item [item]
   [:tr  {:key (:file/path item)}
    [:td {:width "40px"} (if (:file/dir? item) "dir" "file")]
    [:td
-    [:a {:on-click #(>navigate-to-explore (:file/path item))} (:file/name item)]]])
+    [:a {:href (create-url-explore (:file/path item))} (:file/name item)]]])
 
 (defn explorer-view []
   (let [loading? (<loading?)]
@@ -34,7 +35,7 @@
                 :on-change update-input-path}]])))
 
 (defn page [params]
-  (let [dir-path (-> params :path :path)]
+  (let [dir-path (<current-dir) #_(-> params :query :dir)]
     [:div
      [:div.title (str "Explorer - " dir-path)]
      [:br]
