@@ -7,7 +7,7 @@
             [page.explore.view :as explore]
             [page.home.view :as home]
             [route.event :as route-event] ;; required
-            [page.explore.event :refer [>explore >select-dir]]))
+            [page.explore.event :refer [>select-dir]]))
 
 
 (def routes [["/about"
@@ -17,6 +17,8 @@
              ["/explore"
               {:name        :route/explore
                :view        explore/page
+               ;; about controllers
+               ;; see https://cljdoc.org/d/metosin/reitit/0.7.0-alpha7/doc/frontend/controllers?q=controller#how-controllers-work
                :controllers [{:parameters {:query [:dir]}
                               :start      (fn [params]
                                             (let [dir-path-to-explore (-> params :query :dir)]
@@ -45,13 +47,6 @@
    router
    on-navigate
    {:use-fragment true}))
-
-(comment
-  (init-routes!)
-  (rfe/href :route/explore {} {:dir "some/dir"})
-
-  ;;
-  )
 
 
 

@@ -47,7 +47,7 @@
 (defn >navigate-to-explore
   "navigate to the 'explore' view for the given dir-path"
   [dir-path]
-  (rfc/dispatch [:route.event/push-state :route/explore{:dir dir-path}]))
+  (rfc/dispatch [:route.event/push-state :route/explore {} {:dir dir-path}]))
 
 (defn create-url-explore [dir-path]
   (href :route/explore {} {:dir dir-path}))

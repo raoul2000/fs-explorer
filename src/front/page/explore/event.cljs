@@ -42,7 +42,12 @@
  (fn [{db :db} [_ dir]]
    {:db (-> db
             (assoc :current-dir dir))
-    :fx  [(when-not (= (:current-dir db) dir) [:dispatch [::ls dir]])]}))
+    :fx  [(when-not (= (:current-dir db) dir) [:http-xhrio {:method          :get
+                                                            :uri             (str "/explore?dir=" dir)
+                                                            :format          (edn-request-format)
+                                                            :response-format (edn-response-format)
+                                                            :on-success      [::ls-success]
+                                                            :on-failure      [::ls-failure]}])]}))
 
 (defn >select-dir [path]
   (re-frame/dispatch [::select-dir path]))

@@ -8,9 +8,8 @@
             [db :refer [>initialize-db]]))
 
 (defn link-explore [route-name]
-  (fn []
-    (let [current-dir (<current-dir)]
-      [:li (when (explore-route? route-name) ">") [:a {:href (create-url-explore current-dir)} "Explore"]])))
+  (let [current-dir (<current-dir)]
+    [:li (when (explore-route? route-name) ">") [:a {:href (create-url-explore current-dir)} "Explore"]]))
 
 (defn nav
   "The navigation bar component"

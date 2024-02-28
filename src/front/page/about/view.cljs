@@ -7,5 +7,5 @@
    [:button {:on-click #(route/>navigate-to-home)}
     "go to homepage"]
    [:br]
-   [:button {:on-click #(route/>navigate-to-explore "some/folder/here")}
+   [:button {:on-click #(route/>navigate-to-explore "/")}
     "go to explore"]])
