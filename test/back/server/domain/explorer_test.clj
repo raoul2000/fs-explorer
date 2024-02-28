@@ -3,6 +3,9 @@
             [domain.explorer :refer (explore)]
             [babashka.fs :as fs]))
 
+;; fixtures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (def fixture-base-path  (fs/absolutize "test/back/fixtures/fs"))
 (defn make-dirs [dirs]
   (doseq [dir dirs]
@@ -23,6 +26,10 @@
   (clean-fs))
 
 (use-fixtures :once with-fs-tree)
+
+
+;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (deftest explore-test
   (testing "explore a file system tree"

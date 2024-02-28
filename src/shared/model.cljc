@@ -1,10 +1,15 @@
 (ns model
   (:require [clojure.spec.alpha :as s]))
 
+;; directory or regular file name
 (s/def :file/name string?)
 (s/def :file/dir? boolean?)
+;; full file path - platform dependent
 (s/def :file/path string?)
-(s/def :file/info (s/keys :req [:file/name :file/dir? :file/path]))
+;; caonical path id
+(s/def :file/id   string?)
+;; information map describing a file or a folder
+(s/def :file/info (s/keys :req [:file/name :file/dir? :file/path :file/id]))
 
 (s/def ::content (s/coll-of :file/info))
 

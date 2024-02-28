@@ -32,6 +32,6 @@ Accept: application/edn
 
 ### GET /explore
 
-GET {{baseUrl}}/explore?dir=barcode/home/
+GET {{baseUrl}}/explore?dir=barcode
 Accept: application/edn
 

@@ -2,17 +2,33 @@
   (:require [babashka.fs :as fs]
             [clojure.spec.alpha :as s]
             [model :as model]
-            [clojure.string :refer [blank?]]))
+            [clojure.string :refer [blank? join]]))
+
+(defn fs-path->db-path
+  "Converts *fs-path* an OS file system absolute path into a db path. The db *root-path*
+   is an absolute path to the DB root folder.
+   
+   Example:
+   ```clojure
+   (fs-path->db-path \"c:\\folder1\\db\" \"c:\\folder1\\db\\folder2\\folder3\")
+   => \"folder2/folder3\"
+   ```
+   "
+  [root-path fs-path]
+  (->> (fs/relativize root-path fs-path)
+       fs/components
+       (join "/")))
 
 (defn- read-file-content [file-path]
   {:model/content (slurp file-path)})
 
-(defn- list-dir-content [dir-path]
+(defn- list-dir-content [dir-path root-dir-path]
   {:model/content (->> (fs/list-dir dir-path)
                        (map (fn [file]
                               {:file/name (fs/file-name file)
                                :file/dir? (fs/directory? file)
-                               :file/path (str file)})))})
+                               :file/path (str file)
+                               :file/id   (fs-path->db-path root-dir-path file)})))})
 
 (defn normalize-dir-path
   "when *dir* refers to a folder that is under *root-path* returns its absolute path form as Path,
@@ -44,7 +60,7 @@
 
     (if (fs/regular-file? abs-path)
       (read-file-content abs-path)
-      (list-dir-content abs-path))))
+      (list-dir-content abs-path root-dir-path))))
 
 (comment
   ;; if path is relative then
@@ -59,7 +75,14 @@
 
   (fs/path "c:/a/b"  "/c/s")
 
-  (fs/relativize "c:/a" "c:/d/b/c")
+  (->> (fs/relativize "c:/a" "c:/a/b/c")
+       (fs/components)
+       (join "/"))
+
+  (fs/components "b/C")
+
+
+
   (defn normalize-path [dir root-path]
     (if (blank? dir)
       (fs/normalize root-path)
