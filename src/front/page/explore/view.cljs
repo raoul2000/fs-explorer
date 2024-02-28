@@ -9,7 +9,7 @@
   [:tr  {:key (:file/path item)}
    [:td {:width "40px"} (if (:file/dir? item) "dir" "file")]
    [:td
-    [:a {:href (create-url-explore (:file/path item))} (:file/name item)]]])
+    [:a {:href (create-url-explore (:file/id item))} (:file/name item)]]])
 
 (defn explorer-view []
   (let [loading? (<loading?)]
