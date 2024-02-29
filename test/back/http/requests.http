@@ -37,6 +37,5 @@ Accept: application/edn
 
 ### GET /download
 
-GET {{baseUrl}}/download?dir=data.json
-
+GET {{baseUrl}}/download?dir=data.json&disposition=inline
 

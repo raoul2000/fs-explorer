@@ -3,27 +3,87 @@
             [server.response :as response]
             [domain.explorer :as explorer]))
 
+(def valid-dispositions #{"inline" "attachment"})
+(def default-disposition "attachment")
 
-(defn create
+(defn create [{:keys [root-dir-path]}]
+  (fn [request]
+    (let [param-file        (get-in request [:params :dir])
+          param-disposition (get-in request [:params :disposition] default-disposition)]
+      (cond
+        (nil? param-file)
+        (response/error-BAS_REQUEST {:msg "missing dir param"})
+
+        (not (valid-dispositions param-disposition))
+        (response/error-BAS_REQUEST {:msg          "invalid disposition value"
+                                     :disposition  param-disposition
+                                     :domain       valid-dispositions})
+
+        :else
+        (let [abs-path (explorer/absolutize-path param-file root-dir-path)]
+          (if-not (fs/regular-file? abs-path)
+            (response/error-SERVER_ERROR {:msg "file not found"
+                                          :file abs-path})
+            (response/ok (fs/file abs-path)
+                         {"Content-Disposition" (format "%s; filename=\"%s\"" param-disposition (fs/file-name abs-path))
+                          ;; Note that the Content-Type header is set by the ring-mw/file-info interceptor
+                          ;; (see route)
+                          ;; Other option is to force the Content-Type header :
+                          ;; "Content-Type" "image/jpg" 
+                          })))))))
+
+
+(defn create_2 [{:keys [root-dir-path]}]
+  (fn [request]
+    (if-let [file-path (get-in request [:params :dir])]
+      (let [abs-path    (explorer/absolutize-path file-path root-dir-path)
+            disposition (get-in request [:params :disposition] "attachment")]
+
+        (when-not (#{"inline" "attachment"} disposition)
+          (throw (ex-info "invalid disposition value" {:disposition disposition})))
+
+        (if (fs/regular-file? abs-path)
+          (response/ok (fs/file abs-path)
+                       {"Content-Disposition" (format "%s; filename=\"%s\"" disposition (fs/file-name abs-path))
+                        ;; Note that the Content-Type header is set by the ring-mw/file-info interceptor
+                        ;; (see route)
+                        ;; Other option is to force the Content-Type header :
+                        ;; "Content-Type" "image/jpg" 
+                        })
+          (response/error-SERVER_ERROR {:msg "file not found"
+                                        :file abs-path})))
+      (response/error-NOT_FOUND {:msg "missing dir param"}))))
+
+(defn create_1
   [{:keys [root-dir-path]}]
   {:name ::download-handler
    :enter (fn [context]
             (if-let [dir-path (get-in  context [:request :params :dir])]
               (let [abs-path (explorer/absolutize-path dir-path root-dir-path)]
-                (if (fs/regular-file? abs-path)
-                  (assoc context :response
-                         (response/ok (fs/file abs-path)
+                (assoc context :response (if (fs/regular-file? abs-path)
+                                           (response/ok (fs/file abs-path)
+
+                                                        {"Content-Disposition" (format "attachment; filename=\"%s\"" (fs/file-name abs-path))})
+                                           (response/error-SERVER_ERROR {:msg      "file not found..."
+                                                                         :file-path abs-path})))
+
+
+                #_(if (fs/regular-file? abs-path)
+                    (assoc context :response
+                           (response/ok (fs/file abs-path)
                                                                ;; set Content-Disposition header to force download.
                                                                ;; Replace 'attachment' with 'inline' to ask the browser to show the
                                                                ;; file content
-                                      {"Content-Disposition" (format "attachment; filename=\"%s\"" (fs/file-name abs-path))}
+                                        {"Content-Disposition" (format "attachment; filename=\"%s\"" (fs/file-name abs-path))}
                                                                ;; Note that the Content-Type header is set by the ring-mw/file-info interceptor
                                                                ;; (see route)
                                                                ;; Other option is to force the Content-Type header :
                                                                ;; "Content-Type" "image/jpg"
-                                      ))
-                  (throw (ex-info "file not found" {:file-path abs-path}))))
-              (response/error-SERVER_ERROR {:msg "missing file path"})
+                                        ))
+                    (response/error-SERVER_ERROR {:msg "file not found..."
+                                                  :file-path abs-path})
+                    #_(throw (ex-info "file not found" {:file-path abs-path}))))
+              (assoc context :response (response/error-SERVER_ERROR {:msg "missing file path"}))
               #_(throw (ex-info "missing file path" {}))))}
 
 

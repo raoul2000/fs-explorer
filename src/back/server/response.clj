@@ -9,6 +9,7 @@
 (def ok                   (partial response 200))
 (def error-SERVER_ERROR   (partial response 500))
 (def error-NOT_FOUND      (partial response 404))
+(def error-BAS_REQUEST    (partial response 400))
 
 (def supported-types ["text/html" "application/edn" "application/json" "text/plain"])
 ;; create a content negociator interceptor for the given list
