@@ -1,6 +1,6 @@
 (ns server.domain.explorer-test
-  (:require [clojure.test :refer (deftest testing is use-fixtures)]
-            [domain.explorer :refer (explore)]
+  (:require [clojure.test :refer (deftest testing is use-fixtures are)]
+            [domain.explorer :as exp]
             [babashka.fs :as fs]))
 
 ;; fixtures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -34,11 +34,37 @@
 (deftest explore-test
   (testing "explore a file system tree"
     (is (= #:model{:content
-            [#:file{:name "dir1",
-                    :dir? true,
-                    :path (str (fs/path fixture-base-path "dir1"))}
-             #:file{:name "dir2",
-                    :dir? true,
-                    :path (str (fs/path fixture-base-path "dir2"))}]}
-           (explore (str fixture-base-path) {:root-dir-path fixture-base-path}))
+                   [#:file{:name "dir1",
+                           :dir? true,
+                           :path (str (fs/path fixture-base-path "dir1"))
+                           :id   "dir1"}
+
+                    #:file{:name "dir2",
+                           :dir? true,
+                           :path (str (fs/path fixture-base-path "dir2"))
+                           :id   "dir2"}]}
+           (exp/explore (str fixture-base-path) {:root-dir-path fixture-base-path}))
         "returns 2 absolute path")))
+
+(deftest absolutize-path-test
+  (testing "dir and file path absolutizer"
+    (are [result arg-map] (= result (str (exp/absolutize-path (:dir       arg-map)
+                                                              (:root-path arg-map))))
+      ""                              {:dir "" :root-path ""}
+      (str (fs/normalize "/a/b/c"))   {:dir "" :root-path "/a/b/c"}
+      (str (fs/normalize "/a/b/c"))   {:dir "c" :root-path "/a/b"}
+      (str (fs/normalize "/a/b/c"))   {:dir "b/c" :root-path "/a"}
+      
+      ;; TODO: add more tests 
+      ;;
+      )))
+
+(comment
+
+  (fs/absolute? "c:\\a")
+  (fs/normalize "a/b/c")
+  (fs/absolutize "a/b/c")
+  (exp/absolutize-path "a/b" "c:/tmp")
+
+  ;;
+  )

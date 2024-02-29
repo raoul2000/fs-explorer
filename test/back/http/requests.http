@@ -35,3 +35,8 @@ Accept: application/edn
 GET {{baseUrl}}/explore?dir=barcode
 Accept: application/edn
 
+### GET /download
+
+GET {{baseUrl}}/download?dir=data.json
+
+

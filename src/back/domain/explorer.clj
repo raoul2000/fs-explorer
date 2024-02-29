@@ -30,33 +30,34 @@
                                :file/path (str file)
                                :file/id   (fs-path->db-path root-dir-path file)})))})
 
-(defn normalize-dir-path
-  "when *dir* refers to a folder that is under *root-path* returns its absolute path form as Path,
-   otherwise throws. Does not check if *dir* refers to an existing folder."
-  [^String dir ^String root-path]
-  {:post [(instance? java.nio.file.Path %)]}
-  (if (blank? dir)
+(defn absolutize-path
+  "when *this-path* refers to a file or folder that is under *root-path* returns its absolute path 
+   form as string otherwise throws. 
+   Does not check if *this-path* refers to an existing file or folder."
+  [^String this-path ^String root-path]
+  (if (blank? this-path)
     (fs/normalize root-path)
-    (let [abs-dir         (if (fs/relative? dir)
-                            (fs/normalize (fs/path root-path dir))
-                            (fs/normalize dir))
+    (let [abs-path         (if (fs/relative? this-path)
+                             (fs/normalize (fs/path root-path this-path))
+                             (fs/normalize this-path))
 
-          first-component (->> (fs/relativize root-path abs-dir)
+          first-component (->> (fs/relativize root-path abs-path)
                                (fs/components)
                                first
                                str)]
       (when (= ".." first-component)
-        (throw (ex-info "invalid dir" {:dir       dir
-                                       :root-path root-path})))
-      abs-dir)))
+        (throw (ex-info "path outside root-path" {:dir       this-path
+                                                  :root-path root-path})))
+      (str abs-path))))
 
 (defn explore [fs-path {:keys [root-dir-path] :as options}]
   {:post [(s/valid? :model/read-result %)]}
-  (let [abs-path (normalize-dir-path (or fs-path "") root-dir-path)]
+  (let [abs-path (absolutize-path (or fs-path "") root-dir-path)]
 
     (when-not (fs/exists? abs-path)
-      (throw (ex-info "dir not found" {:dir fs-path
-                                       :root-path root-dir-path})))
+      (throw (ex-info "file not found" {:dir       fs-path
+                                        :root-path root-dir-path
+                                        :abs-path  abs-path})))
 
     (if (fs/regular-file? abs-path)
       (read-file-content abs-path)
