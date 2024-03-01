@@ -6,9 +6,11 @@
             [db :refer [>initialize-db]]
             [components.navbar :refer [navbar]]))
 
-(defn main-page []
+(defn main-page 
+  "Displays the main page depending on the *current-route* provided by subscription."
+  [] 
   (let [current-route (<current-route)]
-    [:div.section
+    [:div.section {:style {:margin-top "40px"}}
      [navbar current-route]
      (when current-route
        [#((-> current-route :data :view) (:parameters current-route))])]))
