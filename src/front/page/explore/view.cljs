@@ -1,6 +1,5 @@
 (ns page.explore.view
   (:require [page.explore.subs :refer [<explore <loading? <current-dir]]
-            [page.explore.event :refer [>select-dir]]
             [clojure.string :as s]
             [route.helper :refer [>navigate-to-explore create-url-explore]]
             [reagent.core :as r]))
@@ -13,8 +12,7 @@
 
 (defn explorer-view []
   (let [loading? (<loading?)]
-    [:div "explorer view"
-     [:br]
+    [:div 
      (when-not loading?
        (let [list-items (<explore)]
          (if-not  (zero? (count list-items))
@@ -29,10 +27,10 @@
       [:div
        [:button
         {:on-click #(>navigate-to-explore @path)} "explore"]
-       [:input {:type "text"
+       [:input {:type        "text"
                 :placeholder "enter path"
-                :value @path
-                :on-change update-input-path}]])))
+                :value       @path
+                :on-change   update-input-path}]])))
 
 (defn page [params]
   (let [dir-path (<current-dir) #_(-> params :query :dir)]
