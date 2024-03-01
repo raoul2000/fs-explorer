@@ -9,12 +9,19 @@
 (def ok                   (partial response 200))
 (def error-SERVER_ERROR   (partial response 500))
 (def error-NOT_FOUND      (partial response 404))
-(def error-BAS_REQUEST    (partial response 400))
+(def error-BAD_REQUEST    (partial response 400))
+
+(defn error-body
+  ([msg]
+   {:error {:msg msg}})
+  ([msg info]
+   {:error {:msg msg :info info}}))
 
 (def supported-types ["text/html" "application/edn" "application/json" "text/plain"])
 ;; create a content negociator interceptor for the given list
 ;; of supported content types
 (def content-neg-intc (conneg/negotiate-content supported-types))
+
 
 
 (defn accepted-type

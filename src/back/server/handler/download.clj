@@ -12,18 +12,18 @@
           param-disposition (get-in request [:params :disposition] default-disposition)]
       (cond
         (nil? param-file)
-        (response/error-BAS_REQUEST {:msg "missing dir param"})
+        (response/error-BAD_REQUEST  (response/error-body "missing dir param"))
 
         (not (valid-dispositions param-disposition))
-        (response/error-BAS_REQUEST {:msg          "invalid disposition value"
-                                     :disposition  param-disposition
-                                     :domain       valid-dispositions})
+        (response/error-BAD_REQUEST  (response/error-body "invalid disposition value"
+                                                          {:disposition  param-disposition
+                                                           :domain       valid-dispositions}))
 
         :else
         (let [abs-path (explorer/absolutize-path param-file root-dir-path)]
           (if-not (fs/regular-file? abs-path)
-            (response/error-SERVER_ERROR {:msg "file not found"
-                                          :file abs-path})
+            (response/error-SERVER_ERROR (response/error-body "file not found"
+                                                              {:file abs-path}))
             (response/ok (fs/file abs-path)
                          {"Content-Disposition" (format "%s; filename=\"%s\"" param-disposition (fs/file-name abs-path))
                           ;; Note that the Content-Type header is set by the ring-mw/file-info interceptor
