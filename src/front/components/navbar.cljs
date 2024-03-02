@@ -54,9 +54,6 @@
 
         ;; Nav items must force burger control to close when they are clicked
            [navbar-item-explore route-name show-burger]
-           [:a.navbar-item {:href ""
-                            :title "settings"}
-            "item 1"]
 
            [:a.navbar-item {:class    (when (about-route? route-name) "is-underlined")
                             :on-click #(reset! show-burger false)

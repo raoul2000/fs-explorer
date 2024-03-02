@@ -12,12 +12,13 @@
     (when-let [view-component (-> current-route :data :view)]
       [view-component (:parameters current-route)])))
 
-(defn main-page
-  "Displays the main page depending on the *current-route* provided by subscription."
-  []
-  [:div.section {:style {:margin-top "40px"}}
+(defn main-page []
+  [:div
    [navbar]
-   [main-view]])
+   [:div.section {:style {:margin-top "40px"}}
+    [main-view]]
+   #_[:footer.footer
+      [:div.content.has-text-centered "some text"]]])
 
 
 (def debug? ^boolean goog.DEBUG)
