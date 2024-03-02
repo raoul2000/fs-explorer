@@ -1,10 +1,36 @@
 (ns main
   (:require [reagent.dom :as rdom]
+            [re-pressed.core :as rp]
             [re-frame.core :as re-frame]
             [route.core :refer [init-routes!]]
             [route.subs :refer [<current-route]]
             [db :refer [>initialize-db]]
             [components.navbar :refer [navbar]]))
+
+(re-frame/reg-event-fx
+ ::keypress-search
+ (fn [_ _]
+   (js/console.log "key event")))
+
+(defn >initialize-key-event-handlers
+  "see https://github.com/gadfly361/re-pressed
+   
+   Key codes can be found here : https://www.toptal.com/developers/keycode
+   "
+  []
+  (js/console.log "initializing key event handler")
+  (re-frame/dispatch-sync [::rp/add-keyboard-event-listener "keydown"
+                           :clear-on-success-event-match     true])
+  (re-frame/dispatch [::rp/set-keydown-rules {:event-keys
+                                              [[[::keypress-search] [{:keyCode 70
+                                                                      :ctrlKey true}]]]
+
+                                              :prevent-default-keys
+                                              [{:keyCode 70 
+                                                :ctrlKey true}]}]))
+
+;; :clear-keys [ [{:keyCode 65 ;; 'k'
+                                                              ;;:ctrlKey true}]]
 
 (defn main-view []
   (let [current-route (<current-route)]
@@ -31,6 +57,7 @@
 (defn run []
   (re-frame/clear-subscription-cache!)
   (>initialize-db)
+  (>initialize-key-event-handlers)
   (dev-setup)
   (init-routes!)
   (rdom/render [main-page] (.getElementById js/document "app")))
