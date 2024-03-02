@@ -10,14 +10,38 @@
 (s/def ::explore     :model/content)
 (s/def ::current-dir string?)
 (s/def ::loading?    boolean?)
-(s/def ::db          (s/keys :req-un [::loading? ::explore ::current-dir]))
+
+;; search feature
+
+(s/def ::visible?    boolean?)
+;; the search value
+(s/def ::text-filter string?)
+;; complete list of dis. This list is filtered by user input in the search modal
+(s/def ::dir-index   (s/coll-of string?))
+(s/def ::search      (s/keys :req-un [::visible?
+                                      ::dir-index
+                                      ::text-filter]))
+
+(s/def ::db          (s/keys :req-un [::loading?
+                                      ::explore
+                                      ::current-dir
+                                      ::search]))
 
 ;; Default db ----------------------------------------------------------------------------
+
 
 (def default-db {:current-route nil
                  :explore       []
                  :current-dir   nil
-                 :loading?      false})
+                 :loading?      false
+                 :search       {:visible?         false
+                                :text-filter      ""
+                                :dir-index        (take 100 (repeat "a/b/c"))
+                                #_["a/b/c" "a/bd/e/f" "a/b/x/y" "x/y/z"
+                                                   "a/b/c" "a/bd/e/f" "a/b/x/y" "x/y/z"
+                                                   "a/b/c" "a/bd/e/f" "a/b/x/y" "x/y/z"
+                                                   "a/b/c" "a/bd/e/f" "a/b/x/y" "x/y/z"
+                                                   "a/b/c" "a/bd/e/f" "a/b/x/y" "x/y/z"]}})
 
 ;; spec interceptor -----------------------------------------------------------------------
 
