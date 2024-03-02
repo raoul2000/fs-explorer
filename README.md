@@ -1,6 +1,6 @@
 # FS-Explorer
 
-This project is a basic file system explorer implemented as a fullstack clojure(script) application. Its real purpose is not actually to explore a file system (there are plenty of application that does this very well) but to explore clojure(script) related technologies, library and tools to build fullstack application.
+This project is a basic file system explorer implemented as a fullstack clojure(script) application. Its real purpose is not actually to explore a file system (there are plenty of application that do this very well) but to explore clojure(script) related technologies, library and tools to build fullstack application.
 
 It is derivated from a similar project called [clostack](https://github.com/raoul2000/clostack).
 
@@ -51,7 +51,7 @@ Powered by [shadow-cljs](https://shadow-cljs.github.io/docs/UsersGuide.html).
 > $ export PATH="/c/Program Files/Java/jdk-17.0.1/bin:$PATH"
 > $ npx shadow-cljs watch app
 >```
-> This way, another Java version (gere 17) will be used only for *shadow-cljs* and everyone is happy.
+> This way, another Java version (here 17) will be used only for *shadow-cljs* and everyone is happy.
 > 
 > Same applies to all *shadow-cljs* commands.
 >
@@ -62,11 +62,16 @@ $ npx shadow-cljs watch app
 or
 $ npm run watch-app
 ```
+
 By default, following URL are availables : 
 - http://localhost:9630 : shadow-cls server dashboard
 - http://localhost:8021 : tests
 
+
+
 ## Work on the Backend
+
+The backend is an HTTP server powered by [Pedestal](http://pedestal.io/pedestal). It exposes several REST endpoints that are consumed by the front end app.
 
 - run the project directly
 ```bash
