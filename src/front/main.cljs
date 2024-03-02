@@ -6,14 +6,17 @@
             [db :refer [>initialize-db]]
             [components.navbar :refer [navbar]]))
 
-(defn main-page 
+(defn main-page
   "Displays the main page depending on the *current-route* provided by subscription."
-  [] 
+  []
+  (js/console.log "rendering main-page")
   (let [current-route (<current-route)]
     [:div.section {:style {:margin-top "40px"}}
      [navbar current-route]
-     (when current-route
-       [#((-> current-route :data :view) (:parameters current-route))])]))
+     (when-let [view-component (-> current-route :data :view)]
+       [view-component (:parameters current-route)])
+     #_(when current-route
+         [#((-> current-route :data :view) (:parameters current-route))])]))
 
 (def debug? ^boolean goog.DEBUG)
 
