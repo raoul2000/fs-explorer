@@ -62,6 +62,9 @@ $ npx shadow-cljs watch app
 or
 $ npm run watch-app
 ```
+By default, following URL are availables : 
+- http://localhost:9630 : shadow-cls server dashboard
+- http://localhost:8021 : tests
 
 ## Work on the Backend
 
