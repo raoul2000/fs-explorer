@@ -1,11 +1,14 @@
 (ns components.navbar
   (:require [reagent.core :as rc]
-            [route.helper :refer [home-route? about-route? explore-route? create-url-about create-url-explore create-url-home
-                                  >navigate-to-about >navigate-to-explore]]
+            [route.helper :refer [about-route? explore-route? create-url-about create-url-explore]]
             [page.explore.subs :refer [<current-dir]]))
 
 
-(defn navbar-item-explore [route-name show-burger]
+(defn navbar-item-explore 
+  "The nav item 'Explore' href must always refer to the latest browsed dir and so this
+   component is re-rendered each time the dir being explored changes." 
+  
+  [route-name show-burger]
   (js/console.log "rendering navbar-item-explore")
   (let [current-dir (<current-dir)]
     [:a.navbar-item {:class     (when (explore-route? route-name) "is-underlined")
@@ -16,7 +19,10 @@
 
 (defn navbar
   "Render the main top Navigation Bar.   
-   The *current-route* may be use to render the selected nav items"
+   
+   It is re-rendererd :
+   - when local state *show-burger* changes meaning user open/close the navbar when displayed as dropdown
+   - when *current-route* changes so to underline the nav item that matches the current route"
   []
   (let [show-burger (rc/atom false)]
     (fn [current-route]
