@@ -34,7 +34,7 @@
                  :explore       []
                  :current-dir   nil
                  :loading?      false
-                 :search       {:visible?         false
+                 :search       {:visible?         true
                                 :text-filter      ""
                                 :dir-index        (take 100 (repeat "a/b/c"))
                                 #_["a/b/c" "a/bd/e/f" "a/b/x/y" "x/y/z"
