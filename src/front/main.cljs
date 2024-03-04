@@ -10,17 +10,6 @@
 
 ;; key handler ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(re-frame/reg-event-fx
- ::keypress-esc
- (fn [{db :db} _]
-   {:db (assoc-in db [:search :visible?] false)}))
-
-(re-frame/reg-event-fx
- ::keypress-search
- (fn [{db :db} _]
-   {:db (assoc-in db [:search :visible?] true)}))
-
-
 (defn >initialize-key-event-handlers
   "see https://github.com/gadfly361/re-pressed
    
@@ -30,9 +19,13 @@
   (re-frame/dispatch-sync [::rp/add-keyboard-event-listener "keydown"
                            :clear-on-success-event-match     true])
   (re-frame/dispatch      [::rp/set-keydown-rules {:event-keys
-                                                   [[[::keypress-search] [{:keyCode 70 :ctrlKey true}]]
-                                                    [[::keypress-esc]    [{:keyCode 27}]]
-                                                    #_[[::keypress-enter]  [{:keyCode 13}]]]
+                                                   [[[:components.search-dir/show]    [{:keyCode 70 
+                                                                                        :ctrlKey true}]]
+                                                    
+                                                    [[:components.search-dir/hide]    [{:keyCode 27}]]
+                                                    #_[[::keypress-enter]  [{:keyCode 13}]]
+                                                    ;;
+                                                    ]
 
                                                    :always-listen-keys
                                                    [{:keyCode 27}

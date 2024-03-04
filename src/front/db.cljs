@@ -17,7 +17,7 @@
 ;; the search value
 (s/def ::text-filter string?)
 ;; complete list of dis. This list is filtered by user input in the search modal
-(s/def ::dir-index   (s/coll-of string?))
+(s/def ::dir-index   (s/coll-of string? :kind vector? ))
 (s/def ::search      (s/keys :req-un [::visible?
                                       ::dir-index
                                       ::text-filter]))
@@ -36,12 +36,7 @@
                  :loading?      false
                  :search       {:visible?         true
                                 :text-filter      ""
-                                :dir-index        (take 100 (repeat "a/b/c"))
-                                #_["a/b/c" "a/bd/e/f" "a/b/x/y" "x/y/z"
-                                                   "a/b/c" "a/bd/e/f" "a/b/x/y" "x/y/z"
-                                                   "a/b/c" "a/bd/e/f" "a/b/x/y" "x/y/z"
-                                                   "a/b/c" "a/bd/e/f" "a/b/x/y" "x/y/z"
-                                                   "a/b/c" "a/bd/e/f" "a/b/x/y" "x/y/z"]}})
+                                :dir-index        (mapv #(str "item" %) (range 1 20))}})
 
 ;; spec interceptor -----------------------------------------------------------------------
 
