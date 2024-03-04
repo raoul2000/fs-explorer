@@ -1,17 +1,10 @@
 (ns components.search-dir
-  (:require [reagent.dom :as rdom]
-            [reagent.core :as rc]
+  (:require [reagent.core :as rc]
             [clojure.string :as str]
-            [re-pressed.core :as rp]
             [re-frame.core :as re-frame]
-            [route.core :refer [init-routes!]]
-            [route.subs :refer [<current-route]]
-            [db :refer [>initialize-db]]
-            [components.navbar :refer [navbar]]
-            [route.helper :refer [create-url-explore >navigate-to-explore]]))
+            [route.helper :refer [>navigate-to-explore]]))
 
-
-;; Events ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Events ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (re-frame/reg-event-db
  ::hide
@@ -40,8 +33,7 @@
   [s]
   (re-frame/dispatch [::update-search-filter s]))
 
-
-;; Subscriptions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Subscriptions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (re-frame/reg-sub
  ::show-search
@@ -83,22 +75,7 @@
   []
   @(re-frame/subscribe [::selected-dirs]))
 
-
-;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-(defn render-result-item-with-selection [item selected]
-  [:a {:id item
-       :on-click  (fn [event]
-                    (.preventDefault event)
-                    (.stopPropagation event)
-                    (>hide)
-                    (>navigate-to-explore item)
-                    (>update-text-filter item))
-       :href      (create-url-explore item)
-       :class     (str "dropdown-item " (when selected "is-active"))
-       :key       item}
-   item])
+;; component ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn ensure-selected-item-visible
   "Assumes that the value of the selected item is also its DOM element id"
@@ -107,6 +84,24 @@
                                        (get items)
                                        (.getElementById js/document))]
     (.scrollIntoView selected-dom-element #js{"block" "nearest"})))
+
+(defn cancel-event
+  "Apply `preventDefault` and `stopPropagation` to the given *js Event*"
+  [e]
+  (.preventDefault e)
+  (.stopPropagation e))
+
+(defn render-item [item selected?]
+  [:a {:id item
+       :on-click  (fn [event]
+                    (cancel-event event)
+                    (>hide)
+                    (>navigate-to-explore item)
+                    (>update-text-filter item))
+       :href      ""
+       :class     (str "dropdown-item " (when selected? "is-active"))
+       :key       item}
+   item])
 
 (defn modal-search
   "insert the dir search component in the DOM. 
@@ -121,16 +116,15 @@
               filtered-item-count (count selected-items)
 
               ;; handle keyboard events
+
               on-arrow-up         (fn [e]
-                                    (.preventDefault e)
-                                    (.stopPropagation e)
                                     (when-not (zero? @selected-index)
+                                      (cancel-event e)
                                       (swap! selected-index dec)
                                       (ensure-selected-item-visible @selected-index selected-items)))
               on-arrow-down       (fn [e]
-                                    (.preventDefault e)
-                                    (.stopPropagation e)
                                     (when-not (= filtered-item-count (inc @selected-index))
+                                      (cancel-event e)
                                       (swap! selected-index inc)
                                       (ensure-selected-item-visible @selected-index selected-items)))
               on-enter            (fn []
@@ -144,6 +138,9 @@
            [:div.modal-content    {:style {:width "50%"
                                            :top   "1em"}}
             [:div.box
+
+             ;; the input text control
+
              [:input.input.is-medium {:type         "text"
                                       :value        text-filter
                                       :auto-focus   true
@@ -157,14 +154,21 @@
                                       :on-change   (fn [e]
                                                      (reset! selected-index 0)
                                                      (>update-text-filter (-> e .-target .-value)))}]
+             ;; hint text
+
+             [:div.is-size-7.has-text-right {:style {:margin-top "10px"}}
+              "select : " [:span.tag.is-light "Enter"]
+              " close : " [:span.tag.is-light "Esc"]]
+
+             ;; selected results from filter text
+
              (when-not (zero? filtered-item-count)
-               [:div {:style {:max-height "100px"
+               [:div {:style {:max-height "30vh"
                               :margin-top "10px"
                               :overflow   "auto"}}
                 [:ul
                  (doall
                   (map-indexed (fn [index item]
-                                 (render-result-item-with-selection item (= index @selected-index)))
+                                 (render-item item (= index @selected-index)))
                                selected-items))]])]]])))))
-
 

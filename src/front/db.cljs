@@ -1,6 +1,5 @@
 (ns db
   (:require [cljs.reader]
-            [re-frame.core :refer [after]]
             [cljs.spec.alpha :as s]
             [re-frame.core :as re-frame]
             [model :as model]))
@@ -17,7 +16,7 @@
 ;; the search value
 (s/def ::text-filter string?)
 ;; complete list of dis. This list is filtered by user input in the search modal
-(s/def ::dir-index   (s/coll-of string? :kind vector? ))
+(s/def ::dir-index   (s/coll-of string? :kind vector?))
 (s/def ::search      (s/keys :req-un [::visible?
                                       ::dir-index
                                       ::text-filter]))
@@ -34,9 +33,9 @@
                  :explore       []
                  :current-dir   nil
                  :loading?      false
-                 :search       {:visible?         true
+                 :search       {:visible?         false
                                 :text-filter      ""
-                                :dir-index        (mapv #(str "item" %) (range 1 20))}})
+                                :dir-index        (mapv #(str "item" %) (range 1 100))}})
 
 ;; spec interceptor -----------------------------------------------------------------------
 
@@ -47,12 +46,12 @@
     (throw (ex-info (str "spec check failed: " {:cause (s/explain-data a-spec db)}) {}))))
 
 ;; now we create an interceptor using `after`
-(def check-spec-interceptor (after (partial check-and-throw ::db)))
+(def check-spec-interceptor (re-frame/after (partial check-and-throw ::db)))
 
 ;; event ---------------------------------------------------------------------------------
 
 (re-frame/reg-event-db ::initialize
-                       (fn [db _]
+                       (fn [_db _]
                          default-db))
 
 (defn >initialize-db []
