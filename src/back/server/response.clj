@@ -36,7 +36,7 @@
     "text/html"        body
     "text/plain"       body
     "application/edn"  (pr-str body)
-    "application/json" (json/write-str body)))
+    "application/json" (json/write-str body :escape-slash false)))
 
 (defn coerce-to
   "Updates and returns a response map given a *content-type*. The *response* body
