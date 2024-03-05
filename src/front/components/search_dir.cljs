@@ -50,6 +50,9 @@
  (fn [db _]
    (get-in db [:search :dir-index])))
 
+(defn <dir-index []
+  @(re-frame/subscribe [::dir-index]))
+
 (re-frame/reg-sub
  ::text-filter
  (fn [db _]
@@ -91,6 +94,12 @@
   (.preventDefault e)
   (.stopPropagation e))
 
+(defn apply-filter [text-filter coll]
+  (case text-filter
+    "" []
+    "*" coll
+    (filterv #(str/starts-with? % text-filter) coll)))
+
 (defn render-item [item selected?]
   [:a {:id item
        :on-click  (fn [event]
@@ -102,6 +111,62 @@
        :class     (str "dropdown-item " (when selected? "is-active"))
        :key       item}
    item])
+
+;; This is an implementation attempt to get the same behaviour as the youtube search 
+;; Selecting via arrows should update the input text but not perform filtering
+(defn modal-search-test []
+  (let [text-filter    (rc/atom "")
+        selected-index (rc/atom 0)
+        arrow-pressed? (rc/atom false)]
+    (fn []
+      (when (<show-search?)
+        (let [all-items              (<dir-index)
+              filtered-items         (apply-filter @text-filter all-items)
+              filtered-item-count    (count filtered-items)]
+
+          [:div.modal.is-active {:style {:justify-content "flex-start"}}
+           [:div.modal-background {:style {:background-color "rgba(0, 0, 0, 0.11)"}}]
+           [:div.modal-content    {:style {:width "50%"
+                                           :top   "1em"}}
+            [:div.box
+             [:input.input {:type         "text"
+                            :value        @text-filter
+                            :auto-focus   true
+                            :placeholder  "enter search ..."
+                            :on-key-down  (fn [event]
+                                            (case (.-code event)
+                                              "ArrowDown"  (when-not (= filtered-item-count (inc @selected-index))
+                                                             (cancel-event event)
+                                                             (reset! arrow-pressed? true)
+                                                             (swap! selected-index inc)
+                                                             (reset! text-filter (get filtered-items @selected-index))
+                                                             (ensure-selected-item-visible @selected-index filtered-items))
+
+                                              "ArrowUp"    (js/console.log "up")
+                                              "Enter"      (js/console.log "enter")
+                                              nil))
+                            :on-change    (fn [event]
+                                            (if @arrow-pressed?
+                                              (reset! arrow-pressed? false)
+                                              (reset! text-filter (-> event .-target .-value))))}]
+
+             ;; hint text
+
+             [:div.is-size-7.has-text-right {:style {:margin-top "10px"}}
+              "select : " [:span.tag.is-light "Enter"]
+              " close : " [:span.tag.is-light "Esc"]]
+
+             (when-not (zero? filtered-item-count)
+               [:div {:style {:max-height "30vh"
+                              :margin-top "10px"
+                              :overflow   "auto"}}
+                [:ul
+                 (doall
+                  (map-indexed (fn [index item]
+                                 (render-item item (= index @selected-index)))
+                               filtered-items))]])]]])))))
+
+
 
 (defn modal-search
   "insert the dir search component in the DOM. 
