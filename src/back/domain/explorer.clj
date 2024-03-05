@@ -4,11 +4,24 @@
             [model :as model]
             [clojure.string :refer [blank? join]]))
 
+;; utils  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn normalize-path-separator
+  "Force path separator to '/' if not already defined as the platform path separator
+   otherwise return *path* unchanged."
+  [^String path]
+  (if (= fs/path-separator "/")
+    path
+    (->> path
+         fs/components
+         (join "/"))))
+
 (defn fs-path->db-path
-  "Converts *fs-path* an OS file system absolute path into a db path. The db *root-path*
-   is an absolute path to the DB root folder.
+  "Given absolute path *fs-path* returns a db path relatively to *root-path*.
    
-   Example:
+   A db-path is a relative path with char '/' as path separator. 
+   
+   Example (Windows):
    ```clojure
    (fs-path->db-path \"c:\\folder1\\db\" \"c:\\folder1\\db\\folder2\\folder3\")
    => \"folder2/folder3\"
@@ -16,8 +29,12 @@
    "
   [root-path fs-path]
   (->> (fs/relativize root-path fs-path)
-       fs/components
-       (join "/")))
+       normalize-path-separator))
+
+(comment
+  (fs-path->db-path "c:\\a" "c:\\a\\b")
+  ;;
+  )
 
 (defn- read-file-content [file-path]
   {:model/content (slurp file-path)})
@@ -50,6 +67,8 @@
                                                   :root-path root-path})))
       (str abs-path))))
 
+;; explore  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn explore [fs-path {:keys [root-dir-path] :as options}]
   {:post [(s/valid? :model/read-result %)]}
   (let [abs-path (absolutize-path (or fs-path "") root-dir-path)]
@@ -63,81 +82,39 @@
       (read-file-content abs-path)
       (list-dir-content abs-path root-dir-path))))
 
-(comment
-  ;; if path is relative then
-  ;;    it is relative to root-dir-path
-  ;;    absolutize it
-  ;;  endif
-  ;;  if abs-path is not under root-dir-path then
-  ;;     error
-  ;;  endif
+;; index ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  (fs/relative? "c:/a/b")
+(def dir-index-type  "dir")
+(def file-index-type "file")
+(def default-index-type dir-index-type)
+(def valid-index-types #{dir-index-type file-index-type})
 
-  (fs/path "c:/a/b"  "/c/s")
+(defn build-dir-index [root-dir-path]
+  (let [path-coll (volatile! [])
+        abs-path   (fs/absolutize root-dir-path)]
+    (when (and (fs/exists? abs-path)
+               (fs/directory? abs-path))
+      (fs/walk-file-tree abs-path {:pre-visit-dir (fn [path _attr]
+                                                    (when-not (= path abs-path)
+                                                      (vswap! path-coll conj path))
+                                                    :continue)})
+      (->> @path-coll
+           (map str)
+           (map (fn [path]
+                  (fs-path->db-path root-dir-path path)))
+           (map normalize-path-separator)))))
 
-  (->> (fs/relativize "c:/a" "c:/a/b/c")
-       (fs/components)
-       (join "/"))
+(defn index
+  "Builds and returns the list of all files or folders under *root-dir-path*"
+  [index-type {:keys [root-dir-path] :as options}]
+  (let [idx-type (or index-type default-index-type)]
 
-  (fs/components "b/C")
+    (when-not (valid-index-types  idx-type)
+      (throw (ex-info "invalid index type" {:type   index-type
+                                            :domain valid-index-types})))
+    (when (= idx-type file-index-type)
+      (throw (ex-info "not implemented type" {:type idx-type})))
 
-
-
-  (defn normalize-path [dir root-path]
-    (if (blank? dir)
-      (fs/normalize root-path)
-      (let [abs-dir (if (fs/relative? dir)
-                      (fs/normalize (fs/path root-path dir))
-                      (fs/normalize dir))
-            first-component (->> (fs/relativize root-path abs-dir)
-                                 (fs/components)
-                                 first
-                                 str)]
-        (when (= ".." first-component)
-          (throw (ex-info "invalid dir" {:dir dir
-                                         :root-path root-path})))
-        (fs/normalize abs-dir))))
-
-  (normalize-path "b/c" "c:/a")
-  (normalize-path "/" "c:/a")
-  (normalize-path "b/c/../../d" "c:/a")
-  (normalize-path "b/c/../../../d" "c:/a")
-  (normalize-path "../../a/b" "c:/a")
-  (normalize-path "../../d/b" "c:/a")
-
-  (fs/normalize "a/b/../c")
-
-
-  (fs/path "c:/tmp" "../lof")
-  (s/valid? :model/read-result (explore "tmp" {:root-dir-path "c:/tmp"}))
-  (s/explain-data :model/read-result (explore "tmp"  {:root-dir-path "c:"}))
-  (->> (fs/list-dir "c:\\tmp")
-       (map str))
-
-  (def root "/a/b/c")
-
-  (def p1 "d")
-
-  (defn is-inside? [dir base-dir]
-    (if-not (fs/absolute? dir)
-      true
-      (let [rel-dir (fs/relativize dir base-dir)])))
-
-  (fs/unixify (fs/normalize (fs/path "/a/b/c" "../../..")))
-  (fs/relativize (fs/path "c:/tmp")  (fs/path "c:/tmp/barcode/d"))
-  (fs/relativize (fs/path "c:/tmp")  (fs/path "c:/a/b"))
-  (fs/real-path "c:/tmp/../") ;; => c:/tmp
-  (fs/normalize "c:/tmp/../") ;; => c:/tmp
-  (fs/normalize "/a/b/c/../d")
-
-  (fs/relativize "/a/b/d" "/a/b/../c/../d")
-  (fs/normalize "/a/../../a")
-
-  (fs/relativize "c:/" "")
-  (fs/relativize "/a/b/c" "/a/b/d")
-  (fs/normalize "/a/b/./c/../d")
-  (fs/components "/a/b/c")
-  (fs/components "../a/b/c")
-  ;;
-  )
+    {:type   idx-type
+     :index (condp = idx-type
+              dir-index-type (build-dir-index root-dir-path))}))
