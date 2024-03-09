@@ -49,9 +49,8 @@
      [navbar]
      [:div.section {:style {:margin-top "40px"}}
       [main-view]]
-     [modal-search]
-     #_[:footer.footer
-        [:div.content.has-text-centered "some text"]]]
+     [modal-search]]
+    ;; loading app in progress ...
     [:section.hero.is-fullheight
      [:div.hero-body
       [:div
