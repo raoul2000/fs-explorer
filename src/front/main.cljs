@@ -4,7 +4,7 @@
             [re-frame.core :as re-frame]
             [route.core :refer [init-routes!]]
             [route.subs :refer [<current-route]]
-            [db :refer [>initialize-db]]
+            [db :refer [>initialize-db <db-initialized?]]
             [components.navbar :refer [navbar]]
             [components.search-dir :refer [modal-search]]))
 
@@ -19,9 +19,9 @@
   (re-frame/dispatch-sync [::rp/add-keyboard-event-listener "keydown"
                            :clear-on-success-event-match     true])
   (re-frame/dispatch      [::rp/set-keydown-rules {:event-keys
-                                                   [[[:components.search-dir/show]    [{:keyCode 70 
+                                                   [[[:components.search-dir/show]    [{:keyCode 70
                                                                                         :ctrlKey true}]]
-                                                    
+
                                                     [[:components.search-dir/hide]    [{:keyCode 27}]]
                                                     #_[[::keypress-enter]  [{:keyCode 13}]]
                                                     ;;
@@ -44,15 +44,19 @@
       [view-component (:parameters current-route)])))
 
 (defn main-page []
-  [:div
-   [navbar]
-   [:div.section {:style {:margin-top "40px"}}
-    [main-view]]
-   [modal-search]
-   #_[:footer.footer
-      [:div.content.has-text-centered "some text"]]])
-
-
+  (if (<db-initialized?)
+    [:div
+     [navbar]
+     [:div.section {:style {:margin-top "40px"}}
+      [main-view]]
+     [modal-search]
+     #_[:footer.footer
+        [:div.content.has-text-centered "some text"]]]
+    [:section.hero.is-fullheight
+     [:div.hero-body
+      [:div
+       [:div.title "Loading "]
+       [:div.subtitle "just a few seconds ..."]]]]))
 
 
 (def debug? ^boolean goog.DEBUG)

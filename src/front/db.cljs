@@ -2,6 +2,7 @@
   (:require [cljs.reader]
             [cljs.spec.alpha :as s]
             [re-frame.core :as re-frame]
+            [ajax.edn :refer [edn-response-format edn-request-format]]
             [model :as model]))
 
 ;; spec db -------------------------------------------------------------------------------
@@ -31,11 +32,11 @@
 
 (def default-db {:current-route nil
                  :explore       []
-                 :current-dir   nil
+                 :current-dir   "/"
                  :loading?      false
                  :search       {:visible?         false
                                 :text-filter      ""
-                                :dir-index        (mapv #(str "item" %) (range 1 100))}})
+                                :dir-index        []}})
 
 ;; spec interceptor -----------------------------------------------------------------------
 
@@ -50,9 +51,45 @@
 
 ;; event ---------------------------------------------------------------------------------
 
-(re-frame/reg-event-db ::initialize
-                       (fn [_db _]
-                         default-db))
+(re-frame/reg-event-db
+ ::load-index-success
+ [check-spec-interceptor]
+ (fn [db [_ success-response]]
+   (-> db
+       (assoc-in [:search :dir-index] (vec (:index success-response))))))
+
+(re-frame/reg-event-db
+ ::load-index-failure
+ [check-spec-interceptor]
+ (fn [db [_ _error-response]]
+   (-> db
+       (assoc-in [:search :dir-index] []))))
+
+(re-frame/reg-event-fx
+ ::load-index
+ (fn [_cofx _event]
+   {:fx [[:http-xhrio {:method          :get
+                       :uri             (str "/index?type=dir")
+                       :format          (edn-request-format)
+                       :response-format (edn-response-format)
+                       :on-success      [::load-index-success]
+                       :on-failure      [::load-index-failure]}]]}))
+
+(re-frame/reg-event-fx
+ ::initialize
+ (fn [_cofx _event]
+   {:db default-db
+    :fx [[:dispatch [::load-index]]]}))
 
 (defn >initialize-db []
-  (re-frame/dispatch-sync [::initialize]))
+  (re-frame/dispatch [::initialize]))
+
+;; subs ----------------------------------------------------------------------------------
+
+(re-frame/reg-sub
+ ::initialized?
+ (fn  [db _]
+   (seq (get-in db [:search :dir-index]))))
+
+(defn <db-initialized? []
+  @(re-frame/subscribe [::initialized?]))
