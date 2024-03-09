@@ -71,7 +71,17 @@
    (case text-filter
      "" []
      "*" dir-index
-     (filterv #(str/starts-with? % text-filter) dir-index))))
+     (filterv #_(re-matches (re-pattern (str ".*" text-filter ".*")) %)
+      #(str/starts-with? % text-filter) dir-index))))
+
+(comment
+  (def items ["abcd" "abce" "abcz"])
+
+  (re-matches #".*(abc).*" "abc abc")
+  (re-matches #"abc" "abc abc")
+
+  ;;
+  )
 
 (defn <selected-dirs
   "Returns a vector of dirs selected by the current search filter text"
