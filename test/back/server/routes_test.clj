@@ -86,7 +86,7 @@
     (let [response (response-for service :get (url-for :greet :query-params {:name "bob"}))]
       (is (= 400 (:status response))
           "logic error returns code 400")
-      (is (= {"error" {"message" "user not allowed",
+      (is (= {"error" {"msg" "user not allowed",
                        "info"    {"name" "bob"}}} (json/read-str (:body response)))
           "logic error returns json body with logic message and info")))) 
 
