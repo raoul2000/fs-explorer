@@ -38,7 +38,7 @@
                   :height  "28"}]]
 
            ;; always visible
-          [:a.navbar-item {:title  "search (ctrl+k)"
+          #_[:a.navbar-item {:title  "search (ctrl+k)"
                            :href   ""}
            "search"]
 
