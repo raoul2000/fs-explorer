@@ -2,7 +2,8 @@
   (:require [reagent.core :as rc]
             [route.helper :refer [about-route? explore-route? create-url-about create-url-explore]]
             [route.subs :refer [<current-route]]
-            [page.explore.subs :refer [<current-dir]]))
+            [page.explore.subs :refer [<current-dir]]
+            [components.icon :refer [about-icon]]))
 
 
 (defn navbar-item-explore
@@ -59,4 +60,4 @@
                             :on-click #(reset! show-burger false)
                             :href     (create-url-about)
                             :title    "about"}
-            "About"]]]]))))
+            about-icon]]]]))))

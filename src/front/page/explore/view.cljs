@@ -2,11 +2,13 @@
   (:require [page.explore.subs :refer [<explore <loading? <current-dir]]
             [clojure.string :as s]
             [route.helper :refer [>navigate-to-explore create-url-explore]]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [components.icon :refer [folder-icon file-icon]]
+            ))
 
 (defn view-item [item]
   [:tr  {:key (:file/path item)}
-   [:td {:width "40px"} (if (:file/dir? item) "dir" "file")]
+   [:td {:width "40px"} (if (:file/dir? item) folder-icon file-icon)]
    [:td
     [:a {:href (create-url-explore (:file/id item))} (:file/name item)]]])
 
