@@ -4,6 +4,7 @@
             [re-frame.core :as re-frame]
             [route.helper :refer [>navigate-to-explore]]))
 
+
 ;; Events ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (re-frame/reg-event-db
@@ -22,11 +23,10 @@
 (defn >show []
   (re-frame/dispatch [::show]))
 
-
 (re-frame/reg-event-db
  ::update-search-filter
  (fn [db [_ new-value]]
-   (assoc-in db [:search :text-filter] new-value)))
+   (assoc-in db [:search :quick-filter] new-value)))
 
 (defn >update-text-filter
   "The dir search filter value changed"
@@ -53,41 +53,6 @@
 (defn <dir-index []
   @(re-frame/subscribe [::dir-index]))
 
-(re-frame/reg-sub
- ::text-filter
- (fn [db _]
-   (get-in db [:search :text-filter])))
-
-(defn <text-filter []
-  @(re-frame/subscribe [::text-filter]))
-
-(re-frame/reg-sub
- ::selected-dirs
-
- :<- [::dir-index]
- :<- [::text-filter]
-
- (fn [[dir-index text-filter]]
-   (case text-filter
-     "" []
-     "*" dir-index
-     (filterv #_(re-matches (re-pattern (str ".*" text-filter ".*")) %)
-      #(str/starts-with? % text-filter) dir-index))))
-
-(comment
-  (def items ["abcd" "abce" "abcz"])
-
-  (re-matches #".*(abc).*" "abc abc")
-  (re-matches #"abc" "abc abc")
-
-  ;;
-  )
-
-(defn <selected-dirs
-  "Returns a vector of dirs selected by the current search filter text"
-  []
-  @(re-frame/subscribe [::selected-dirs]))
-
 ;; component ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn ensure-selected-item-visible
@@ -104,11 +69,12 @@
   (.preventDefault e)
   (.stopPropagation e))
 
-(defn apply-filter [text-filter coll]
-  (case text-filter
-    "" []
+(defn apply-filter [quick-filter coll]
+  (case quick-filter
+    ""  []
     "*" coll
-    (filterv #(str/starts-with? % text-filter) coll)))
+    (when (> (count quick-filter) 2)
+      (filterv #(str/starts-with? % quick-filter) coll))))
 
 (defn render-item [item selected?]
   [:a {:id item
@@ -124,15 +90,54 @@
 
 ;; This is an implementation attempt to get the same behaviour as the youtube search 
 ;; Selecting via arrows should update the input text but not perform filtering
-(defn modal-search-test []
-  (let [text-filter    (rc/atom "")
-        selected-index (rc/atom 0)
-        arrow-pressed? (rc/atom false)]
+(defn modal-search
+  "Displays the *quick filter* modal box, allowing the user to search for a dir."
+  []
+  (let [quick-filter    (rc/atom {:text           ""
+                                  :apply?         false
+                                  :selected-index -1
+                                  :filtered-items []})
+        all-items      (<dir-index)]
     (fn []
       (when (<show-search?)
-        (let [all-items              (<dir-index)
-              filtered-items         (apply-filter @text-filter all-items)
-              filtered-item-count    (count filtered-items)]
+        (let [filtered-items      (:filtered-items @quick-filter)
+              filtered-item-count (count filtered-items)
+
+              ;; handle keyboard events
+
+              on-arrow-up         (fn [event]
+                                    (when-not (zero? (:selected-index @quick-filter))
+                                      (cancel-event event)
+                                      (swap! quick-filter (fn [old]
+                                                            (let [new-selected-index (dec (:selected-index old))]
+                                                              (assoc old
+                                                                     :text           (get filtered-items new-selected-index)
+                                                                     :apply?         false
+                                                                     :selected-index new-selected-index))))
+                                      (ensure-selected-item-visible (:selected-index @quick-filter) filtered-items)))
+
+              on-arrow-down       (fn [event]
+                                    (when-not (= filtered-item-count (inc (:selected-index @quick-filter)))
+                                      (cancel-event event)
+                                      (swap! quick-filter (fn [old]
+                                                            (let [new-selected-index (inc (:selected-index old))]
+                                                              (assoc old
+                                                                     :text           (get filtered-items new-selected-index)
+                                                                     :apply?         false
+                                                                     :selected-index new-selected-index))))
+                                      (ensure-selected-item-visible (:selected-index @quick-filter) filtered-items)))
+
+              on-enter            (fn []
+                                    (when-let [selected-item (get filtered-items (:selected-index @quick-filter))]
+                                      (>hide)
+                                      (>navigate-to-explore selected-item)))
+
+              on-change            (fn [event]
+                                     (let [text (-> event .-target .-value)]
+                                       (reset! quick-filter {:text           text
+                                                             :apply?         true
+                                                             :selected-index -1
+                                                             :filtered-items (apply-filter text all-items)})))]
 
           [:div.modal.is-active {:style {:justify-content "flex-start"}}
            [:div.modal-background {:style {:background-color "rgba(0, 0, 0, 0.11)"}}]
@@ -140,31 +145,24 @@
                                            :top   "1em"}}
             [:div.box
              [:input.input {:type         "text"
-                            :value        @text-filter
+                            :value        (:text @quick-filter)
                             :auto-focus   true
                             :placeholder  "enter search ..."
                             :on-key-down  (fn [event]
                                             (case (.-code event)
-                                              "ArrowDown"  (when-not (= filtered-item-count (inc @selected-index))
-                                                             (cancel-event event)
-                                                             (reset! arrow-pressed? true)
-                                                             (swap! selected-index inc)
-                                                             (reset! text-filter (get filtered-items @selected-index))
-                                                             (ensure-selected-item-visible @selected-index filtered-items))
-
-                                              "ArrowUp"    (js/console.log "up")
-                                              "Enter"      (js/console.log "enter")
+                                              "ArrowDown"  (on-arrow-down event)
+                                              "ArrowUp"    (on-arrow-up event)
+                                              "Enter"      (on-enter)
                                               nil))
-                            :on-change    (fn [event]
-                                            (if @arrow-pressed?
-                                              (reset! arrow-pressed? false)
-                                              (reset! text-filter (-> event .-target .-value))))}]
-
+                            :on-change    on-change}]
              ;; hint text
 
-             [:div.is-size-7.has-text-right {:style {:margin-top "10px"}}
-              "select : " [:span.tag.is-light "Enter"]
-              " close : " [:span.tag.is-light "Esc"]]
+             [:div.is-size-7.is-flex.is-justify-content-space-between.has-text-grey-light {:style {:margin-top "10px"}}
+              [:div (str filtered-item-count " item(s) selected")]
+              [:div "select : " [:span.tag.is-light "Enter"]
+               " close : " [:span.tag.is-light "Esc"]]]
+
+             ;; filtered options values
 
              (when-not (zero? filtered-item-count)
                [:div {:style {:max-height "30vh"
@@ -173,77 +171,6 @@
                 [:ul
                  (doall
                   (map-indexed (fn [index item]
-                                 (render-item item (= index @selected-index)))
+                                 (render-item item (= index (:selected-index @quick-filter))))
                                filtered-items))]])]]])))))
-
-
-
-(defn modal-search
-  "insert the dir search component in the DOM. 
-   
-   It is displayed depending on *db* state that can be changed with `>show` and `>hide`"
-  []
-  (let [selected-index       (rc/atom 0)]
-    (fn []
-      (when (<show-search?)
-        (let [selected-items      (<selected-dirs)
-              text-filter         (<text-filter)
-              filtered-item-count (count selected-items)
-
-              ;; handle keyboard events
-
-              on-arrow-up         (fn [e]
-                                    (when-not (zero? @selected-index)
-                                      (cancel-event e)
-                                      (swap! selected-index dec)
-                                      (ensure-selected-item-visible @selected-index selected-items)))
-              on-arrow-down       (fn [e]
-                                    (when-not (= filtered-item-count (inc @selected-index))
-                                      (cancel-event e)
-                                      (swap! selected-index inc)
-                                      (ensure-selected-item-visible @selected-index selected-items)))
-              on-enter            (fn []
-                                    (when-let [selected-item (get selected-items @selected-index)]
-                                      (>hide)
-                                      (>navigate-to-explore selected-item)
-                                      (>update-text-filter (get selected-items @selected-index))))]
-
-          [:div.modal.is-active   {:style {:justify-content "flex-start"}}
-           [:div.modal-background {:style {:background-color "rgba(0, 0, 0, 0.11)"}}]
-           [:div.modal-content    {:style {:width "50%"
-                                           :top   "1em"}}
-            [:div.box
-
-             ;; the input text control
-
-             [:input.input.is-medium {:type         "text"
-                                      :value        text-filter
-                                      :auto-focus   true
-                                      :placeholder  "enter search "
-                                      :on-key-down  (fn [e]
-                                                      (case (.-code e)
-                                                        "ArrowDown"  (on-arrow-down e)
-                                                        "ArrowUp"    (on-arrow-up e)
-                                                        "Enter"      (on-enter)
-                                                        nil))
-                                      :on-change   (fn [e]
-                                                     (reset! selected-index 0)
-                                                     (>update-text-filter (-> e .-target .-value)))}]
-             ;; hint text
-
-             [:div.is-size-7.has-text-right {:style {:margin-top "10px"}}
-              "select : " [:span.tag.is-light "Enter"]
-              " close : " [:span.tag.is-light "Esc"]]
-
-             ;; selected results from filter text
-
-             (when-not (zero? filtered-item-count)
-               [:div {:style {:max-height "30vh"
-                              :margin-top "10px"
-                              :overflow   "auto"}}
-                [:ul
-                 (doall
-                  (map-indexed (fn [index item]
-                                 (render-item item (= index @selected-index)))
-                               selected-items))]])]]])))))
 
