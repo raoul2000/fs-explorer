@@ -4,7 +4,6 @@
             [re-frame.core :as re-frame]
             [route.helper :refer [>navigate-to-explore]]))
 
-
 ;; Events ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (re-frame/reg-event-db
@@ -22,16 +21,6 @@
 
 (defn >show []
   (re-frame/dispatch [::show]))
-
-(re-frame/reg-event-db
- ::update-search-filter
- (fn [db [_ new-value]]
-   (assoc-in db [:search :quick-filter] new-value)))
-
-(defn >update-text-filter
-  "The dir search filter value changed"
-  [s]
-  (re-frame/dispatch [::update-search-filter s]))
 
 ;; Subscriptions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
