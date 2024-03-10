@@ -6,7 +6,8 @@
             [route.subs :refer [<current-route]]
             [db :refer [>initialize-db <db-initialized?]]
             [components.navbar :refer [navbar]]
-            [components.search-dir :refer [modal-search]]))
+            [components.search-dir :refer [modal-search]]
+            [components.search-dir2 :as search2]))
 
 ;; key handler ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -49,7 +50,7 @@
      [navbar]
      [:div.section {:style {:margin-top "40px"}}
       [main-view]]
-     [modal-search]]
+     [search2/modal-search]]
     ;; loading app in progress ...
     [:section.hero.is-fullheight
      [:div.hero-body
