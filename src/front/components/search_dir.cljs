@@ -76,22 +76,19 @@
     (when (> (count quick-filter) 2)
       (filterv #(str/starts-with? % quick-filter) coll))))
 
-(defn render-item [item selected?]
+(defn render-item [item index selected? on-click-select]
   [:a {:id item
        :on-click  (fn [event]
                     (cancel-event event)
-                    (>hide)
-                    (>navigate-to-explore item)
-                    (>update-text-filter item))
+                    (on-click-select index item))
        :href      ""
        :class     (str "dropdown-item " (when selected? "is-active"))
-       :key       item}
-   item])
+       :key       item} item])
 
-;; This is an implementation attempt to get the same behaviour as the youtube search 
-;; Selecting via arrows should update the input text but not perform filtering
+
 (defn modal-search
-  "Displays the *quick filter* modal box, allowing the user to search for a dir."
+  "Displays the *quick filter* modal box, allowing the user to search for a dir.
+   The behavior of this component is trying to mimic youtube search input."
   []
   (let [quick-filter    (rc/atom {:text           ""
                                   :apply?         false
@@ -110,10 +107,10 @@
                                       (cancel-event event)
                                       (swap! quick-filter (fn [old]
                                                             (let [new-selected-index (dec (:selected-index old))]
-                                                              (assoc old
-                                                                     :text           (get filtered-items new-selected-index)
-                                                                     :apply?         false
-                                                                     :selected-index new-selected-index))))
+                                                              (assoc  old
+                                                                      :text           (get filtered-items new-selected-index)
+                                                                      :apply?         false
+                                                                      :selected-index new-selected-index))))
                                       (ensure-selected-item-visible (:selected-index @quick-filter) filtered-items)))
 
               on-arrow-down       (fn [event]
@@ -121,29 +118,45 @@
                                       (cancel-event event)
                                       (swap! quick-filter (fn [old]
                                                             (let [new-selected-index (inc (:selected-index old))]
-                                                              (assoc old
-                                                                     :text           (get filtered-items new-selected-index)
-                                                                     :apply?         false
-                                                                     :selected-index new-selected-index))))
+                                                              (assoc  old
+                                                                      :text           (get filtered-items new-selected-index)
+                                                                      :apply?         false
+                                                                      :selected-index new-selected-index))))
                                       (ensure-selected-item-visible (:selected-index @quick-filter) filtered-items)))
 
+                                  ;; user click Enter to navigate to the selected item
               on-enter            (fn []
                                     (when-let [selected-item (get filtered-items (:selected-index @quick-filter))]
                                       (>hide)
                                       (>navigate-to-explore selected-item)))
 
-              on-change            (fn [event]
-                                     (let [text (-> event .-target .-value)]
-                                       (reset! quick-filter {:text           text
-                                                             :apply?         true
-                                                             :selected-index -1
-                                                             :filtered-items (apply-filter text all-items)})))]
+                                  ;; user enters a new value in the filter text input
+              on-change           (fn [event]
+                                    (let [text (-> event .-target .-value)]
+                                      (reset! quick-filter {:text           text
+                                                            :apply?         true
+                                                            :selected-index -1
+                                                            :filtered-items (apply-filter text all-items)})))
+
+                                  ;; user clicks on a item in the options list"
+              on-click-select     (fn
+                                    [index item]
+                                    (>hide)
+                                    (>navigate-to-explore item)
+                                    (swap! quick-filter (fn [old]
+                                                          (assoc  old
+                                                                  :text           item
+                                                                  :apply?         true
+                                                                  :selected-index index))))]
 
           [:div.modal.is-active {:style {:justify-content "flex-start"}}
            [:div.modal-background {:style {:background-color "rgba(0, 0, 0, 0.11)"}}]
            [:div.modal-content    {:style {:width "50%"
                                            :top   "1em"}}
             [:div.box
+
+             ;; input text
+
              [:input.input {:type         "text"
                             :value        (:text @quick-filter)
                             :auto-focus   true
@@ -151,10 +164,11 @@
                             :on-key-down  (fn [event]
                                             (case (.-code event)
                                               "ArrowDown"  (on-arrow-down event)
-                                              "ArrowUp"    (on-arrow-up event)
+                                              "ArrowUp"    (on-arrow-up   event)
                                               "Enter"      (on-enter)
                                               nil))
                             :on-change    on-change}]
+
              ;; hint text
 
              [:div.is-size-7.is-flex.is-justify-content-space-between.has-text-grey-light {:style {:margin-top "10px"}}
@@ -171,6 +185,6 @@
                 [:ul
                  (doall
                   (map-indexed (fn [index item]
-                                 (render-item item (= index (:selected-index @quick-filter))))
+                                 (render-item item index (= index (:selected-index @quick-filter)) on-click-select))
                                filtered-items))]])]]])))))
 

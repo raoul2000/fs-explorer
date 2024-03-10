@@ -29,7 +29,6 @@
 
 ;; Default db ----------------------------------------------------------------------------
 
-
 (def default-db {:current-route nil
                  :explore       []
                  :current-dir   "/"
@@ -37,6 +36,10 @@
                  :search       {:visible?         false
                                 :text-filter      ""
                                 :dir-index        []}})
+(comment
+  (s/valid? ::db default-db)
+  ;;
+  )
 
 ;; spec interceptor -----------------------------------------------------------------------
 
