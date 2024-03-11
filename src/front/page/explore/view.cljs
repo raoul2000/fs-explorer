@@ -1,5 +1,5 @@
 (ns page.explore.view
-  (:require [page.explore.subs :refer [<explore <loading? <current-dir]]
+  (:require [page.explore.subs :refer [<explore <loading? <current-dir <sorted-explore]]
             [clojure.string :as s]
             [route.helper :refer [>navigate-to-explore create-url-explore]]
             [reagent.core :as r]
@@ -16,7 +16,7 @@
   (let [loading? (<loading?)]
     [:div
      (when-not loading?
-       (let [list-items (<explore)]
+       (let [list-items (<sorted-explore)]
          (if-not  (zero? (count list-items))
            [:table.table.is-hoverable.is-fullwidth
             [:tbody (map view-item list-items)]]
