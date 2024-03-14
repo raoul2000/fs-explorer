@@ -4,7 +4,8 @@
             [route.helper :refer [>navigate-to-explore create-url-explore]]
             [reagent.core :as r]
             [components.icon :refer [folder-icon file-icon]]
-            [components.message :refer [message]]))
+            [components.message :refer [message]]
+            [components.icon :refer [home-icon]]))
 
 (defn view-item [item]
   [:tr  {:key (:file/path item)}
@@ -35,16 +36,24 @@
                 :on-change   update-input-path}]])))
 
 (defn breadcrumbs []
-  (let [crumbs (<breadcrumbs)
-        last-crumb (last crumbs)]
+  (let [crumbs     (<breadcrumbs)]
     [:div.breadcrumb.has-arrow-separator.is-medium
      [:ul
-      [:li [:a {:href (create-url-explore "")}  "Home"]]
-      (->> (butlast crumbs)
-           (map (fn [{:keys [name path]}]
-                  [:li [:a {:key  path 
-                            :href (create-url-explore path)} name]])))
-      [:li.is-active [:a {:href (create-url-explore (:path last-crumb))} (:name last-crumb)]]]]))
+      [:li {:key  "home"} [:a {:href (create-url-explore "")} home-icon]]
+
+      (when (seq crumbs)
+        (concat
+
+         (when-let [head (butlast crumbs)]
+           (->> head
+                (map (fn [{:keys [name path]}]
+                       [:li  {:key path}
+                        [:a {:href (create-url-explore path)} name]]))))
+
+         (when-let [last-crumb (last crumbs)]
+           [[:li.is-active {:key  (:path last-crumb)}
+             [:a {:href (create-url-explore (:path last-crumb))}
+              [:div.tags [:span.tag.is-medium.is-info (:name last-crumb)]]]]])))]]))
 
 
 (defn page [params]

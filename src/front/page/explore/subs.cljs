@@ -41,17 +41,20 @@
   @(re-frame/subscribe [::current-dir]))
 
 (defn- split-db-path [db-path]
-  (loop [crumbs (reverse (s/split db-path #"/"))
-         result []]
-    (if (empty? crumbs)
-      (reverse result)
-      (recur (rest crumbs)
-             (conj result {:name (first crumbs)
-                           :path (s/join "/" (reverse crumbs))})))))
+  (if (= "" db-path)
+    []
+    (loop [crumbs (reverse (s/split db-path #"/"))
+           result []]
+      (if (empty? crumbs)
+        (reverse result)
+        (recur (rest crumbs)
+               (conj result {:name (first crumbs)
+                             :path (s/join "/" (reverse crumbs))}))))))
 
 (comment
   (split-db-path "/a/b/c")
   (split-db-path "a/b/c")
+  (split-db-path "")
   ;;
   )
 
