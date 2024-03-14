@@ -1,5 +1,6 @@
 (ns page.explore.subs
-  (:require [re-frame.core :as re-frame]))
+  (:require [re-frame.core :as re-frame]
+            [clojure.string :as s]))
 
 
 (re-frame/reg-sub
@@ -38,4 +39,28 @@
 
 (defn <current-dir []
   @(re-frame/subscribe [::current-dir]))
+
+(defn- split-db-path [db-path]
+  (loop [crumbs (reverse (s/split db-path #"/"))
+         result []]
+    (if (empty? crumbs)
+      (reverse result)
+      (recur (rest crumbs)
+             (conj result {:name (first crumbs)
+                           :path (s/join "/" (reverse crumbs))})))))
+
+(comment
+  (split-db-path "/a/b/c")
+  (split-db-path "a/b/c")
+  ;;
+  )
+
+(re-frame/reg-sub
+ ::breadcrumbs
+ :<- [::current-dir]
+ (fn [current-dir] ;; ex /A/B/C
+   (split-db-path current-dir)))
+
+(defn <breadcrumbs []
+  @(re-frame/subscribe [::breadcrumbs]))
 
