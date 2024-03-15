@@ -4,7 +4,7 @@
             [route.helper :refer [>navigate-to-explore create-url-explore]]
             [reagent.core :as r]
             [components.icon :refer [folder-icon file-icon home-icon]]
-            [components.message :refer [message]]))
+            [components.message :refer [warning-message]]))
 
 (defn view-item [item]
   [:tr  {:key (:file/path item)}
@@ -20,7 +20,7 @@
          (if-not  (zero? (count list-items))
            [:table.table.is-hoverable.is-fullwidth
             [:tbody (map view-item list-items)]]
-           [:div [message "This folder is empty"]])))]))
+           [:div [warning-message "This folder is empty"]])))]))
 
 (defn toolbar []
   (let [path              (r/atom "")
