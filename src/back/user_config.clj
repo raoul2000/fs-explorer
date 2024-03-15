@@ -2,19 +2,19 @@
   "User configuration loading and validation"
   (:require [babashka.fs :as fs]
             [clojure.data.json :as json]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s]
+            [utils :refer [can-be-converted-to-url?]]))
+
+;; spec ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; server port number
 (s/def ::server-port    (s/and int? #(< 0 % 65353)))
 ;; open the browser on startup ?
 (s/def ::open-browser   boolean?)
 ;; what URL open in the browser
-(s/def ::browse-url     (s/and string?
-                               #(try
-                                  (new java.net.URL %)
-                                  (catch Throwable _t false))))
+(s/def ::browse-url     string?)
 ;; path to the root folder for all relatives path 
-(s/def ::root-dir-path  (s/and string? fs/directory? fs/absolute?))
+(s/def ::root-dir-path  string?)
 
 (s/def ::config         (s/keys :opt [::server-port
                                       ::open-browser
@@ -41,6 +41,8 @@
 
   ;;
   )
+
+;; function  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- json-string->map
   "Converts the given JSON string into a map with namespaced keywords. Throws
@@ -77,23 +79,25 @@
 
 (defn- validate
   "Returns the given *user-config* map if it is valid or throws"
-  [user-config]
-  (when-not (s/valid? ::config user-config)
-    (throw (ex-info "User configuration is not valid" {:msg (s/explain-str ::config user-config)})))
-  user-config)
+  [{browse-url    ::browse-url
+    root-dir-path ::root-dir-path
+    :as           user-config}]
 
-(comment
+  (cond
+    (not (s/valid? ::config user-config))
+    (throw (ex-info "User configuration is not valid" {:msg (s/explain-str ::config user-config)}))
 
-  (s/explain ::config {:user-config/server-port 888
-                       :otherk "Val"})
+    (and browse-url
+         (not (can-be-converted-to-url? (::browse-url user-config))))
+    (throw (ex-info "Invalid URL" {:browse-url (::browse-url user-config)}))
 
-  (try
-    (validate {:user-config/server-port -888})
-    (catch Exception e
-      (println (format "Error : %s - cause : %s" (.getMessage e) (ex-data e)))))
+    (and root-dir-path
+         (not (and (fs/directory? (::root-dir-path user-config))
+                   (fs/absolute?  (::root-dir-path user-config)))))
+    (throw (ex-info "Invalid Dir" {:dir (::root-dir-path user-config)}))
 
-  ;;
-  )
+    :else user-config))
+
 
 (defn load-from-file
   "Read user config from the given *file-path* and validate it. Returns
@@ -112,13 +116,3 @@
   (->> file-path
        read-from-file
        validate))
-
-(comment
-  (s/conform ::config (read-from-file "test/back/fixture/config-ok.json"))
-  (try
-    (load-from-file "test/back/fixture/config-invalid-port.json")
-    (catch Exception e
-      (println (format "Error : %s - cause : %s" (.getMessage e) (ex-data e)))))
-
-  ;;
-  )

@@ -15,3 +15,17 @@
        (apply merge-with m maps)
        (apply f maps)))
    maps))
+
+(defn can-be-converted-to-url?
+  "Returns TRUE if *s* can be converted into a java.net.URL object"
+  [s]
+  (try
+    (new java.net.URL s)
+    true
+    (catch Throwable _t false)))
+
+(comment
+  (can-be-converted-to-url? "ee")
+  (can-be-converted-to-url? "http://host:88/path/to/res")
+  ;;
+  )
