@@ -1,6 +1,6 @@
 (ns user-config-test
   (:require [clojure.test :refer (deftest testing is use-fixtures)]
-            [user-config :refer (load-from-file)]
+            [user-config :refer [load-from-file]]
             [babashka.fs :as fs]
             [clojure.data.json :as json]))
 
@@ -32,8 +32,14 @@
 
 (use-fixtures :once with-fs-tree)
 
+
 ;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(deftest json-string->map-test
+  (testing "converting a JSON string into a user config map"
+    (is (= #:user-config{:server-port 45}
+           (#'user-config/json-string->map "{\"server-port\" : 45}"))
+        "converts to a namespaced keys map")))
 
 (deftest load-from-file-test
   (testing "Load and validate configuration from a JSON file"

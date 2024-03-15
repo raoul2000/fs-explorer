@@ -5,50 +5,13 @@
             [clojure.spec.alpha :as s]
             [utils :refer [can-be-converted-to-url?]]))
 
-;; spec ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; server port number
-(s/def ::server-port    (s/and int? #(< 0 % 65353)))
-;; open the browser on startup ?
-(s/def ::open-browser   boolean?)
-;; what URL open in the browser
-(s/def ::browse-url     string?)
-;; path to the root folder for all relatives path 
-(s/def ::root-dir-path  string?)
-
-(s/def ::config         (s/keys :opt [::server-port
-                                      ::open-browser
-                                      ::browse-url
-                                      ::root-dir-path]))
-
-(comment
-  (new java.net.URI "http:dd.com:888")
-
-  (s/valid? ::browse-url "https://rlo.caelhost:8808/?ee=zz")
-  (s/valid? ::browse-url "")
-  (s/explain-data ::browse-url "http://localhost:8808")
-  (s/valid? ::server-port 112)
-  (s/valid? ::server-port -112)
-  (s/conform ::server-port 112)
-  (s/conform ::server-port "112")
-  (s/explain ::server-port "112")
-
-  (s/valid? ::config {})
-  (s/valid? ::config {::server-port 11})
-  (s/valid? ::config {:server-port -11})
-  (s/valid? ::config {::server-port "XX"})
-  (s/explain-data  ::config {::server-port "XX"})
-
-  ;;
-  )
-
 ;; function  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- json-string->map
   "Converts the given JSON string into a map with namespaced keywords. Throws
    when invalid JSON"
   [s]
-  (json/read-str s :key-fn #(keyword #_(str *ns*)  "user-config" %)))
+  (json/read-str s :key-fn #(keyword "user-config" %)))
 
 (comment
   (def cfg-1 (json-string->map "{\"server-port\" : 45}"))
@@ -104,6 +67,7 @@
    the user config map or throws.
    
    All keys in the returned map are namespaced in 'user-config'. 
+
    Example : 
    ```
    {
@@ -111,6 +75,7 @@
       :user-config/server-port  8001
    }
    ```
+   The returned map is valid for the :user-config/config spec
    "
   [file-path]
   (->> file-path
