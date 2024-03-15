@@ -3,9 +3,8 @@
             [clojure.string :as s]
             [route.helper :refer [>navigate-to-explore create-url-explore]]
             [reagent.core :as r]
-            [components.icon :refer [folder-icon file-icon]]
-            [components.message :refer [message]]
-            [components.icon :refer [home-icon]]))
+            [components.icon :refer [folder-icon file-icon home-icon]]
+            [components.message :refer [message]]))
 
 (defn view-item [item]
   [:tr  {:key (:file/path item)}
@@ -53,7 +52,7 @@
          (when-let [last-crumb (last crumbs)]
            [[:li.is-active {:key  (:path last-crumb)}
              [:a {:href (create-url-explore (:path last-crumb))}
-              [:div.tags [:span.tag.is-medium.is-info (:name last-crumb)]]]]])))]]))
+              [:div.tags [:span.tag.is-medium.is-info.has-text-weight-bold (:name last-crumb)]]]]])))]]))
 
 
 (defn page [params]

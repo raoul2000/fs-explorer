@@ -1,9 +1,10 @@
 (ns components.navbar
   (:require [reagent.core :as rc]
-            [route.helper :refer [about-route? explore-route? create-url-about create-url-explore]]
+            [route.helper :refer [about-route? explore-route? create-url-about create-url-explore config-route?
+                                  create-url-config]]
             [route.subs :refer [<current-route]]
             [page.explore.subs :refer [<current-dir]]
-            [components.icon :refer [about-icon]]))
+            [components.icon :refer [about-icon about-icon-selected config-icon config-icon-selected]]))
 
 
 (defn navbar-item-explore
@@ -39,8 +40,8 @@
 
            ;; always visible
           #_[:a.navbar-item {:title  "search (ctrl+k)"
-                           :href   ""}
-           "search"]
+                             :href   ""}
+             "search"]
 
           ;; burger control - displayed driven by *show-burger* r/atom
           [:a {:role "button", :class (str "navbar-burger " (when @show-burger "is-active")), :aria-label "menu", :aria-expanded "false"
@@ -56,8 +57,16 @@
         ;; Nav items must force burger control to close when they are clicked
            [navbar-item-explore route-name show-burger]
 
-           [:a.navbar-item {:class    (when (about-route? route-name) "is-underlined")
-                            :on-click #(reset! show-burger false)
+           [:a.navbar-item {:on-click #(reset! show-burger false)
+                            :href     (create-url-config)
+                            :title    "config"}
+            (if (config-route? route-name)
+              config-icon-selected
+              config-icon)]
+
+           [:a.navbar-item {:on-click #(reset! show-burger false)
                             :href     (create-url-about)
                             :title    "about"}
-            about-icon]]]]))))
+            (if (about-route? route-name)
+              about-icon-selected
+              about-icon)]]]]))))

@@ -42,6 +42,18 @@
 
 (def about-route? (partial = :route/about))
 
+;; Config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn >navigate-to-config
+  "navigate to the 'Config' view"
+  []
+  (rfc/dispatch [:route.event/push-state :route/config]))
+
+(defn create-url-config []
+  (href :route/config))
+
+(def config-route? (partial = :route/config))
+
 ;; Explore ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn >navigate-to-explore

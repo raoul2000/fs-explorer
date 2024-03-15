@@ -6,6 +6,7 @@
             [page.about.view :as about]
             [page.explore.view :as explore]
             [page.home.view :as home]
+            [page.config.view :as config]
             [route.event :as route-event] ;; required
             [page.explore.event :refer [>select-dir]]))
 
@@ -27,6 +28,9 @@
                               ;; Teardown can be done here.
                               :stop       (fn [params]
                                             (js/console.log "[explorer] <<-- path = " (-> params :query :dir)))}]}]
+             ["/config"
+              {:name :route/config
+               :view config/page}]
 
              ["/"
               {:name       :route/home
