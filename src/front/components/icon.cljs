@@ -7,7 +7,9 @@
                 :question-icon-selected (icons/icon :phosphor.fill/question)
                 :home-icon              (icons/icon :phosphor.fill/house)
                 :config-icon            (icons/icon :phosphor.regular/gear)
-                :config-icon-selected   (icons/icon :phosphor.fill/gear)})
+                :config-icon-selected   (icons/icon :phosphor.fill/gear)
+                :quick-search-icon      (icons/icon :phosphor.regular/magnifying-glass)
+                })
 
 ;; nanbar icons
 
@@ -16,6 +18,8 @@
 
 (def config-icon          (icons/render (:config-icon app-icons)              {:size "20px"}))
 (def config-icon-selected (icons/render (:config-icon-selected app-icons)     {:size "20px"})) 
+
+(def quick-search-icon    (icons/render (:quick-search-icon app-icons)              {:size "20px"}))
 
 ;; explorer view icons
 

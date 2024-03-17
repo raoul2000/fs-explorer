@@ -4,7 +4,8 @@
                                   create-url-config]]
             [route.subs :refer [<current-route]]
             [page.explore.subs :refer [<current-dir]]
-            [components.icon :refer [about-icon about-icon-selected config-icon config-icon-selected]]))
+            [components.icon :refer [quick-search-icon about-icon about-icon-selected config-icon config-icon-selected]]
+            [components.search-dir :as search-dir]))
 
 
 (defn navbar-item-explore
@@ -17,7 +18,9 @@
                      :href      (create-url-explore current-dir)
                      :on-click  #(reset! show-burger false)
                      :title     "explore"}
-     "Explore"]))
+     [:img {:src     "/image/cljs-logo.png",
+            :alt     "logo",
+            :height  "28"}]]))
 
 (defn navbar
   "Render the main top Navigation Bar.   
@@ -33,10 +36,8 @@
         (js/console.log "rendering navbar")
         [:nav.navbar.is-fixed-top.has-shadow {:role "navigation", :aria-label "main navigation"}
          [:div.navbar-brand
-          [:a.navbar-item {:href ""}
-           [:img {:src     "/image/cljs-logo.png",
-                  :alt     "logo",
-                  :height  "28"}]]
+          [navbar-item-explore route-name show-burger]
+
 
            ;; always visible
           #_[:a.navbar-item {:title  "search (ctrl+k)"
@@ -50,12 +51,18 @@
            [:span {:aria-hidden "true"}]
            [:span {:aria-hidden "true"}]]]
 
-                                     ;; responsive
+         ;; responsive
          [:div {:class (str "navbar-menu " (when @show-burger "is-active"))}
           [:div.navbar-end
 
-        ;; Nav items must force burger control to close when they are clicked
-           [navbar-item-explore route-name show-burger]
+           ;; Nav items must force burger control to close when they are clicked
+           [:a.navbar-item {:on-click (fn [event]
+                                        (reset! show-burger false)
+                                        (search-dir/cancel-event event)
+                                        (search-dir/>show))
+                            :href     ""
+                            :title    "quick-search (ctr + f)"}
+            [:div {:style {"display" "flex"}}  quick-search-icon "Quick Search"]]
 
            [:a.navbar-item {:on-click #(reset! show-burger false)
                             :href     (create-url-config)

@@ -15,7 +15,12 @@
               {:name        :route/about
                :view        about/page}]
 
-             ["/explore"
+
+             ["/config"
+              {:name :route/config
+               :view config/page}]
+
+             ["/"
               {:name        :route/explore
                :view        explore/page
                ;; about controllers
@@ -24,17 +29,14 @@
                               :start      (fn [params]
                                             (let [dir-path-to-explore (-> params :query :dir)]
                                               (js/console.log "[explorer] -->>  path = " dir-path-to-explore)
-                                              (>select-dir (or dir-path-to-explore "/"))))
+                                              (>select-dir (or dir-path-to-explore ""))))
                               ;; Teardown can be done here.
                               :stop       (fn [params]
                                             (js/console.log "[explorer] <<-- path = " (-> params :query :dir)))}]}]
-             ["/config"
-              {:name :route/config
-               :view config/page}]
 
-             ["/"
-              {:name       :route/home
-               :view       home/page}]])
+             #_["/"
+                {:name       :route/home
+                 :view       home/page}]])
 
 (defn on-navigate [new-match]
   (when new-match
