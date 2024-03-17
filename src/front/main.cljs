@@ -4,7 +4,7 @@
             [re-frame.core :as re-frame]
             [route.core :refer [init-routes!]]
             [route.subs :refer [<current-route]]
-            [db :refer [>initialize-db <db-initialized?]]
+            [db :refer [>initialize-db <db-initialized? >start-counting >stop-counting]]
             [components.navbar :refer [navbar]]
             [components.search-dir :refer [modal-search]]))
 
@@ -43,11 +43,18 @@
     (when-let [view-component (-> current-route :data :view)]
       [view-component (:parameters current-route)])))
 
+(defn counter []
+  [:div
+   [:button {:on-click >start-counting} "start counting"]
+   [:button {:on-click >stop-counting} "stop counting"]])
+
 (defn main-page []
   (if (<db-initialized?)
     [:div
      [navbar]
+
      [:div.section {:style {:margin-top "40px"}}
+      #_[counter]
       [main-view]]
      [modal-search]]
     ;; loading app in progress ...
@@ -57,8 +64,9 @@
        [:div.title "Loading "]
        [:div.subtitle "just a few seconds ..."]]]]))
 
-
 (def debug? ^boolean goog.DEBUG)
+
+
 
 (defn dev-setup []
   (when debug?

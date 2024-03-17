@@ -3,7 +3,9 @@
             [cljs.spec.alpha :as s]
             [re-frame.core :as re-frame]
             [ajax.edn :refer [edn-response-format edn-request-format]]
-            [model :as model]))
+            [model :as model]
+            [oxbow.re-frame :as o] ;;sse
+            ))
 
 ;; spec db ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -38,7 +40,8 @@
                  :search       {:visible?         false
                                 :text-filter      ""
                                 :dir-index        []}
-                 :user-config  {}})
+                 :user-config  {}
+                 :server-event {}})
 (comment
   (s/valid? ::db default-db)
   ;;
@@ -140,3 +143,17 @@
 (defn <db-initialized? []
   @(re-frame/subscribe [::initialized?]))
 
+(re-frame/reg-event-db
+ ::on-count-tick
+ (fn [db [_ {:keys [data] :as event}]]
+   (js/console.log event)
+   (update db :counter-value conj data)))
+
+(defn >start-counting []
+  (re-frame/dispatch [::o/sse-client {:id       ::counter-events
+                                      :uri      "/event"
+                                      :on-event [::on-count-tick]}]))
+
+
+(defn >stop-counting []
+  (re-frame/dispatch [::o/abort ::counter-events]))
