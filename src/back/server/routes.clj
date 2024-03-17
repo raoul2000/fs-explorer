@@ -12,6 +12,7 @@
             [server.handler.explorer :as explorer-handler]
             [server.handler.index :as index-handler]
             [server.handler.event :as event-handler]
+            [server.handler.open-file :as open-file]
             ;; sse
             [io.pedestal.http.sse :as sse]))
 
@@ -54,6 +55,7 @@
      ;; note: route'/explore/' is NOT valid
      ["/explore"       :get  (interceptor-chain (explorer-handler/create options))    :route-name    :explorer]
      ["/index"         :get  (interceptor-chain (index-handler/create    options))    :route-name    :index]
+     ["/open"          :get  (interceptor-chain (open-file/create        options))    :route-name    :open-file]
 
      ;; SSE notifier
      ["/event"         :get [(sse/start-event-stream event-handler/event-stream)]     :route-name    :get-event-stream]

@@ -23,7 +23,7 @@ Accept: application/json
 ### GET /config
 
 GET {{baseUrl}}/config
-
+Accept: application/edn
 
 ### GET /explore (default)
 
@@ -37,9 +37,17 @@ Accept: application/edn
 
 ### GET /download
 
-GET {{baseUrl}}/download?dir=data.json&disposition=inline
+GET {{baseUrl}}/download?path=package.json&disposition=inline
 
 ### GET /index
 
 GET {{baseUrl}}/index?type=dir
+
+### GET /event
+
+GET {{baseUrl}}/event
+
+### GET /open
+
+GET {{baseUrl}}/open?path=README.txt
 
