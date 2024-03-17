@@ -8,11 +8,11 @@
 
 (defn create [{:keys [root-dir-path]}]
   (fn [request]
-    (let [param-file        (get-in request [:params :dir])
+    (let [param-file        (get-in request [:params :path])
           param-disposition (get-in request [:params :disposition] default-disposition)]
       (cond
         (nil? param-file)
-        (response/error-BAD_REQUEST  (response/error-body "missing dir param"))
+        (response/error-BAD_REQUEST  (response/error-body "missing 'path' param"))
 
         (not (valid-dispositions param-disposition))
         (response/error-BAD_REQUEST  (response/error-body "invalid disposition value"
