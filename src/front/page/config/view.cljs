@@ -43,7 +43,7 @@
 
 (defn page []
   (let [config (<user-config)]
-    [:div.title "Config"
+    [:div.title "Configuration"
      [:hr]
      (if (seq config)
        [user-config config]

@@ -1,16 +1,19 @@
 (ns page.explore.view
   (:require [page.explore.subs :refer [<loading? <sorted-explore <breadcrumbs]]
-            [clojure.string :as s]
             [route.helper :refer [>navigate-to-explore create-url-explore]]
             [reagent.core :as r]
             [components.icon :refer [folder-icon file-icon home-icon]]
             [components.message :refer [warning-message]]))
 
 (defn view-item [item]
-  [:tr  {:key (:file/path item)}
-   [:td {:width "40px"} (if (:file/dir? item) folder-icon file-icon)]
-   [:td
-    [:a {:href (create-url-explore (:file/id item))} (:file/name item)]]])
+  (let [is-dir (:file/dir? item)]
+    [:tr  {:key (:file/path item)}
+     [:td {:width "40px"} (if is-dir folder-icon file-icon)]
+     [:td
+      (if is-dir
+        [:a {:href (create-url-explore (:file/id item))} (:file/name item)]
+        [:a {:href (str "/download?path=" (:file/path item) "&disposition=inline")
+             :target (:file/name item)} (:file/name item)])]]))
 
 (defn explorer-view []
   (let [loading? (<loading?)]
