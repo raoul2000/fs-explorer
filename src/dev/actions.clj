@@ -1,11 +1,13 @@
 (ns actions
-  (:require  [clojure.data.json :as json]))
+  (:require [clojure.data.json :as json]
+            [clojure.spec.alpha :as s])
+  (:import [java.util.regex PatternSyntaxException]))
 
 
 (comment
 
   ;; TODO: find a good name !!
-  ;;      - features, custom action, ....
+  ;;      - features, custom action, action ??....
 
   ;; describing an action attached to a file or a folder.
   ;; - need to select the target (file or folder)
@@ -25,6 +27,20 @@
                {:selector {:name "readme.txt"}
                 :command   "edit"}]}
 
+  ;; let's spec this map
+
+  (s/def :action.selector/name string?)
+  (s/def :action/selector      (s/keys :req [:action.selector/name]))
+  (s/def :action/command       string?)
+  (s/def :action/def           (s/keys :req [:action/selector :action/command]))
+
+
+  (s/explain-str :action/def #:action{:selector #:action.selector{:name "readme.md"}
+                                      :command   "edit"})
+
+
+  ;; json / Clojure ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
   ;; what happens when the map contains an array of keys
   (json/write-str {:colors [:green :red :blue]}  :escape-slash false)
   ;; ... they are turned into string
@@ -40,7 +56,7 @@
                                (mapv keyword v)
                                v)))
 
-  ;; working on user configured regexp
+  ;; working on user configured regexp ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   ;; given this Re
   (def re1 ".*\\/A.*")
