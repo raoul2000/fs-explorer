@@ -39,15 +39,20 @@
   ;; the system configuration
   (def system-config (-> sys/config
                          (assoc :app/user-config {:user-config/root-dir-path "c:\\tmp\\test_1"
-                                                  :user-config/open-browser  false})
+                                                  :user-config/open-browser  false
+                                                  :user-config/actions [{:selector  "readme.md"
+                                                                         :command   "open"}
+
+                                                                        {:selector  "readme.txt"
+                                                                         :command   "open"}]})
                          #_(assoc-in [:app/config    :open-browser?]    false)
                          #_(assoc-in [:app/config    :polite?]          true)
                          (assoc-in [:server/server ::http/join?]   false)))
-  
+
   (s/valid? :user-config/config {:user-config/root-dir-path "tmp"
-                                  :user-config/open-browser  false})
-  (s/explain :user-config/config {:user-config/root-dir-path "./test"
                                  :user-config/open-browser  false})
+  (s/explain :user-config/config {:user-config/root-dir-path "./test"
+                                  :user-config/open-browser  false})
 
   ;; start the system
   (def system (ig/init system-config))
@@ -66,7 +71,7 @@
 
   (test/run-all-tests)
 
-  
+
   ;;
   )
 

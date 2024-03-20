@@ -24,12 +24,7 @@
                      :browse-url               ""
                      :port                     8890
                      :root-dir-path            (str (fs/home))
-
-                     :actions                  [{:selector  "readme.md"
-                                                 :command   "open"}
-
-                                                {:selector  "readme.txt"
-                                                 :command   "open"}]}
+                     :actions                  []}
    
    :server/routes    {:config                  (ig/ref :app/config)}
 
@@ -52,8 +47,11 @@
         (dissoc :user-config)
         (assoc  :port           port)
         (assoc  :browse-url     browse-url)
-        (update :open-browser?  #(get user-config :user-config/open-browser  %))
-        (update :root-dir-path  #(get user-config :user-config/root-dir-path  %)))))
+        (update :open-browser?  #(get user-config :user-config/open-browser   %))
+        (update :root-dir-path  #(get user-config :user-config/root-dir-path  %))
+        (update :actions        #(get user-config :user-config/actions        %))
+        
+        )))
 
 (defn init-server [{:keys [config] :as service-map}]
   (when (:open-browser? config)
