@@ -37,11 +37,11 @@
                  :explore       []
                  :current-dir   "/"
                  :loading?      false
-                 :search       {:visible?         false
-                                :text-filter      ""
-                                :dir-index        []}
-                 :user-config  {}
-                 :server-event {}})
+                 :search        {:visible?         false
+                                 :text-filter      ""
+                                 :dir-index        []}
+                 :user-config   {}
+                 :server-event  {}})
 (comment
   (s/valid? ::db default-db)
   ;;
@@ -126,13 +126,27 @@
 
 ;; subs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; the complete configuration
+
 (re-frame/reg-sub
  ::user-config
  (fn [db _]
    (:user-config db)))
 
 (defn <user-config []
-  @re-frame/subscribe [::user-config])
+  @(re-frame/subscribe [::user-config]))
+
+
+;; part of the configuration
+
+(re-frame/reg-sub
+ ::config-actions
+ :<- [::user-config]
+ (fn [user-config]
+   (:actions user-config)))
+
+(defn <config-actions []
+  @(re-frame/subscribe [::config-actions]))
 
 
 (re-frame/reg-sub

@@ -5,7 +5,8 @@
             [route.subs :refer [<current-route]]
             [page.explore.subs :refer [<current-dir]]
             [components.icon :refer [quick-search-icon about-icon about-icon-selected config-icon config-icon-selected]]
-            [components.search-dir :as search-dir]))
+            [components.search-dir :as search-dir]
+            [utils :refer [cancel-event]]))
 
 
 (defn navbar-item-explore
@@ -58,7 +59,7 @@
            ;; Nav items must force burger control to close when they are clicked
            [:a.navbar-item {:on-click (fn [event]
                                         (reset! show-burger false)
-                                        (search-dir/cancel-event event)
+                                        (cancel-event event)
                                         (search-dir/>show))
                             :href     ""
                             :title    "quick-search (ctr + f)"}

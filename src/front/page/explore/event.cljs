@@ -51,3 +51,32 @@
 
 (defn >select-dir [path]
   (re-frame/dispatch [::select-dir path]))
+
+;; run a command -------------------------------------------------------------------------------------------------------
+
+(re-frame/reg-event-db
+ ::run-command-success
+ (fn [db [_ success-response]]
+   (tap> {:run-command-success success-response})
+   db))
+
+
+(re-frame/reg-event-db
+ ::run-command-failure
+ (fn [db [_ error-response]]
+   (tap> {:run-command-failure error-response})
+   db))
+
+
+(re-frame/reg-event-fx
+ ::run-command
+ (fn [{db :db} [_ command-name path]]
+   {:http-xhrio {:method          :get
+                 :uri             (str "/cmd?path=" path "&name=" command-name)
+                 :format          (edn-request-format)
+                 :response-format (edn-response-format)
+                 :on-success      [::run-command-success]
+                 :on-failure      [::run-command-failure]}}))
+
+(defn >run-command [command-name path]
+  (re-frame/dispatch [::run-command command-name path]))

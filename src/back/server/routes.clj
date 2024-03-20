@@ -13,6 +13,7 @@
             [server.handler.index :as index-handler]
             [server.handler.event :as event-handler]
             [server.handler.open-file :as open-file]
+            [server.handler.run-command :as run-command]
             ;; sse
             [io.pedestal.http.sse :as sse]))
 
@@ -56,6 +57,7 @@
      ["/explore"       :get  (interceptor-chain (explorer-handler/create options))    :route-name    :explorer]
      ["/index"         :get  (interceptor-chain (index-handler/create    options))    :route-name    :index]
      ["/open"          :get  (interceptor-chain (open-file/create        options))    :route-name    :open-file]
+     ["/cmd"           :get  (interceptor-chain (run-command/create      options))    :route-name    :run-command]
 
      ;; SSE notifier
      ["/event"         :get [(sse/start-event-stream event-handler/event-stream)]     :route-name    :get-event-stream]

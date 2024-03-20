@@ -48,7 +48,16 @@
 ;; path to the root folder for all relatives path 
 (s/def :user-config/root-dir-path  string?)
 
+;; actions ------------------------------
+(s/def :action/selector     string?)
+(s/def :action/command      string?)
+(s/def :action/def          (s/keys :req [:action/selector :action/command]))
+(s/def :action/coll         (s/coll-of :action/def :kind vector?)) ;; could add :distinct true
+
+(s/def :user-config/actions (s/coll-of :action/def :kind vector?))
+
 (s/def :user-config/config         (s/keys :opt [:user-config/server-port
                                                  :user-config/open-browser
                                                  :user-config/browse-url
-                                                 :user-config/root-dir-path]))
+                                                 :user-config/root-dir-path
+                                                 :user-config/actions]))

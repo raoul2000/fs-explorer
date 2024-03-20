@@ -2,7 +2,8 @@
   (:require [reagent.core :as rc]
             [clojure.string :as str]
             [re-frame.core :as re-frame]
-            [route.helper :refer [>navigate-to-explore]]))
+            [route.helper :refer [>navigate-to-explore]]
+            [utils :refer [cancel-event]]))
 
 ;; Events ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -52,11 +53,7 @@
                                        (.getElementById js/document))]
     (.scrollIntoView selected-dom-element #js{"block" "nearest"})))
 
-(defn cancel-event
-  "Apply `preventDefault` and `stopPropagation` to the given *js Event*"
-  [e]
-  (.preventDefault e)
-  (.stopPropagation e))
+
 
 (defn apply-filter [quick-filter coll]
   (case quick-filter

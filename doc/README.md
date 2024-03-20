@@ -24,3 +24,13 @@ Example:
 }
 ```
 
+
+## Actions
+
+The application is doing some default actions listed below : 
+
+- user clicks on a *folder* : navigates into this folder.
+- user clicks on a *file* : opens a new tab in the browser to display file's content or download the file if it can't be displayed.
+
+It is possible to configure the application to replace those default actions by 
+

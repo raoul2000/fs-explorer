@@ -23,8 +23,14 @@
                      :open-browser?            true
                      :browse-url               ""
                      :port                     8890
-                     :root-dir-path            (str (fs/home))}
+                     :root-dir-path            (str (fs/home))
 
+                     :actions                  [{:selector  "readme.md"
+                                                 :command   "open"}
+
+                                                {:selector  "readme.txt"
+                                                 :command   "open"}]}
+   
    :server/routes    {:config                  (ig/ref :app/config)}
 
    :server/server    {:config                  (ig/ref :app/config)
@@ -33,7 +39,6 @@
                       ::http/resource-path     "/public"
                       ::http/type              :jetty
                       ::http/join?             true}})
-
 
 ;; key initializers function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

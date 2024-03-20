@@ -21,23 +21,31 @@
                :action        {:name  "os.open"}}]}
 
   ;; a simple version to start : 
-  {::features [{:selector {:name "readme.md"}
-                :command   "edit"}
+  {::features [{:selector  "readme.md"
+                :command   "open"}
 
-               {:selector {:name "readme.txt"}
-                :command   "edit"}]}
+               {:selector  "readme.txt"
+                :command   "download"}]}
+  
+  ;; Meaning:
+  ;; - when user clicks on file names "readme.md" , start the built-in command named "open"
+  ;; - when user clicks on file names "readme.txt" , start the built-in command named "download"
 
   ;; let's spec this map
+  
+  (s/def :action/selector     string?)
+  (s/def :action/command      string?)
+  (s/def :action/def          (s/keys :req [:action/selector :action/command]))
+  (s/def :action/coll         (s/coll-of :action/def :kind vector?)) ;; could add :distinct true
 
-  (s/def :action.selector/name string?)
-  (s/def :action/selector      (s/keys :req [:action.selector/name]))
-  (s/def :action/command       string?)
-  (s/def :action/def           (s/keys :req [:action/selector :action/command]))
 
-
-  (s/explain-str :action/def #:action{:selector #:action.selector{:name "readme.md"}
+  (s/explain-str :action/def #:action{:selector  "readme.md"
                                       :command   "edit"})
-
+  
+  (s/explain-str :action/coll [#:action{:selector  "readme.md"
+                                        :command   "edit"}
+                               #:action{:selector  "readme.md"
+                                        :command   "edit"}])
 
   ;; json / Clojure ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

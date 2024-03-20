@@ -51,3 +51,7 @@ GET {{baseUrl}}/event
 
 GET {{baseUrl}}/open?path=README.txt
 
+### GET /cmd
+
+GET {{baseUrl}}/cmd?path=README.txt&name=open
+
