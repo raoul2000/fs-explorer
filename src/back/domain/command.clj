@@ -4,4 +4,6 @@
 (defn run [cmd-name path options]
   (case cmd-name
     "open"      (open path options)
-    :else       true))
+    
+    (throw (ex-info "unkown command name" {:command-name cmd-name
+                                           :path         path}))))

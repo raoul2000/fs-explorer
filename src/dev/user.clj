@@ -41,7 +41,7 @@
                          (assoc :app/user-config {:user-config/root-dir-path "c:\\tmp\\test_1"
                                                   :user-config/open-browser  false
                                                   :user-config/actions [{:selector  "readme.md"
-                                                                         :command   "open"}
+                                                                         :command   "dummy"}
 
                                                                         {:selector  "readme.txt"
                                                                          :command   "open"}]})
