@@ -27,10 +27,28 @@ Example:
 
 ## Actions
 
-The application is doing some default actions listed below : 
-
+The application provide following defaults actions : 
 - user clicks on a *folder* : navigates into this folder.
 - user clicks on a *file* : opens a new tab in the browser to display file's content or download the file if it can't be displayed.
 
-It is possible to configure the application to replace those default actions by 
+
+It is possible to change default behaviors on *files* by configuring **actions**. In the example below, when the user clicks on a file named `readme.md` or `readme.txt` the build-in command **open** will be executed on this file.
+
+Example : 
+```json
+{
+  "actions": [
+      {
+        "selector": "readme.md",
+        "command": "open"
+      },
+      {
+        "selector": "readme.txt",
+        "command": "open"
+      }
+    ]    
+}
+```
+
+
 
