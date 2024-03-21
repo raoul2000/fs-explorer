@@ -26,13 +26,13 @@
 
                {:selector  "readme.txt"
                 :command   "download"}]}
-  
+
   ;; Meaning:
   ;; - when user clicks on file names "readme.md" , start the built-in command named "open"
   ;; - when user clicks on file names "readme.txt" , start the built-in command named "download"
 
   ;; let's spec this map
-  
+
   (s/def :action/selector     string?)
   (s/def :action/command      string?)
   (s/def :action/def          (s/keys :req [:action/selector :action/command]))
@@ -41,11 +41,23 @@
 
   (s/explain-str :action/def #:action{:selector  "readme.md"
                                       :command   "edit"})
-  
+
   (s/explain-str :action/coll [#:action{:selector  "readme.md"
                                         :command   "edit"}
                                #:action{:selector  "readme.md"
                                         :command   "edit"}])
+  
+  ;; the selectr's value could be a regular expression
+  ;; - validation : it seems java and javascript regexp are quite similuar based on https://en.wikipedia.org/wiki/Comparison_of_regular_expression_engines#Language_features
+  ;;   so backend side could validate the regexp before sending it to the front for evaluation in the browser
+  ;; - representation : it is entered as a string by the user and compiled into a regex by the back for validation and the front
+  ;;   for evaluation.
+  ;; 
+  ;;
+  )
+
+
+(comment
 
   ;; json / Clojure ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

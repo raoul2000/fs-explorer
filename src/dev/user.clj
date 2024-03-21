@@ -44,7 +44,11 @@
                                                                          :command   "dummy"}
 
                                                                         {:selector  "readme.txt"
-                                                                         :command   "open"}]})
+                                                                         :command   "open"}
+                                                                        
+                                                                        {:selector "README"
+                                                                         :command "c:\\program files\\notepad++\\notepad++.exe"}
+                                                                        ]})
                          #_(assoc-in [:app/config    :open-browser?]    false)
                          #_(assoc-in [:app/config    :polite?]          true)
                          (assoc-in [:server/server ::http/join?]   false)))

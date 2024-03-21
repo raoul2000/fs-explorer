@@ -72,7 +72,7 @@
  ::run-command
  (fn [{db :db} [_ command-name path]]
    {:http-xhrio {:method          :get
-                 :uri             (str "/cmd?path=" path "&name=" command-name)
+                 :uri             (str "/cmd?path=" (js/encodeURIComponent path) "&name=" command-name)
                  :format          (edn-request-format)
                  :response-format (edn-response-format)
                  :on-success      [::run-command-success]

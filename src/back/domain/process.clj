@@ -11,6 +11,7 @@
 
   ;; does NOT wait until command terminates (can open multiple notepad.exe)
   (p/process "notepad.exe")
+  (p/process ["c:\\program files\\notepad++\\notepad++.exe" (fs/absolutize "test/back/process/prog1.js")] )
   ;; to wait process termination : 
   (-> (p/process "notepad.exe") deref)
 
