@@ -49,7 +49,11 @@
 (s/def :user-config/root-dir-path  string?)
 
 ;; actions ------------------------------
-(s/def :action/selector     string?)
+(s/def :action.selector/match string?)
+(s/def :action.selector/equals string?)
+(s/def :action/selector (s/or :equal string?
+                              :map   (s/keys :opt [:action.selector/equals
+                                                   :action.selector/match])))
 (s/def :action/command      string?)
 (s/def :action/def          (s/keys :req [:action/selector :action/command]))
 (s/def :action/coll         (s/coll-of :action/def :kind vector?)) ;; could add :distinct true

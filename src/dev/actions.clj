@@ -46,13 +46,46 @@
                                         :command   "edit"}
                                #:action{:selector  "readme.md"
                                         :command   "edit"}])
-  
-  ;; the selectr's value could be a regular expression
-  ;; - validation : it seems java and javascript regexp are quite similuar based on https://en.wikipedia.org/wiki/Comparison_of_regular_expression_engines#Language_features
+
+  ;; the selector's value could be a regular expression
+  ;; - validation : it seems java and javascript regexp are quite similar based on https://en.wikipedia.org/wiki/Comparison_of_regular_expression_engines#Language_features
   ;;   so backend side could validate the regexp before sending it to the front for evaluation in the browser
   ;; - representation : it is entered as a string by the user and compiled into a regex by the back for validation and the front
   ;;   for evaluation.
   ;; 
+  ;;
+
+  ;; possible representation
+  {:selector {:equals "readme.md"}}  ;; exact match. Same as {:selector "readme.md"}
+  {:selector {:match ".*"}}          ;; regex match
+  {:selector {:starts-with "read"}}  ;; partial match
+  {:selector {:endss-with ".md"}}    ;; partial match
+  ;; mix them all 
+  {:selector {:match       "me"
+              :starts-with "read"
+              :ends-with   ".md"}}
+
+  ;; let's try to spec the selector
+  (s/def :action.selector/match string?)
+  (s/def :action.selector/equals string?)
+  (s/def :action/selector (s/or :equal string?
+                                :map   (s/keys :opt [:action.selector/equals
+                                                     :action.selector/match])))
+  ;; following is same as above
+  (s/def :action/command      string?)
+  (s/def :action/def          (s/keys :req [:action/selector :action/command]))
+  (s/def :action/coll         (s/coll-of :action/def :kind vector?))
+
+  (s/valid? :action/coll [#:action{:command "open"
+                                   :selector "readme.md"}])
+  
+  (s/valid? :action/coll [#:action{:command "open"
+                                   :selector {:equals "readme.md"}}])
+  
+  (s/valid? :action/coll [#:action{:command "open"
+                                   :selector {:equals "readme.md"
+                                              :match  "someRegEx"}}])
+
   ;;
   )
 
@@ -85,9 +118,18 @@
   (type (re-pattern re1))
   ;; and use it to match
 
-  (re-find (re-pattern re1) "abc/Abd")
-  (re-find (re-pattern "txt") "readme.txt")
-  (re-find (re-pattern "txt") "readme.md")
+  (re-matches (re-pattern re1) "abc/Abd")
+  (re-matches (re-pattern re1) "xxxx")
+
+  (re-matches (re-pattern "txt") "readme.txt")
+  (re-matches (re-pattern "abc") "readme.txt")
+  (re-find  (re-pattern "txt") "readme.txt")
+  (re-find  (re-pattern "abc") "readme.txt")
+
+  (re-matches (re-pattern "e") "readme.txt")
+  (re-matches (re-pattern "x") "readme.txt")
+  (re-matches (re-pattern "x") "readme.txt")
+  (re-matches (re-pattern "txt") "readme.md")
 
   ;; it can have capturing groups
   (re-find (re-pattern "(.*)\\/A(.*)")  "abcd/Abcd")

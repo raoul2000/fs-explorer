@@ -9,9 +9,58 @@
             [components.message :refer [warning-message]]
             [utils :refer [cancel-event]]))
 
+
+(defn eval-selector-rule [[rule val] s]
+  (tap> {:rule rule  :val val  :s s})
+  (cond
+    (= rule :action.selector/equals)  (= val s)
+    :else (throw (ex-info "unkown selector rule type" {:selector-rule-type rule}))))
+
+(defn selector-match [{id :file/id} selector-val]
+  (tap> {:selector-match true
+         :id id
+         :sel selector-val
+         :map? (map? selector-val)
+         :filter (when (map? selector-val)
+                   (filter #(eval-selector-rule % id) selector-val))})
+  (cond
+    (string? selector-val)   (= selector-val id)
+    (map?    selector-val)   (->> selector-val
+                                  (filter #(eval-selector-rule % id)))
+    :else (throw (ex-info "failed to apply selector" {:selector selector-val}))))
+
+(comment
+  (selector-match #:file{:id "filename.txt"}
+                  #:action.selector{:dummy "dummy-value"})
+
+  (selector-match #:file{:id "filename.txt"}
+                  #:action.selector{:equals "filename.txt"})
+  (selector-match #:file{:id "filename.txt"}
+                  #:action.selector{:dummy "dummy-value"})
+  (map identity #:action.selector{:dummy "dummy-value"})
+
+  (filter (fn [n]
+            (when (= 2 n)
+              (throw (ex-info "boum" {:n n})))
+            true) [1 2 3])
+  ;;
+  )
+
+(defn find-matching-command [config-actions item]
+  (first (take-while #(selector-match item (:user-config/selector %)) config-actions)))
+
+
+(comment
+  (def cfg-actions [{:selector "readme.txt"}])
+
+  (find-matching-command cfg-actions #:file{:name "readme.txt"})
+
+  ;;
+  )
+
 (defn file-action [item config-actions]
-  (tap> {:file-action config-actions
-         :explain (spec/explain-data :user-config/actions config-actions)})
+  #_(tap> {:file-action config-actions
+           :explain     (spec/explain-data :user-config/actions config-actions)})
   (if-let   [{:keys [command]} (first (filter (fn [{:keys [selector]}]
                                                 (= (:file/name item) selector)) config-actions))]
     ;; create anchor element's attributes for the selected action

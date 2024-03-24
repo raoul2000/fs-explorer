@@ -40,15 +40,17 @@
   (def system-config (-> sys/config
                          (assoc :app/user-config {:user-config/root-dir-path "c:\\tmp\\test_1"
                                                   :user-config/open-browser  false
-                                                  :user-config/actions [{:selector  "readme.md"
+                                                  :user-config/actions [{:selector  {:equal "package.json"}
+                                                                         :command  "notepad.exe"}
+
+                                                                        {:selector  "readme.md"
                                                                          :command   "dummy"}
 
                                                                         {:selector  "readme.txt"
                                                                          :command   "open"}
-                                                                        
+
                                                                         {:selector "README"
-                                                                         :command "c:\\program files\\notepad++\\notepad++.exe"}
-                                                                        ]})
+                                                                         :command "c:\\program files\\notepad++\\notepad++.exe"}]})
                          #_(assoc-in [:app/config    :open-browser?]    false)
                          #_(assoc-in [:app/config    :polite?]          true)
                          (assoc-in [:server/server ::http/join?]   false)))
