@@ -9,12 +9,12 @@
             [components.message :refer [warning-message]]
             [utils :refer [cancel-event]]))
 
-
-(defn eval-selector-rule [[rule val] s]
-  (tap> {:rule rule  :val val  :s s})
+(defn eval-selector-rule [[rule-name rule-arg] s]
   (cond
-    (= rule :action.selector/equals)  (= val s)
-    :else (throw (ex-info "unkown selector rule type" {:selector-rule-type rule}))))
+    (= rule-name :action.selector/equals)  (= rule-arg s)
+    (= rule-name :action.selector/match)   (re-find (re-pattern rule-arg) s)
+    :else (throw (ex-info "unkown selector rule type" {:selector-rule-name rule-name
+                                                       :selector-rule-arg  rule-arg}))))
 
 (defn selector-match [{id :file/id} selector-val]
   (tap> {:selector-match true
@@ -25,9 +25,8 @@
                    (filter #(eval-selector-rule % id) selector-val))})
   (cond
     (string? selector-val)   (= selector-val id)
-    (map?    selector-val)   (->> selector-val
-                                  (filter #(eval-selector-rule % id)))
-    :else (throw (ex-info "failed to apply selector" {:selector selector-val}))))
+    (map?    selector-val)   (filter #(eval-selector-rule % id) selector-val)
+    :else                    (throw (ex-info "failed to apply selector" {:selector selector-val}))))
 
 (comment
   (selector-match #:file{:id "filename.txt"}
@@ -37,7 +36,7 @@
                   #:action.selector{:equals "filename.txt"})
   (selector-match #:file{:id "filename.txt"}
                   #:action.selector{:dummy "dummy-value"})
-  (map identity #:action.selector{:dummy "dummy-value"})
+  (map identity #:action.selector{:dummy "dummy-value"}) 
 
   (filter (fn [n]
             (when (= 2 n)

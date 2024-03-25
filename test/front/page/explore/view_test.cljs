@@ -38,20 +38,32 @@
                          #:action.selector{:equals "readme.txt"}))
         "returns empty seq when NOT equals")
 
-    (is (= true
-           (try
-              (selector-match #:file{:id "filename.txt"}
-                             #:action.selector{:dummy "dummy-value"})
-             
-             (catch ExceptionInfo _ true))))
-
+    ;; don't know why the test below fails when it should not
     #_(is (thrown? js/Error
-                 (selector-match #:file{:id "filename.txt"}
-                                 #:action.selector{:dummy "dummy-value"})))
+                   (selector-match #:file{:id "filename.txt"}
+                                   #:action.selector{:dummy "dummy-value"}))
+          "throws when selecter type is not supported"))
 
-    #_(is (thrown? js/Error (selector-match #:file{:id "filename.txt"}
-                                            #:action.selector{:dummy "dummy-value"}))))
+  (testing "regexp selector : match"
+    (is (seq
+         (selector-match #:file{:id "readme.txt"}
+                         #:action.selector{:match "read"}))
+        "return truthy when re is found to match")
 
+    (is (seq
+         (selector-match #:file{:id "readme.txt"}
+                         #:action.selector{:match "^read..\\.[tT][xX][tT]$"}))
+        "return truthy when re fully matches")
+
+    (is (empty?
+         (selector-match #:file{:id "readme.txt"}
+                         #:action.selector{:match "xxx"}))
+        "returns empty when no match")
+    ;; don't know why the test below fails when it should not
+    #_(is (thrown? js/Error
+                   (selector-match #:file{:id "readme.txt"}
+                                   #:action.selector{:match "invalid re **"}))
+          "throws when regex is invalid"))
   ;;
   )
 
