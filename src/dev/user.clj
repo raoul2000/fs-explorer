@@ -10,7 +10,8 @@
             [user-config :as user-conf]))
 
   ;; avoid reloading of dev ns
-(set-refresh-dirs (str (fs/path (fs/cwd) "src" "back")))
+(set-refresh-dirs (str (fs/path (fs/cwd) "src" "back"))
+                  (str (fs/path (fs/cwd) "src" "shared")))
 
 (comment
 
@@ -25,15 +26,7 @@
   (p/clear)
 
 
-  ;; tools.namespace ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-  ;; see https://github.com/clojure/tools.namespace/
-  ;; see https://cognitect.com/blog/2013/06/04/clojure-workflow-reloaded
-
-  ;; NOTE : set-refresh-dirs above
-  (refresh)
-  (refresh-all)
-
+  
   ;; system ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   ;; the system configuration
@@ -66,7 +59,16 @@
   ;; stop the system
   (ig/halt! system)
 
+;; tools.namespace ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+  ;; see https://github.com/clojure/tools.namespace/
+  ;; see https://cognitect.com/blog/2013/06/04/clojure-workflow-reloaded
+
+  ;; NOTE : set-refresh-dirs above
+  (refresh)
+  (refresh-all)
+
+  
   ;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   (require 'server.routes-test

@@ -1,7 +1,7 @@
 (ns server.handler.download
   (:require [babashka.fs :as fs]
             [server.response :as response]
-            [domain.explorer :as explorer]))
+            [domain.explorer.core :as explorer]))
 
 (def valid-dispositions #{"inline" "attachment"})
 (def default-disposition "attachment")

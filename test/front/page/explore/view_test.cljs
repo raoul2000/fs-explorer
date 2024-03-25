@@ -60,7 +60,7 @@
                          #:action.selector{:match "xxx"}))
         "returns empty when no match")
     ;; don't know why the test below fails when it should not
-    #_(is (thrown? js/Error
+    #_(is (thrown? ExceptionInfo
                    (selector-match #:file{:id "readme.txt"}
                                    #:action.selector{:match "invalid re **"}))
           "throws when regex is invalid"))

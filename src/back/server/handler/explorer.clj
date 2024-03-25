@@ -1,6 +1,6 @@
 (ns server.handler.explorer
   (:require [server.response :as response]
-            [domain.explorer :as exp]))
+            [domain.explorer.core :as exp]))
 
 (defn create
   [{:keys [root-dir-path]}]

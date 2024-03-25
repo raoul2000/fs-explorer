@@ -1,6 +1,6 @@
 (ns domain.open-file
   (:require [babashka.fs :as fs]
-            [domain.explorer :refer [absolutize-path]])
+            [domain.explorer.core :refer [absolutize-path]])
   (:import (java.io File)
            (java.awt Desktop)))
 

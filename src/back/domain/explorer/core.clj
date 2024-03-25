@@ -1,4 +1,4 @@
-(ns domain.explorer
+(ns domain.explorer.core
   (:require [babashka.fs :as fs]
             [clojure.spec.alpha :as s]
             [model :as model]
@@ -67,6 +67,12 @@
                                                   :root-path root-path})))
       (str abs-path))))
 
+;; actions  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn add-actions [config-actions result]
+  (update result :model/content (fn [old]
+                                  (map #(assoc % :file/action "") old))))
+
 ;; explore  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn explore [fs-path {:keys [root-dir-path] :as options}]
@@ -80,7 +86,14 @@
 
     (if (fs/regular-file? abs-path)
       (read-file-content abs-path)
-      (list-dir-content abs-path root-dir-path))))
+      #_(list-dir-content abs-path root-dir-path)
+      (->> (list-dir-content abs-path root-dir-path)
+           (add-actions (:user-config/actions options))))))
+
+(comment
+  (explore "" {:root-dir-path "c:\\tmp\\test_1"})
+  ;;
+  )
 
 ;; index ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

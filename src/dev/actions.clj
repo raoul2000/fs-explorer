@@ -89,6 +89,30 @@
   ;;
   )
 
+(comment
+  
+  ;; BREAKING CHANGE !!
+
+  ;; actions feature should be implemented on server side
+  ;; - actual command line must not be exposed on client side
+  ;; - more control on registered commands
+  ;; - for regex selectors, validation and execution done on the same environment (Java) even
+  ;;   if in theory there should be compatibility between Java and javascript
+  ;; 
+  ;; A command catalog should be configured where each command is identified by an id
+  ;; Association between files and actions is done via this id
+  ;;
+  ;; for example:
+  {:id "notepad"
+   :command "notepad.exe"}
+  
+  ;; and thenfor the action :
+  {:selector    "readme.txt"
+   :command-id  "notepad"}
+  
+  
+  ;;
+  )
 
 (comment
 

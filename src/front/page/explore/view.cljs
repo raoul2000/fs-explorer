@@ -36,7 +36,7 @@
                   #:action.selector{:equals "filename.txt"})
   (selector-match #:file{:id "filename.txt"}
                   #:action.selector{:dummy "dummy-value"})
-  (map identity #:action.selector{:dummy "dummy-value"}) 
+  (map identity #:action.selector{:dummy "dummy-value"})
 
   (filter (fn [n]
             (when (= 2 n)
@@ -46,13 +46,21 @@
   )
 
 (defn find-matching-command [config-actions item]
-  (first (take-while #(selector-match item (:user-config/selector %)) config-actions)))
+  (->> config-actions
+       (take-while #(selector-match item (:user-config/selector %)))
+       (first)
+       :user-config/command))
 
 
 (comment
-  (def cfg-actions [{:selector "readme.txt"}])
+  (def cfg-actions [#:user-config{:selector "readme.txt"
+                                  :command "CMD1"}])
 
-  (find-matching-command cfg-actions #:file{:name "readme.txt"})
+  (try
+    #_(find-matching-command cfg-actions #:file{:id "readme.txt"})
+    (find-matching-command cfg-actions #:file{:id "filename.txt"})
+    (catch ExceptionInfo ex (ex-data ex)))
+
 
   ;;
   )
@@ -60,7 +68,11 @@
 (defn file-action [item config-actions]
   #_(tap> {:file-action config-actions
            :explain     (spec/explain-data :user-config/actions config-actions)})
-  (if-let   [{:keys [command]} (first (filter (fn [{:keys [selector]}]
+  (tap> {:file-action item
+         :config-actions (:selector (first config-actions))})
+  
+  (if-let   [{:keys [command]} (find-matching-command config-actions item)
+             #_(first (filter (fn [{:keys [selector]}]
                                                 (= (:file/name item) selector)) config-actions))]
     ;; create anchor element's attributes for the selected action
     {:href  ""

@@ -1,6 +1,6 @@
 (ns domain.command
   (:require [babashka.process :as p]
-            [domain.explorer :refer [absolutize-path]]
+            [domain.explorer.core :refer [absolutize-path]]
             [domain.open-file :refer [open]]))
 
 (defn run-string-as-cmd [cmd path  {:keys [root-dir-path] :as options}]
