@@ -78,10 +78,10 @@
 
   (s/valid? :action/coll [#:action{:command "open"
                                    :selector "readme.md"}])
-  
+
   (s/valid? :action/coll [#:action{:command "open"
                                    :selector {:equals "readme.md"}}])
-  
+
   (s/valid? :action/coll [#:action{:command "open"
                                    :selector {:equals "readme.md"
                                               :match  "someRegEx"}}])
@@ -90,7 +90,7 @@
   )
 
 (comment
-  
+
   ;; BREAKING CHANGE !!
 
   ;; actions feature should be implemented on server side
@@ -105,12 +105,48 @@
   ;; for example:
   {:id "notepad"
    :command "notepad.exe"}
-  
-  ;; and thenfor the action :
+
+  ;; and then for the action :
   {:selector    "readme.txt"
    :command-id  "notepad"}
-  
-  
+
+  ;; Shape of the command catalog
+  ;; Could we spe something like this ?
+  {"my-command" {:command "notepad.exe"}}
+
+  ;; yes, using s/map-of
+  (s/def :command/instruction string?)
+  (s/def :command/catalog (s/map-of string? :command/instruction))
+
+  (s/valid? :command/catalog {"aa"  "notepad.exe"})
+
+  ;; let's extend command definition over a simple string
+
+  ;; simple case : provide command instruction
+  (s/def :command/simple-definition string?)
+
+  ;; more details : command defined as map
+  (s/def :command/instruction string?)
+  (s/def :command/description string?)
+  (s/def :command/extended-definition (s/keys :req [:command/instruction]
+                                              :opt [:command/description]))
+
+  ;; a definition can be simple (string) or extended (map)
+  (s/def :command/definition (s/or :simple :command/simple-definition
+                                   :extended :command/extended-definition))
+
+  (s/def :command/catalog (s/map-of string? :command/definition))
+
+  ;; let's try
+  (s/valid? :command/definition "notepad.exe")
+  (s/valid? :command/definition #:command{:instruction "notepad.exe"
+                                          :description "start edition wiht notepad.exe"})
+
+  (s/valid? :command/catalog {"notepad"  "notepad.exe"
+                              "notepad2" #:command{:instruction "notepad.exe"
+                                                   :description "start edition wiht notepad.exe"}
+                              "editor"  #:command{:instruction "notepad++.exe"}})
+
   ;;
   )
 
@@ -132,6 +168,51 @@
                                       (= k :colors))
                                (mapv keyword v)
                                v)))
+
+  ;; Problem : assuming we want to read a JSON file and parse it so to create a map where keys are string?
+  ;; solution : do not provide a :key-fn arg as string is default type for keys
+  (json/read-str "{\"colors\":[\"green\",\"red\",\"blue\"]}")
+
+  
+  ;; Now, as we saw above, command catalog is a map where keys are string. It is read from the user-config json file
+  ;; where other keys are actual keys. We must find a way to parse the user-config JSON file and produce a map
+  ;; with : 
+  ;; - some keys as string (in command catalog)
+  ;; - some keys as actual keys with distinct ns
+  ;; for example :
+  (def result #:user-config{:port 8080
+                            :commands {"cmd1" #:command{:instruction "notepad.exe"}}})
+  (:user-config/port result)
+  (get-in result [:user-config/commands "cmd1" :command/instruction] result)
+
+  ;; and this is the JSON read from user config file : 
+  (def json "{\"port\": 8080, \"commands\" : {\"cmd1\" : {\"instruction\" : \"notepad.exe\"}}}")
+
+  ;; in its simplest form, no namespace and no keywords keys
+  (json/read-str json)
+
+  ;; handle keyword conversion for the top level keys 
+  (json/read-str json
+                 :key-fn #(if (#{"port" "commands"} %)
+                            (keyword %)
+                            %))
+  ;; problem is that the value of the :commands key needs specific transformation 
+
+  (defn ->key [k]
+    (cond
+      (#{"port" "commands"} k)  (keyword "user-config" k)
+      (#{"instruction"} k)      (keyword "command" k)
+      :else k))
+
+  (json/read-str json :key-fn ->key)
+
+  ;; If it would get more complex, like for instance the same property name but with 2 different ns 
+  ;; depending on its location in the trree, then it may be required to perform post process walk to
+  ;; fix it.
+  ;; see  https://github.com/clojure/data.json?tab=readme-ov-file#converting-keyvalue-types
+  
+
+
 
   ;; working on user configured regexp ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
