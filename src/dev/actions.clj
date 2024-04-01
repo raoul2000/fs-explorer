@@ -173,13 +173,14 @@
   ;; solution : do not provide a :key-fn arg as string is default type for keys
   (json/read-str "{\"colors\":[\"green\",\"red\",\"blue\"]}")
 
-  
+
   ;; Now, as we saw above, command catalog is a map where keys are string. It is read from the user-config json file
   ;; where other keys are actual keys. We must find a way to parse the user-config JSON file and produce a map
   ;; with : 
   ;; - some keys as string (in command catalog)
   ;; - some keys as actual keys with distinct ns
   ;; for example :
+
   (def result #:user-config{:port 8080
                             :commands {"cmd1" #:command{:instruction "notepad.exe"}}})
   (:user-config/port result)
@@ -210,12 +211,13 @@
   ;; depending on its location in the trree, then it may be required to perform post process walk to
   ;; fix it.
   ;; see  https://github.com/clojure/data.json?tab=readme-ov-file#converting-keyvalue-types
-  
 
 
 
   ;; working on user configured regexp ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+  ;; This is used for regexp based selector
+  
   ;; given this Re
   (def re1 ".*\\/A.*")
 
