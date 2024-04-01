@@ -1,6 +1,6 @@
-(ns user-config-test
+(ns user-config.core-test
   (:require [clojure.test :refer (deftest testing is use-fixtures)]
-            [user-config :refer [load-from-file]]
+            [user-config.core :refer [load-from-file]]
             [babashka.fs :as fs]
             [clojure.data.json :as json]))
 
@@ -38,7 +38,7 @@
 (deftest json-string->map-test
   (testing "converting a JSON string into a user config map"
     (is (= #:user-config{:server-port 45}
-           (#'user-config/json-string->map "{\"server-port\" : 45}"))
+           (#'user-config.core/json-string->map "{\"server-port\" : 45}"))
         "converts to a namespaced keys map")))
 
 (deftest load-from-file-test
@@ -61,30 +61,30 @@
 (deftest validate-user-config-test
   (testing "user config validation"
 
-    (is (thrown? Exception (#'user-config/validate #:user-config{:server-port ""}))
+    (is (thrown? Exception (#'user-config.core/validate #:user-config{:server-port ""}))
         "server port can't be a string")
     (is (= #:user-config{:server-port 8881}
-           (#'user-config/validate #:user-config{:server-port 8881})))
+           (#'user-config.core/validate #:user-config{:server-port 8881})))
 
-    (is (thrown? Exception (#'user-config/validate #:user-config{:open-browser 1}))
+    (is (thrown? Exception (#'user-config.core/validate #:user-config{:open-browser 1}))
         "open-browser can't be integer")
     (is (= #:user-config{:open-browser true}
-           (#'user-config/validate #:user-config{:open-browser true})))
+           (#'user-config.core/validate #:user-config{:open-browser true})))
 
-    (is (thrown? Exception (#'user-config/validate #:user-config{:browse-url "not_valid"}))
+    (is (thrown? Exception (#'user-config.core/validate #:user-config{:browse-url "not_valid"}))
         "browse-url must be a valid URL")
     (is (= #:user-config{:browse-url "http://hostname:888/path"}
-           (#'user-config/validate #:user-config{:browse-url "http://hostname:888/path"})))
+           (#'user-config.core/validate #:user-config{:browse-url "http://hostname:888/path"})))
 
-    (is (thrown? Exception (#'user-config/validate #:user-config{:root-dir-path ""}))
+    (is (thrown? Exception (#'user-config.core/validate #:user-config{:root-dir-path ""}))
         "root-dir-path can't be empty string")
-    (is (thrown? Exception (#'user-config/validate #:user-config{:root-dir-path 12}))
+    (is (thrown? Exception (#'user-config.core/validate #:user-config{:root-dir-path 12}))
         "root-dir-path can't be integer")
-    (is (thrown? Exception (#'user-config/validate #:user-config{:root-dir-path "../"}))
+    (is (thrown? Exception (#'user-config.core/validate #:user-config{:root-dir-path "../"}))
         "root-dir-path can't be a relative path")
-    (is (thrown? Exception (#'user-config/validate #:user-config{:root-dir-path user-config-file-path}))
+    (is (thrown? Exception (#'user-config.core/validate #:user-config{:root-dir-path user-config-file-path}))
         "root-dir-path can't be a file path")
 
     (is (= #:user-config{:root-dir-path fixture-base-path}
-           (#'user-config/validate #:user-config{:root-dir-path fixture-base-path}))
+           (#'user-config.core/validate #:user-config{:root-dir-path fixture-base-path}))
         "root-dir-path must be absolute path of existing dir"))) 

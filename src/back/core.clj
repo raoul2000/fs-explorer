@@ -1,7 +1,7 @@
 (ns core
   "Main namespace. Include the application entry point function"
   (:require [system :as  sys]
-            [user-config :as user-config])
+            [user-config.core :as user-config])
   (:gen-class))
 
 (defn -main [& args]
@@ -11,7 +11,7 @@
 
       (-> sys/config
           (assoc    :app/user-config   (or user-config {}))          
-          ;; late hard coded config overwrite
+          ;; late hard coded config overwrite TODO: remove
           (assoc-in [:app/config       :polite?]     true)
           sys/init))
 

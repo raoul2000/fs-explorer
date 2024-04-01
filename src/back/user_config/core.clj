@@ -1,5 +1,4 @@
-(ns user-config
-  "User configuration loading and validation"
+(ns user-config.core
   (:require [babashka.fs :as fs]
             [clojure.data.json :as json]
             [clojure.spec.alpha :as s]
@@ -15,12 +14,12 @@
 
 (comment
   (def cfg-1 (json-string->map "{\"server-port\" : 45}"))
-  (s/valid? ::config cfg-1)
+  (s/valid? :user-config/config cfg-1)
 
   (def cfg-2 (json-string->map "{\"server-port\" : -45}"))
 
-  (s/valid? ::config cfg-2)
-  (s/explain-str ::config cfg-2)
+  (s/valid? :user-config/config cfg-2)
+  (s/explain-str :user-config/config cfg-2)
 
   ;;
   )
@@ -42,22 +41,22 @@
 
 (defn- validate
   "Returns the given *user-config* map if it is valid or throws"
-  [{browse-url    ::browse-url
-    root-dir-path ::root-dir-path
+  [{browse-url    :user-config/browse-url
+    root-dir-path :user-config/root-dir-path
     :as           user-config}]
 
   (cond
-    (not (s/valid? ::config user-config))
-    (throw (ex-info "User configuration is not valid" {:msg (s/explain-str ::config user-config)}))
+    (not (s/valid? :user-config/config user-config))
+    (throw (ex-info "User configuration is not valid" {:msg (s/explain-str :user-config/config user-config)}))
 
     (and browse-url
-         (not (can-be-converted-to-url? (::browse-url user-config))))
-    (throw (ex-info "Invalid URL" {:browse-url (::browse-url user-config)}))
+         (not (can-be-converted-to-url? (:user-config/browse-url user-config))))
+    (throw (ex-info "Invalid URL" {:browse-url (:user-config/browse-url user-config)}))
 
     (and root-dir-path
-         (not (and (fs/directory? (::root-dir-path user-config))
-                   (fs/absolute?  (::root-dir-path user-config)))))
-    (throw (ex-info "Invalid Dir" {:dir (::root-dir-path user-config)}))
+         (not (and (fs/directory? (:user-config/root-dir-path user-config))
+                   (fs/absolute?  (:user-config/root-dir-path user-config)))))
+    (throw (ex-info "Invalid Dir" {:dir (:user-config/root-dir-path user-config)}))
 
     :else user-config))
 
@@ -81,3 +80,5 @@
   (->> file-path
        read-from-file
        validate))
+
+
