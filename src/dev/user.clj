@@ -6,8 +6,7 @@
             [clojure.test :as test]
             [io.pedestal.http :as http]
             [babashka.fs :as fs]
-            [clojure.spec.alpha :as s]
-            [user-config :as user-conf]))
+            [clojure.spec.alpha :as s]))
 
   ;; avoid reloading of dev ns
 (set-refresh-dirs (str (fs/path (fs/cwd) "src" "back"))
