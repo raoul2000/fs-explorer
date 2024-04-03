@@ -40,6 +40,8 @@
 
 ;; user-config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; general settings ---------------------------------------------
+
 ;; server port number
 (s/def :user-config/server-port    (s/and int? #(< 0 % 65353)))
 ;; open the browser on startup ?
@@ -49,7 +51,7 @@
 ;; path to the root folder for all relatives path 
 (s/def :user-config/root-dir-path  string?)
 
-;; actions ------------------------------
+;; actions ----------------------------------------------------
 (s/def :action.selector/match string?)
 (s/def :action.selector/equals string?)
 (s/def :action/selector (s/or :equal string?

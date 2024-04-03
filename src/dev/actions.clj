@@ -59,7 +59,7 @@
   {:selector {:equals "readme.md"}}  ;; exact match. Same as {:selector "readme.md"}
   {:selector {:match ".*"}}          ;; regex match
   {:selector {:starts-with "read"}}  ;; partial match
-  {:selector {:endss-with ".md"}}    ;; partial match
+  {:selector {:ends-with ".md"}}    ;; partial match
   ;; mix them all 
   {:selector {:match       "me"
               :starts-with "read"
@@ -132,7 +132,7 @@
                                               :opt [:command/description]))
 
   ;; a definition can be simple (string) or extended (map)
-  (s/def :command/definition (s/or :simple :command/simple-definition
+  (s/def :command/definition (s/or :simple   :command/simple-definition
                                    :extended :command/extended-definition))
 
   (s/def :command/catalog (s/map-of string? :command/definition))
@@ -146,6 +146,21 @@
                               "notepad2" #:command{:instruction "notepad.exe"
                                                    :description "start edition wiht notepad.exe"}
                               "editor"  #:command{:instruction "notepad++.exe"}})
+
+  ;; How to access a value in a namespaced map where keys are strings ?
+  (def m1 #:user-config{"notepad" "notepad.exe"})
+
+  (get m1 :user-config/notepad) ;; => nil
+  (get m1 "notepad") ;; "notepad.exe" .. that's the one ! 
+  (get m1 :user-config/'"notepad") ;; => "notepad"
+
+  ;; ...and what about with a keyword key ?
+  (def m2 #:user-config{:instruction "open"})
+
+  (get m2 :user-config/instruction) ;; => "open"
+  (get m2 :instruction) ;; => nil
+  (:user-config/instruction m2) ;; => open
+  (:instruction m2) ;; => nil
 
   ;;
   )
