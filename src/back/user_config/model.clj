@@ -14,8 +14,13 @@
 
                             ;; all commands
 
-                            :command-index  {"notepad"     "notepad.exe"
+                            :command-index  {;; command is a string
+                                             "notepad"     "notepad.exe"
+
+                                             ;; command configured as a map
                                              "notepad++"   {:command "c:\\Program Files\\notepad++\\notepad++.exe"}
+
+                                             ;; command configured as a map with a description
                                              "vscode"      {:command "c:\\Program Files\\vscode/code.exe"
                                                             :description  "start Visual Studio Code"}}
 
@@ -57,6 +62,88 @@
 
   ;;
   )
+
+;; custom types 2 --------------
+
+;; types are configured in a map where keys is the type name and value is the type definition
+(s/def :user-config/type (s/every-kv string? 
+                                     (partial s/valid? :type/definition)))
+
+;; Type definition is a map with one required key : 'selector'
+(s/def :type/definition (s/keys :req [:type/selector]))
+
+(s/def :type/selector string?)
+
+(comment
+  (s/valid? :type/selector "file.txt")
+  (s/valid? :type/definition {:type/selector "file.txt"})
+  (s/valid? :type/definition {:type/selector true})
+  (s/valid? :type/definition {:type/key "file.txt"})
+
+  (s/valid? :user-config/type {"type 1" {:type/selector "file1.txt"}})
+
+  ;;
+  )
+
+;; a type selector can also be a matcher
+(s/def :type/selector (s/or :exact-match  string?
+                            :filters      :selector/filters))
+
+;; ... and a filters is a map, where keys are filter name and value are filter arg
+(s/def :selector/filters (s/every-kv keyword?  :filter/arg))
+
+;; filter arg is a string
+(s/def :filter/arg string?)
+
+(comment
+  (s/valid? :selector/filters {:f1 "arg1"
+                               :f2 "arg2"})
+
+  (s/valid? :selector/filters {:f1 "arg1"
+                               :f2 ["arg1" "arg2"]})
+
+  (s/valid? :type/definition {:type/selector "file.txt"})
+  (s/valid? :type/definition {:type/selector {:f1 "arg2"
+                                              :f2 "arg2"}})
+  ;;
+  )
+
+;; extend filter argument to a vector of strings
+(s/def :filter/arg (s/or  :single-arg string?
+                          :multi-arg (s/coll-of string?)))
+
+(comment
+  (s/valid?
+   :type/definition {:type/selector {:f1 "arg1"
+                                     :f2 ["ee"]}})
+
+  (s/def ::my-map (s/keys :req [::key-string ::key-vector]))
+
+  (s/def ::key-string (s/or :string string? :vector (s/coll-of string?)))
+  (s/def ::key-vector (s/coll-of string?))
+
+  (s/valid? ::my-map {"A" 1
+                      ["1"] 1})
+  (s/describe ::my-map)
+
+  (s/def ::m2 (s/keys :req [::name]))
+  (s/def ::name (s/or :string string?
+                      :nulmber number?
+                      :list-of-string (s/coll-of string?)))
+  (s/valid? ::m2 {::name "bob"})
+  (s/explain ::m2 {::name ["1"]})
+  (s/explain ::m2 {::name true})
+
+  (s/def ::m3 (s/every-kv string? (s/or :string string? :number number?)))
+  (s/explain ::m3 {"e" 1
+                   "r" "eer"
+                   "t" :somek})
+
+  ()
+
+  ;;
+  )
+
 
 ;; custom types --------------------------------------------------------------------------------------------------------
 
