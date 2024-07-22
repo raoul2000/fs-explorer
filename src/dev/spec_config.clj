@@ -22,13 +22,19 @@
 
                                                ;; command configured as a map with a description
                                              "vscode"      {:command      "c:\\Program Files\\vscode/code.exe"
-                                                            :description  "start Visual Studio Code"}}
+                                                            :label        "start Visual Studio Code"}
+                                             "prog"        {:command      ["c:\\Program Files\\vscode/code.exe"
+                                                                           "arg1" "arg2"]
+                                                            :label        "start Visual Studio Code"}}
 
                               ;; item types
                             :type          {"text-file"   {:selector {:ends-with ".txt"}
                                                            :command  "notepad"}
+                                            "filename"    {:selector {:is "filename.txt"}
+                                                           :command  "notepad"}
                                             "readme"      {:selector {:equals "README.md"}
-                                                           :command  ["notepad" "notepad++" "vscode"]}
+                                                           :command  {:exec ["notepad" "notepad++" "vscode"]
+                                                                      :label "edit"}}
                                             "image"       {:selector {:ends-with [".jpg" ".jpeg"  ".png"]}}}})
                                             ;;
   )
@@ -36,25 +42,51 @@
 (s/def :string/not-blank (s/and string? (complement str/blank?)))
 (s/def :coll/non-empty-string-list (s/coll-of :string/not-blank :min-count 1))
 
-(s/def :filter/name                keyword?)
-(s/def :filter/arg                 (s/or  :string      :string/not-blank
-                                          :string-list :coll/non-empty-string-list))
-(s/def :selector/filters           (s/every-kv :filter/name :filter/arg))
+;; selector --------------------------
+
+(s/def :predicate/name              keyword?)
+(s/def :predicate/arg               (s/or  :string      :string/not-blank
+                                           :string-list :coll/non-empty-string-list))
+(s/def :selector/predicates        (s/every-kv :predicate/name :predicate/arg))
 (s/def :type/selector              (s/or  :strict-equals :string/not-blank
-                                          :filter        :selector/filters))
-(s/def :type/definition            (s/keys :req [:type/selector]))
+                                          :filter        :selector/predicates))
+;; command --------------------------
+;;
+;; form0 : {:command "notepad.exe"}
+;;       : {:command ["notepad.exe" "arg1" "arg2"]}
+;;
+;; form1 : {:command {:exec "notepad.exe"}}
+;;       : {:command {:exec "notepad.exe"
+;;                    :label "run notepad"}}
+;;
+;; form2 : {:command {:exec ["notepad.exe" "arg1" "arg2"]}}
+;;       : {:command {:exec  ["notepad.exe" "arg1" "arg2"]
+;;                    :label "open with notepad"}}
+
+(s/def :command/label :string/not-blank)
+(s/def :command/exec  (s/or :command-line           :string/not-blank
+                            :command-line-with-args :coll/non-empty-string-list))
+
+(s/def :command/def   (s/keys  :req [:command/exec]
+                               :opt [:command/label]))
+
+(s/def :type/command  (s/or  :command-line            :string/not-blank
+                             :command-line-with-args  :coll/non-empty-string-list
+                             :command-def             :command/def))
+
+;; type -----------------------------
+(s/def :type/definition            (s/keys :req [:type/selector]
+                                           :opt [:type/command]))
 (s/def :type/name                  :string/not-blank)
 (s/def :user-config/type           (s/every-kv :type/name :type/definition))
 
-
-
-(s/def :user-config/definition (s/keys :opt [:user-config/type]))
+(s/def :user-config/definition     (s/keys :opt [:user-config/type]))
 
 (comment
 
   ;; test _____________________
-  (s/explain :selector/filters {:f1 "arg"
-                                :f2 ["1"]})
+  (s/explain :selector/predicate {:f1 "arg"
+                                  :f2 ["1"]})
   ;; __________________________
 
 
