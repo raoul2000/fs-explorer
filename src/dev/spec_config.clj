@@ -43,6 +43,14 @@
 (s/def :coll/non-empty-string-list (s/coll-of :string/not-blank :min-count 1))
 
 ;; selector --------------------------
+;;
+;; form 0 : "filename.txt"
+;;
+;; form 1 : {:predicate-1 "arg as string"
+;;           :predicate-2  "arg2"}
+;;        : {:predicate-1 ["arg1" "arg2"]
+;;           :predicate-2 ["arg1" "arg2" "arg3"]}
+;; 
 
 (s/def :predicate/name              keyword?)
 (s/def :predicate/arg               (s/or  :string      :string/not-blank
