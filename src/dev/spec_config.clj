@@ -109,7 +109,6 @@
   ;; _____________________
 
 
-
   (s/valid? :user-config/type {"type1" {:type/selector "ee"}
                                "type2" {:type/selector {:start-with ["1" "2"]}}})
 
