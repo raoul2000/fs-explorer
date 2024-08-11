@@ -1,1 +1,5 @@
-{"root-dir-path":"c:\\dev\\ws\\lab\\fs-explorer\\test\\back\\fixtures","param1":"value1","server-port":8882}
+{
+    "root-dir-path": "c:\\dev\\ws\\lab\\fs-explorer\\test\\back\\fixtures",
+    "param1": "value1",
+    "server-port": 8882
+}

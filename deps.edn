@@ -9,6 +9,7 @@
         org.slf4j/slf4j-simple       {:mvn/version "1.7.28"}
         org.clojure/data.json        {:mvn/version "0.2.6"}
         com.cognitect/transit-clj    {:mvn/version "1.0.329"}
+        clj-commons/clj-yaml         {:mvn/version "1.0.27"}
         org.clojure/tools.cli        {:mvn/version "1.0.206"}
         babashka/fs                  {:mvn/version "0.5.20"}
         babashka/process             {:mvn/version "0.5.22"}
