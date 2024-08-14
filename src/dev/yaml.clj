@@ -59,6 +59,8 @@
     (drop-while (type-does-not-match selector-map s) (:types conf)))
   
   (find-type conf selector-fns "/README.md")
+  (find-type conf selector-fns "/README.txt")
+  (find-type conf selector-fns "/README.xml")
 
   ;;
   )
