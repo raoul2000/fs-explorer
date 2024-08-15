@@ -30,9 +30,9 @@
 
   ;; the system configuration
   (def system-config (-> sys/config
-                         (assoc :app/user-config {:user-config/root-dir-path "c:\\tmp\\test_1"
+                         (assoc :app/user-config {:user-config/root-dir-path "c:\\tmp"
                                                   :user-config/open-browser  false
-                                                  :user-config/actions [{:selector  {:equal "package.json"}
+                                                  :user-config/actions [{:selector  "package.json"
                                                                          :command  "notepad.exe"}
 
                                                                         {:selector  "readme.md"

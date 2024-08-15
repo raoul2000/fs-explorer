@@ -46,10 +46,11 @@
   )
 
 (defn find-matching-command [config-actions item]
+  (js/console.log config-actions)
   (->> config-actions
-       (take-while #(selector-match item (:user-config/selector %)))
+       (take-while #(selector-match item (:selector %)))
        (first)
-       :user-config/command))
+       :command))
 
 
 (comment

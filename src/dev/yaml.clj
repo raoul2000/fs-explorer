@@ -46,7 +46,7 @@
   ;; selector type matches if all selectors are truthy
   (every? identity '("/README.md" true true true true))
 
-
+  
   (defn type-does-not-match [selector-map s]
     (fn [[_type-name type-def]]
       (let [selector-results (map (fn [[pred arg]]
