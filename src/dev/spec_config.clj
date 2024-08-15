@@ -12,6 +12,17 @@
                             :browse-url       "http://localhost:8877"
                             :root-dir-path    "c:\\tmp\\my-root-fs"
 
+                              ;; item types
+
+                            :types {"text-file"   {:selector {:ends-with ".txt"}
+                                                   :command  "notepad"}
+                                    "filename"    {:selector {:is "filename.txt"}
+                                                   :command  "notepad"}
+                                    "readme"      {:selector {:equals "README.md"}
+                                                   :command  {:exec ["notepad" "notepad++" "vscode"]
+                                                              :label "edit"}}
+                                    "image"       {:selector {:ends-with [".jpg" ".jpeg"  ".png"]}}}
+
                               ;; all commands
 
                             :command-index  {;; command is a string (short form)
@@ -25,18 +36,8 @@
                                                             :label        "start Visual Studio Code"}
                                              "prog"        {:command      ["c:\\Program Files\\vscode/code.exe"
                                                                            "arg1" "arg2"]
-                                                            :label        "start Visual Studio Code"}}
-
-                              ;; item types
-                            :type          {"text-file"   {:selector {:ends-with ".txt"}
-                                                           :command  "notepad"}
-                                            "filename"    {:selector {:is "filename.txt"}
-                                                           :command  "notepad"}
-                                            "readme"      {:selector {:equals "README.md"}
-                                                           :command  {:exec ["notepad" "notepad++" "vscode"]
-                                                                      :label "edit"}}
-                                            "image"       {:selector {:ends-with [".jpg" ".jpeg"  ".png"]}}}})
-                                            ;;
+                                                            :label        "start Visual Studio Code"}}})
+  ;;
   )
 
 (s/def :string/not-blank (s/and string? (complement str/blank?)))
@@ -93,17 +94,17 @@
 (comment
 
   ;; test _____________________
-  (s/explain :selector/predicate {:f1 "arg"
+  (s/valid? :selector/predicates {:f1 "arg"
                                   :f2 ["1"]})
   ;; __________________________
 
 
-
   ;; test _____________________
   (s/valid? :type/definition {:type/selector "ee"})
+  (s/valid? :type/definition #:type{:selector "ee"})
   (s/explain :type/definition {:type/selector ["ee"]})
 
-  (s/valid? :type/definition {:type/selector {:k1 "s" :k2 ["s" "s"]}})
+  (s/valid? :type/definition #:type{:selector {:k1 "s" :k2 ["s" "s"]}})
   (s/explain :type/definition {:type/selector {:k1 "s" :k2 ["s" "s" 1]}})
   (s/explain :type/definition {:type/selector {"stringkey" "s" :k2 ["s" "s"]}})
   ;; _____________________
