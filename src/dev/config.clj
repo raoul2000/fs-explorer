@@ -32,6 +32,13 @@
 
                                   :opt [:config/types]))
 
+;; conf settings provided by the user and dedicated to overloads default settings
+(spec/def :user-config/map  (spec/keys :opt [:config/server-port
+                                             :config/root-dir-path
+                                             :config/open-browser
+                                             :config/browse-url
+                                             :config/types]))
+
 (comment
   (def config-1 #:config{:server-port 12
                          :root-dir-path "/tmp"
@@ -41,6 +48,7 @@
                                   :MY_SECOND_TYPE #:config.type{:selectors {:pred  "string"
                                                                             :other-pred "arg2"}}}})
   (spec/valid? :config/map config-1)
+  (spec/valid? :user-config/map {})
 
   ;; reading config values using namespaced keys : 
 
@@ -56,7 +64,7 @@
   )
 
 
-;; loading and prasing a YAML file into a map
+;; loading and prasing user config as YAML file into a map
 
 (def conf (yaml/parse-stream (io/reader "./test/back/fixtures/config-1.yaml")))
 
@@ -78,22 +86,30 @@
   (into {} (map (fn [[k v]]
                   [k (add-ns-to-map "config.type" v)]) m)))
 
-(defn add-ns-to-config [m]
+(defn add-ns-to-user-config [m]
   (w/walk (fn [[k v]]
-            (let [ns-key (add-ns-to-key "config" k)]
+            (let [ns-key (add-ns-to-key "user-config" k)]
               [ns-key (case ns-key
                         :config/types     (build-types   v)
                         v)])) identity m))
 
 (comment
 
-  (spec/valid?  :config/map (add-ns-to-config conf))
-  (spec/explain :config/map (add-ns-to-config conf))
+  (spec/valid?  :user-config/map (add-ns-to-user-config conf))
+  (spec/explain :user-config/map (add-ns-to-user-config conf))
 
   ;; now turn the config map into json
   ;; does not preserve namespace
-  (print (json/write-str conf :escape-slash false))
+  (print (json/write-str (add-ns-to-user-config conf) :escape-slash false))
 
+  ;; using juxt ?
+
+  (into {}
+        (map (juxt  (comp (partial add-ns-to-key "my-ns") first ) second)
+             {:a 1
+              :b 2}))
+  ;; ok
+  
   ;;
   )
 
@@ -114,10 +130,12 @@
   (defn deep-merge-with
     "Like merge-with, but merges maps recursively, applying the given fn
   only when there's a non-map at a particular level.
-
+  ```
   (deepmerge + {:a {:b {:c 1 :d {:x 1 :y 2}} :e 3} :f 4}
                {:a {:b {:c 2 :d {:z 9} :z 3} :e 100}})
-  -> {:a {:b {:z 3, :c 3, :d {:z 9, :x 1, :y 2}}, :e 103}, :f 4}"
+  -> {:a {:b {:z 3, :c 3, :d {:z 9, :x 1, :y 2}}, :e 103}, :f 4}
+  ```
+     "
     [f & maps]
     (apply
      (fn m [& maps]
@@ -126,15 +144,19 @@
          (apply f maps)))
      maps))
 
-  ;; let's create a partial user-config : it is not conform to spec because partial
-  (def config-2 #:config{:root-dir-path "/my/default/folder"
-                         :open-browser true
-                         :browse-url "http://localhost"
-                         :types  {:MY_FIRST_TYPE #:config.type{:selectors {:pred  "string"}}}})
+  ;; let's create a partial user-config
+  (def config-2 #:user-config{:root-dir-path "/my/default/folder"
+                              :open-browser true
+                              :browse-url "http://localhost"
+                              :types  {:MY_FIRST_TYPE #:config.type{:selectors {:pred  "string"}}}})
 
-  (def user-config (add-ns-to-config config-2))
+  (def user-config (add-ns-to-user-config config-2))
+  ;; and it should be valid
+  (spec/valid? :user-config/map user-config)
+
   (def final-config (deep-merge-with  (fn [a b] b) default-config  user-config))
 
+  ;; the merged (final) config must also be valid
   (spec/valid? :config/map final-config)
 
   (= 8880 (:config/server-port final-config))
@@ -142,7 +164,4 @@
 
   ;;
   )
-
-
-
 

@@ -1,5 +1,5 @@
 {
     "param1" : "value1",
-    "server-port": 8882,
+    "server-port": true,
     "root-dir-path" : "c:/tmp/test_1"
 }

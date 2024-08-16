@@ -1,7 +1,6 @@
 # This Deployment runs our API component
 
 root-dir-path: c:\dev\ws\lab\fs-explorer\test\back\fixtures
-server-port: 8882
 open-browser : true
 browse-url: http://localhost:8882
 types:
