@@ -1,0 +1,18 @@
+# This Deployment runs our API component
+
+root-dir-path: c:\dev\ws\lab\fs-explorer\test\back\fixtures
+server-port: 8882
+open-browser : true
+browse-url: http://localhost:8882
+types:
+  MY_FIRST_TYPE:
+    selectors:
+      match-regexp: .*/README.md$
+      ends-with: md
+      starts-with: /R
+      equals: /README.md
+      equals-ignore-case: /ReadMe.MD
+  MY_SECOND_TYPE:
+    selectors:
+      ends-with-ignore-case: txt
+      
