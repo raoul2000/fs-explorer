@@ -3,6 +3,9 @@
 ### GET /hello
 GET {{baseUrl}}/greet
 
+
+# not supported : Accept: application/transit+json 
+
 ### GET /hello
 
 GET {{baseUrl}}/greet?name=bob

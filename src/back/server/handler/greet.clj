@@ -5,4 +5,7 @@
 (defn create [{:keys [polite?] :as options}]
   (fn [request]
     (let [name (get-in request [:params :name])]
-      (response/ok {:response (say-hello name polite?)}))))
+      ;; note that the JSON data returned does not include namespace in keys
+      ;; In case EDN id returns, keys are namespaced
+      (response/ok {:my-ns/response (say-hello name polite?)
+                    :my-ns/score  12}))))
