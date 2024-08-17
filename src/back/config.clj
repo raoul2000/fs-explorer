@@ -47,10 +47,10 @@
 (defn create-browse-url [port]
   (format "http://localhost:%d/" port))
 
-(def default #config{:server-port   default-port
-                     :root-dir-path (str (fs/home))
-                     :open-browser  true
-                     :browse-url    (create-browse-url default-port)})
+(def default-config #:config{:server-port   default-port
+                             :root-dir-path (str (fs/home))
+                             :open-browser  true
+                             :browse-url    (create-browse-url default-port)})
 
 ;; read user config from YAML/JSON file ----------------------------------------------------------------
 
@@ -71,7 +71,7 @@
         (cond
           (#{"yml" "yaml"} ext)  (yaml/parse-stream config-reader)
           (= "json"        ext)  (json/read  config-reader :key-fn keyword)
-          :else                  (throw (ex-info "File type not supported " {:file ""}))))
+          :else                  (throw (ex-info "File type not supported " {:ext ext}))))
 
       (catch Exception e
         (throw (ex-info "Failed to read configuration file" {:file (str abs-file-path)
@@ -124,12 +124,12 @@
        (apply f maps)))
    maps))
 
-(def merge-config (partial (fn [_a b] b)))
+(def merge-config (partial  deep-merge-with (fn [_a b] b)))
 
 
 (comment
   (deep-merge-with (fn [a b] b) {:a 1} {:a 5})
-  (merge-config {:a 1} {:a 5})
+  (merge-config {:a 1 :b {:x1 [1 2 3] :x2 2}} {:a 5 :b {:x1 [11 22 33]}})
   ;;
   )
 
@@ -160,11 +160,51 @@
   (validate-user-config c2)
 
   (validate-final-config c1)
+  ;;
+  )
+
 
 ;; create config -----------------------------------------------------------------------------
 
-  (defn create-config [default-config user-config-file-path])
+(defn create-config [user-config-file-path]
+  ;; always validate default config
+  (let [{:keys [error]} (validate-final-config default-config)]
+    (when error
+      (throw (ex-info "Internal Error : invalid default settings" {:default-settings default-config
+                                                                   :error error}))))
+
+  (let [user-config (when user-config-file-path
+                      (-> user-config-file-path
+                          read-from-file
+                          add-ns-to-user-config))]
+    (when user-config
+      (let [{:keys [error]} (validate-user-config user-config)]
+        (when error
+          (throw (ex-info "Invalid User Configuration" {:file  user-config-file-path
+                                                        :error error})))))
+
+    ;; create final configuration and validate
+    (let [final-config (if user-config
+                         (merge-config default-config user-config)
+                         default-config)
+          validation   (validate-final-config final-config)]
+
+      (when (:error validation)
+        (throw (ex-info "Invalid Configuration" {:file  user-config-file-path
+                                                 :error (:error validation)})))
+
+      final-config)))
+
+(comment
+
+  (create-config nil)
+  (create-config "./test/back/fixtures/config-1.yaml")
+  (create-config "./test/back/fixtures/config-1.json")
 
 
   ;;
   )
+
+
+
+
