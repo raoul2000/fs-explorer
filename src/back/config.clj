@@ -11,6 +11,9 @@
 
 ;; spec ----------------------------------------------------------------------------------------------------------------
 
+(spec/def :string/not-blank (spec/and string? (complement str/blank?)))
+(spec/def :coll/non-empty-string-list (spec/coll-of :string/not-blank :min-count 1))
+
 (spec/def :config/server-port    number?)
 (spec/def :config/root-dir-path  string?)
 (spec/def :config/open-browser   boolean?)
@@ -51,6 +54,14 @@
                              :root-dir-path (str (fs/home))
                              :open-browser  true
                              :browse-url    (create-browse-url default-port)})
+
+;; getters ---------------------------------------------------------------------------------------------
+
+(defn server-port   [config] (:config/server-port   config))
+(defn root-dir-path [config] (:config/root-dir-path config))
+(defn open-broser?  [config] (:config/open-browser  config))
+(defn browse-url    [config] (:config/browse-url    config))
+
 
 ;; read user config from YAML/JSON file ----------------------------------------------------------------
 
@@ -124,83 +135,102 @@
        (apply f maps)))
    maps))
 
-(def merge-config (partial  deep-merge-with (fn [_a b] b)))
-
+(defn merge-configs 
+  "Merge default config with possibly *nil* user config map and returns the result.
+   
+   When the user config defines a *server-port* value but no *browse-url* value, the default
+   *browse-url* value is updated with the user *server-port* value.
+   
+   Returns *default-m* when *user-m* is nil"
+  [default-m user-m]
+  (if user-m
+    (cond-> (deep-merge-with (fn [_a b] b) default-m user-m)
+      (and (:config/server-port user-m)
+           (nil? (:config/browse-url user-m))) (assoc :config/browse-url (create-browse-url (:config/server-port user-m))))
+    default-m))
 
 (comment
-  (deep-merge-with (fn [a b] b) {:a 1} {:a 5})
-  (merge-config {:a 1 :b {:x1 [1 2 3] :x2 2}} {:a 5 :b {:x1 [11 22 33]}})
+
+  (merge-configs #:config{:server-port 2
+                          :browse-url "http://localhost:22"}
+                 #:config{:server-port 33})
+
+  (merge-configs #:config{:server-port 2
+                          :browse-url "http://localhost:22"}
+                 #:config{:browse-url "http://HOST:8888"})
+
+  (merge-configs #:config{:server-port 2
+                          :browse-url "http://localhost:22"}
+                 #:config{:open-browser? true
+                          :browse-url "http://localhost:777"})
   ;;
   )
 
 ;; validate config --------------------------------------------------------------------------
 
-(defn validate-config [config-spec m]
-  (let [is-valid (spec/valid? config-spec m)
-        result   {:config m
-                  :is-valid is-valid}]
-    (if-not is-valid
-      (assoc result :error (spec/explain-data config-spec m))
-      result)))
+(defn config-error
+  "Validate *m* against spec *config-spec* and returns explain when not valid otherwise returns *nil*"
+  [config-spec m]
+  (when-not (spec/valid? config-spec m)
+    (spec/explain-data config-spec m)))
 
-(def validate-user-config  (partial validate-config :user-config/map))
-(def validate-final-config (partial validate-config :config/map))
+(def user-config-error    (partial config-error :user-config/map))
+(def default-config-error (partial config-error :config/map))
+(def final-config-error   default-config-error)
 
 (comment
-  (def c1 (add-ns-to-user-config (read-from-file "./test/back/fixtures/config-1.yaml")))
-  (def c2 (add-ns-to-user-config (read-from-file "./test/back/fixtures/config-1.json")))
 
-  (spec/valid? :user-config/map
-               (add-ns-to-user-config (read-from-file "./test/back/fixtures/config-1.yaml")))
-
-  (spec/valid? :user-config/map
-               (add-ns-to-user-config (read-from-file "./test/back/fixtures/config-1.json")))
-
-  (validate-user-config c1)
-  (validate-user-config c2)
-
-  (validate-final-config c1)
-  ;;
+  (config-error :config/map default-config)
+  (config-error :config/map {})
+ ;;
   )
 
 
 ;; create config -----------------------------------------------------------------------------
 
-(defn create-config [user-config-file-path]
+(defn create-config 
+  "Creates and return a valid configuration map.
+   
+   When *user-config-file-path* is not nil, read user configuration from the file and merges it with the
+   default configuration.
+
+   The returned configuration map is valid against spec `:config/map`.
+
+   Throws on error.
+   "
+  [user-config-file-path]
   ;; always validate default config
-  (let [{:keys [error]} (validate-final-config default-config)]
-    (when error
-      (throw (ex-info "Internal Error : invalid default settings" {:default-settings default-config
-                                                                   :error error}))))
+  (when-let [validation-error (default-config-error default-config)]
+    (throw (ex-info "Internal Error : invalid default settings" {:default-settings default-config
+                                                                 :error            validation-error})))
 
   (let [user-config (when user-config-file-path
                       (-> user-config-file-path
                           read-from-file
                           add-ns-to-user-config))]
     (when user-config
-      (let [{:keys [error]} (validate-user-config user-config)]
-        (when error
-          (throw (ex-info "Invalid User Configuration" {:file  user-config-file-path
-                                                        :error error})))))
+      (when-let [validation-error (user-config-error user-config)]
+        (throw (ex-info "Invalid User Configuration" {:file  user-config-file-path
+                                                      :error validation-error}))))
 
     ;; create final configuration and validate
-    (let [final-config (if user-config
-                         (merge-config default-config user-config)
-                         default-config)
-          validation   (validate-final-config final-config)]
-
-      (when (:error validation)
+    (let [final-config (merge-configs default-config user-config)]
+      (when-let [validation-error (final-config-error final-config)]
         (throw (ex-info "Invalid Configuration" {:file  user-config-file-path
-                                                 :error (:error validation)})))
-
+                                                 :error validation-error})))
       final-config)))
 
 (comment
 
   (create-config nil)
   (create-config "./test/back/fixtures/config-1.yaml")
-  (create-config "./test/back/fixtures/config-1.json")
 
+  (try
+    (create-config "./test/back/fixtures/config-1.json")
+    (catch Exception ex
+      (println (format "error message : %s\ncause : %s"
+                       (ex-message ex)
+                       (ex-data ex)))))
 
   ;;
   )

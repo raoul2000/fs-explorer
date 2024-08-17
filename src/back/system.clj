@@ -10,7 +10,8 @@
 
 (def config
   ;; set when the application starts, before initialising the system
-  {:app/user-config {}
+  {:app/cli-args    []
+   :app/user-config {}
 
    ;; the default configuration - some parameters can be over written by user-config
    :app/config      {:user-config              (ig/ref :app/user-config)
@@ -53,6 +54,9 @@
         
         )))
 
+(defn init-server-routes [config]
+  (server-routes/create config))
+
 (defn init-server [{:keys [config] :as service-map}]
   (when (:open-browser? config)
     (browse-url (:browse-url config)))
@@ -62,9 +66,6 @@
       (assoc  ::http/port (:port config))
       http/create-server
       http/start))
-
-(defn init-server-routes [config]
-  (server-routes/create config))
 
 ;; integrant Key initializer ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
