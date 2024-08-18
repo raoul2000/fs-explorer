@@ -91,7 +91,7 @@
            (add-actions (:user-config/actions options))))))
 
 (comment
-  (explore "" {:root-dir-path "c:\\tmp\\test_1"})
+  (explore "" {:root-dir-path "c:\\tmp"})
   ;;
   )
 

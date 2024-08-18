@@ -25,34 +25,37 @@
   (p/clear)
 
 
-  
   ;; system ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   ;; the system configuration
+  (def system-config-1 (-> sys/config
+                           (assoc :app/user-config {:user-config/root-dir-path "c:\\tmp"
+                                                    :user-config/open-browser  false
+                                                    :user-config/actions [{:selector  "package.json"
+                                                                           :command  "notepad.exe"}
+
+                                                                          {:selector  "readme.md"
+                                                                           :command   "dummy"}
+
+                                                                          {:selector  "readme.txt"
+                                                                           :command   "open"}
+
+                                                                          {:selector "README"
+                                                                           :command "c:\\program files\\notepad++\\notepad++.exe"}]})
+                           #_(assoc-in [:app/config    :open-browser?]    false)
+                           #_(assoc-in [:app/config    :polite?]          true)
+                           (assoc-in [:server/server ::http/join?]   false)))
+
   (def system-config (-> sys/config
-                         (assoc :app/user-config {:user-config/root-dir-path "c:\\tmp"
-                                                  :user-config/open-browser  false
-                                                  :user-config/actions [{:selector  "package.json"
-                                                                         :command  "notepad.exe"}
-
-                                                                        {:selector  "readme.md"
-                                                                         :command   "dummy"}
-
-                                                                        {:selector  "readme.txt"
-                                                                         :command   "open"}
-
-                                                                        {:selector "README"
-                                                                         :command "c:\\program files\\notepad++\\notepad++.exe"}]})
-                         #_(assoc-in [:app/config    :open-browser?]    false)
-                         #_(assoc-in [:app/config    :polite?]          true)
-                         (assoc-in [:server/server ::http/join?]   false)))
+                         (assoc-in [:server/server ::http/join?]   false)
+                         (assoc :app/cli-args ["./test/back/fixtures/config-1.yaml"])))
 
   (s/valid? :user-config/config {:user-config/root-dir-path "tmp"
                                  :user-config/open-browser  false})
   (s/explain :user-config/config {:user-config/root-dir-path "./test"
                                   :user-config/open-browser  false})
 
-  ;; start the system
+  ;; start the system 
   (def system (ig/init system-config))
 
   ;; stop the system
@@ -67,16 +70,16 @@
   (refresh)
   (refresh-all)
 
-  
+
   ;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  (require 'server.routes-test
-           'server.handler.greet-test :reload-all)
+  #_(require 'server.routes-test
+             'server.handler.greet-test :reload-all)
 
-  (test/run-tests 'server.routes-test
-                  'server.handler.greet-test)
+  #_(test/run-tests 'server.routes-test
+                    'server.handler.greet-test)
 
-  (test/run-all-tests)
+  #_(test/run-all-tests)
 
 
   ;;

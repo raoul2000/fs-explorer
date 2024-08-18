@@ -1,10 +1,11 @@
 (ns server.handler.index
   (:require [server.response :as response]
-            [domain.explorer.core :as explorer]))
+            [domain.explorer.core :as explorer]
+            [config :as config]))
 
 
 (defn create
-  [{:keys [root-dir-path]}]
+  [{:keys [config]}]
   (fn [request]
     (let [index-type (get-in request [:params :type])]
-      (response/ok (explorer/index index-type {:root-dir-path root-dir-path})))))
+      (response/ok (explorer/index index-type {:root-dir-path (config/root-dir-path config)})))))

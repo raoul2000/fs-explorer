@@ -2,7 +2,6 @@
 
 root-dir-path: c:\dev\ws\lab\fs-explorer\test\back\fixtures
 open-browser : true
-browse-url: http://localhost:8882
 types:
   MY_FIRST_TYPE:
     selectors:

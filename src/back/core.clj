@@ -23,5 +23,11 @@
   (-main "")
   (-main "test/back/fixture/config-ok.json")
   (-main "test/back/fixture/config-invalid-port.json")
+
+  (defn f [ & args]
+    args)
+  
+  (f 1 2 3)
+
   ;;
   )

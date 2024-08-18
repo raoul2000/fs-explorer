@@ -4,30 +4,20 @@
             [io.pedestal.http :as http]
             [server.routes :as server-routes]
             [clojure.java.browse :refer [browse-url]]
-            [babashka.fs :as fs]))
+            [babashka.fs :as fs]
+            [config :as conf]))
 
 ;; system config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def config
   ;; set when the application starts, before initialising the system
   {:app/cli-args    []
-   :app/user-config {}
 
    ;; the default configuration - some parameters can be over written by user-config
-   :app/config      {:user-config              (ig/ref :app/user-config)
-                     :param1                   "value1"
-                     :param2                   {:nested-p1 true
-                                                :nested-p2 12
-                                                :nested-p3 "some string"}
-                     :polite?                  false
-                     :nice-goodbye?            false
-                     :open-browser?            true
-                     :browse-url               ""
-                     :port                     8890
-                     :root-dir-path            (str (fs/home))
-                     :actions                  []}
-   
-   :server/routes    {:config                  (ig/ref :app/config)}
+   :app/config      {:cli-args                 (ig/ref :app/cli-args)}
+
+   :server/routes    {:config                  (ig/ref :app/config)
+                      :some-route-param        12}
 
    :server/server    {:config                  (ig/ref :app/config)
                       ::http/routes            (ig/ref :server/routes)
@@ -38,48 +28,36 @@
 
 ;; key initializers function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn init-app-config
-  "Create the config map from the given map *m*. 
-   In particular merges user-config with default config"
-  [{:keys [user-config] :or {user-config {}} :as config-map}]
-  (let [port       (get user-config :user-config/server-port  (:port config-map))
-        browse-url (get user-config :user-config/browse-url   (format "http://localhost:%d/" port))]
-    (-> config-map
-        (dissoc :user-config)
-        (assoc  :port           port)
-        (assoc  :browse-url     browse-url)
-        (update :open-browser?  #(get user-config :user-config/open-browser   %))
-        (update :root-dir-path  #(get user-config :user-config/root-dir-path  %))
-        (update :actions        #(get user-config :user-config/actions        %))
-        
-        )))
+(defn init-config [{:keys [cli-args]}]
+  (conf/create-config (first cli-args)))
 
-(defn init-server-routes [config]
-  (server-routes/create config))
+(defn init-server-routes [routes]
+  (tap> {:server-route-config routes})
+  (server-routes/create routes))
 
 (defn init-server [{:keys [config] :as service-map}]
-  (when (:open-browser? config)
-    (browse-url (:browse-url config)))
+  (when (config/open-broser? config)
+    (browse-url (config/browse-url config)))
 
   (-> service-map
       (dissoc :config)
-      (assoc  ::http/port (:port config))
+      (assoc  ::http/port (config/server-port config))
       http/create-server
       http/start))
 
 ;; integrant Key initializer ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod ig/init-key :app/user-config
-  [_ user-config]
-  user-config)
+(defmethod ig/init-key :app/cli-args
+  [_ cli-args]
+  cli-args)
 
 (defmethod ig/init-key :app/config
   [_ config]
-  (init-app-config config))
+  (init-config config))
 
 (defmethod ig/init-key :server/routes
-  [_ {:keys [config]}]
-  (init-server-routes config))
+  [_ routes]
+  (init-server-routes routes))
 
 (defmethod ig/init-key  :server/server
   [_ service-map]

@@ -1,4 +1,4 @@
-(ns config
+(ns test-config
   (:require [clj-yaml.core :as yaml]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as spec]
