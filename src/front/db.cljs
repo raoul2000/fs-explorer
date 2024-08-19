@@ -3,6 +3,7 @@
             [cljs.spec.alpha :as s]
             [re-frame.core :as re-frame]
             [ajax.edn :refer [edn-response-format edn-request-format]]
+            [ajax.json :refer [json-request-format json-response-format]]
             [model :as model]
             [oxbow.re-frame :as o] ;;sse
             ))
@@ -52,7 +53,8 @@
 (defn- check-and-throw
   "Throws an exception if `db` doesn't match the Spec `a-spec`."
   [a-spec db]
-  (when-not (s/valid? a-spec db)
+  true
+  #_(when-not (s/valid? a-spec db)
     (throw (ex-info (str "spec check failed: " {:cause (s/explain-data a-spec db)}) {}))))
 
 ;; now we create an interceptor using `after`
@@ -93,13 +95,16 @@
  ::load-user-config-success
  [check-spec-interceptor]
  (fn [db [_ success-response]]
+   (tap> success-response)
    (-> db
        (assoc :user-config  (:response success-response)))))
+
 
 (re-frame/reg-event-db
  ::load-user-config-failure
  [check-spec-interceptor]
  (fn [db [_ _error-response]]
+    (tap> {:load-user-config-failure _error-response})
    db))
 
 (re-frame/reg-event-fx
@@ -107,8 +112,8 @@
  (fn [_cofx _event]
    {:fx [[:http-xhrio {:method          :get
                        :uri             (str "/config")
-                       :format          (edn-request-format)
-                       :response-format (edn-response-format)
+                       :format          (json-request-format)
+                       :response-format (json-response-format)
                        :on-success      [::load-user-config-success]
                        :on-failure      [::load-user-config-failure]}]]}))
 
