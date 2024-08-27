@@ -1,6 +1,7 @@
 (ns page.explore.event
   (:require [re-frame.core :as re-frame]
             [ajax.edn :refer [edn-response-format edn-request-format]]
+            [ajax.json :refer [json-request-format json-response-format]]
             [day8.re-frame.http-fx]
             [db :refer [check-spec-interceptor]]
             [route.helper :refer [create-url-explore]]))
@@ -10,8 +11,9 @@
  ::ls-success
  [check-spec-interceptor]
  (fn [db [_ success-response]]
+   (tap> {:ls-success-response success-response})
    (-> db
-       (assoc :explore (:model/content success-response))
+       (assoc :explore (:content success-response))
        (assoc :loading? false))))
 
 (re-frame/reg-event-db
@@ -27,8 +29,8 @@
  (fn [{db :db} [_event-id path]]
    {:http-xhrio {:method          :get
                  :uri             (str "/explore?dir=" path)
-                 :format          (edn-request-format)
-                 :response-format (edn-response-format)
+                 :format          (json-request-format)
+                 :response-format (json-response-format {:keywords? true})
                  :on-success      [::ls-success]
                  :on-failure      [::ls-failure]}
     :db  (-> db
@@ -44,8 +46,8 @@
             (assoc :current-dir dir))
     :fx  [(when-not (= (:current-dir db) dir) [:http-xhrio {:method          :get
                                                             :uri             (str "/explore?dir=" dir)
-                                                            :format          (edn-request-format)
-                                                            :response-format (edn-response-format)
+                                                            :format          (json-request-format)
+                                                            :response-format (json-response-format {:keywords? true})
                                                             :on-success      [::ls-success]
                                                             :on-failure      [::ls-failure]}])]}))
 
@@ -73,8 +75,8 @@
  (fn [{db :db} [_ command-name path]]
    {:http-xhrio {:method          :get
                  :uri             (str "/cmd?path=" (js/encodeURIComponent path) "&name=" (js/encodeURIComponent command-name))
-                 :format          (edn-request-format)
-                 :response-format (edn-response-format)
+                 :format          (json-request-format)
+                 :response-format (json-response-format {:keywords? true})
                  :on-success      [::run-command-success]
                  :on-failure      [::run-command-failure]}}))
 

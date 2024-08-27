@@ -84,8 +84,8 @@
  (fn [_cofx _event]
    {:fx [[:http-xhrio {:method          :get
                        :uri             (str "/index?type=dir")
-                       :format          (edn-request-format)
-                       :response-format (edn-response-format)
+                       :format          (json-request-format)
+                       :response-format (json-response-format {:keywords? true})
                        :on-success      [::load-index-success]
                        :on-failure      [::load-index-failure]}]]}))
 
@@ -113,7 +113,7 @@
    {:fx [[:http-xhrio {:method          :get
                        :uri             (str "/config")
                        :format          (json-request-format)
-                       :response-format (json-response-format)
+                       :response-format (json-response-format {:keywords? true})
                        :on-success      [::load-user-config-success]
                        :on-failure      [::load-user-config-failure]}]]}))
 
