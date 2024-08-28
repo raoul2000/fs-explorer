@@ -3,7 +3,6 @@
   (:require [clj-yaml.core :as yaml]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as spec]
-            [clojure.string :as str]
             [clojure.walk :as w]
             [clojure.data.json :as json]
             [babashka.fs :as fs]
@@ -11,7 +10,7 @@
 
 ;; spec ----------------------------------------------------------------------------------------------------------------
 
-(spec/def :string/not-blank (spec/and string? (complement str/blank?)))
+(spec/def :string/not-blank (spec/and string? (complement s/blank?)))
 (spec/def :coll/non-empty-string-list (spec/coll-of :string/not-blank :min-count 1))
 
 (spec/def :config/server-port    number?)
