@@ -31,7 +31,7 @@ Accept: application/json
 ### GET /explore (default)
 
 GET {{baseUrl}}/explore
-Accept: application/edn
+Accept: application/json
 
 ### GET /explore
 

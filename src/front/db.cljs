@@ -95,7 +95,6 @@
  ::load-user-config-success
  [check-spec-interceptor]
  (fn [db [_ success-response]]
-   (tap> success-response)
    (-> db
        (assoc :user-config  (:response success-response)))))
 
@@ -104,7 +103,6 @@
  ::load-user-config-failure
  [check-spec-interceptor]
  (fn [db [_ _error-response]]
-    (tap> {:load-user-config-failure _error-response})
    db))
 
 (re-frame/reg-event-fx

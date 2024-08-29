@@ -59,7 +59,7 @@
      ["/cmd"           :get  (interceptor-chain (run-command/create      route-config))    :route-name    :run-command]
 
      ;; SSE notifier
-     ["/event"         :get [(sse/start-event-stream event-handler/event-stream)]     :route-name    :get-event-stream]
+     ["/event"         :get [(sse/start-event-stream event-handler/event-stream)]          :route-name    :get-event-stream]
 
      ["/download"      :get   [;; file-info interceptor will set the content-type of the response
                               ;; based on the extension of the file to download.
@@ -67,6 +67,6 @@
 
                                (ring-mw/file-info)
                                service-error-handler
-                               (download-handler/create route-config)]                      :route-name    :get-download]}))
+                               (download-handler/create route-config)]                     :route-name    :get-download]}))
 
 

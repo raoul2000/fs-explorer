@@ -11,7 +11,6 @@
  ::ls-success
  [check-spec-interceptor]
  (fn [db [_ success-response]]
-   (tap> {:ls-success-response success-response})
    (-> db
        (assoc :explore (:content success-response))
        (assoc :loading? false))))
@@ -59,14 +58,12 @@
 (re-frame/reg-event-db
  ::run-command-success
  (fn [db [_ success-response]]
-   (tap> {:run-command-success success-response})
    db))
 
 
 (re-frame/reg-event-db
  ::run-command-failure
  (fn [db [_ error-response]]
-   (tap> {:run-command-failure error-response})
    db))
 
 

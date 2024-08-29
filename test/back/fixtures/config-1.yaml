@@ -1,6 +1,6 @@
 # This Deployment runs our API component
 
-root-dir-path: c:\dev\ws\lab\fs-explorer\test\back\fixtures
+root-dir-path: c:\tmp
 open-browser : true
 types:
   MY_FIRST_TYPE:

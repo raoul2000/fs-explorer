@@ -1,36 +1,39 @@
 (ns server.handler.download
   (:require [babashka.fs :as fs]
             [server.response :as response]
-            [domain.explorer.core :as explorer]))
+            [domain.explorer.core :as explorer]
+            [config :as config]))
 
 (def valid-dispositions #{"inline" "attachment"})
 (def default-disposition "attachment")
 
-(defn create [{:keys [root-dir-path]}]
-  (fn [request]
-    (let [param-file        (get-in request [:params :path])
-          param-disposition (get-in request [:params :disposition] default-disposition)]
-      (cond
-        (nil? param-file)
-        (response/error-BAD_REQUEST  (response/error-body "missing 'path' param"))
+(defn create [{:keys [config] :as _route-config}]
+  (let [root-dir-path (config/root-dir-path config)]
+    ;; the handler function
+    (fn [request]
+      (let [param-file        (get-in request [:params :path])
+            param-disposition (get-in request [:params :disposition] default-disposition)]
+        (cond
+          (nil? param-file)
+          (response/error-BAD_REQUEST  (response/error-body "missing 'path' param"))
 
-        (not (valid-dispositions param-disposition))
-        (response/error-BAD_REQUEST  (response/error-body "invalid disposition value"
-                                                          {:disposition  param-disposition
-                                                           :domain       valid-dispositions}))
+          (not (valid-dispositions param-disposition))
+          (response/error-BAD_REQUEST  (response/error-body "invalid disposition value"
+                                                            {:disposition  param-disposition
+                                                             :domain       valid-dispositions}))
 
-        :else
-        (let [abs-path (explorer/absolutize-path param-file root-dir-path)]
-          (if-not (fs/regular-file? abs-path)
-            (response/error-SERVER_ERROR (response/error-body "file not found"
-                                                              {:file abs-path}))
-            (response/ok (fs/file abs-path)
-                         {"Content-Disposition" (format "%s; filename=\"%s\"" param-disposition (fs/file-name abs-path))
-                          ;; Note that the Content-Type header is set by the ring-mw/file-info interceptor
-                          ;; (see route)
-                          ;; Other option is to force the Content-Type header :
-                          ;; "Content-Type" "image/jpg" 
-                          })))))))
+          :else
+          (let [abs-path (explorer/absolutize-path param-file root-dir-path)]
+            (if-not (fs/regular-file? abs-path)
+              (response/error-SERVER_ERROR (response/error-body "file not found"
+                                                                {:file abs-path}))
+              (response/ok (fs/file abs-path)
+                           {"Content-Disposition" (format "%s; filename=\"%s\"" param-disposition (fs/file-name abs-path))
+                            ;; Note that the Content-Type header is set by the ring-mw/file-info interceptor
+                            ;; (see route)
+                            ;; Other option is to force the Content-Type header :
+                            ;; "Content-Type" "image/jpg" 
+                            }))))))))
 
 
 (defn create_2 [{:keys [root-dir-path]}]

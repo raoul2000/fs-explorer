@@ -17,7 +17,7 @@
                                                        :selector-rule-arg  rule-arg}))))
 
 (defn selector-match [{id :file/id} selector-val]
-  (tap> {:selector-match true
+  #_(tap> {:selector-match true
          :id id
          :sel selector-val
          :map? (map? selector-val)
@@ -67,34 +67,29 @@
   )
 
 (defn file-action [item config-actions]
-  #_(tap> {:file-action config-actions
-           :explain     (spec/explain-data :user-config/actions config-actions)})
-  (tap> {:file-action item
-         :config-actions (:selector (first config-actions))})
-  
   (if-let   [{:keys [command]} (find-matching-command config-actions item)
              #_(first (filter (fn [{:keys [selector]}]
-                                                (= (:file/name item) selector)) config-actions))]
+                                (= (:file/name item) selector)) config-actions))]
     ;; create anchor element's attributes for the selected action
     {:href  ""
      :on-click (fn [event]
                  (cancel-event event)
                  (js/console.log (str "running command " command))
-                 (>run-command command (:file/id item)))}
+                 (>run-command command (:id item)))}
 
     ;; default action on files : download inline
-    {:href (str "/download?path=" (:file/path item) "&disposition=inline")
-     :target (:file/name item)}))
+    {:href (str "/download?path=" (:path item) "&disposition=inline")
+     :target (:name item)}))
 
 (defn render-file [item config-actions]
-  [:a  (file-action item config-actions) (:file/name item)])
+  [:a  (file-action item config-actions) (:name item)])
 
 (defn render-dir [item]
-  [:a {:href (create-url-explore (:file/id item))} (:file/name item)])
+  [:a {:href (create-url-explore (:id item))} (:name item)])
 
 (defn view-item [config-actions item]
-  (let [is-dir (:file/dir? item)]
-    [:tr  {:key (:file/path item)}
+  (let [is-dir (:dir? item)]
+    [:tr  {:key (:path item)}
      [:td {:width "40px"} (if is-dir folder-icon file-icon)]
      [:td
       (if is-dir
@@ -107,7 +102,8 @@
      (when-not loading?
        (let [list-items     (<sorted-explore)
              config-actions (<config-actions)]
-         (tap> config-actions)
+         (tap> {:config-actions config-actions
+                :list-items list-items})
          (if-not  (zero? (count list-items))
            [:table.table.is-hoverable.is-fullwidth
             [:tbody
