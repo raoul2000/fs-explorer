@@ -13,17 +13,21 @@
 (spec/def :string/not-blank (spec/and string? (complement s/blank?)))
 (spec/def :coll/non-empty-string-list (spec/coll-of :string/not-blank :min-count 1))
 
-(spec/def :config/server-port    number?)
+(spec/def :config/server-port    pos-int?)
 (spec/def :config/root-dir-path  string?)
 (spec/def :config/open-browser   boolean?)
 (spec/def :config/browse-url     string?)
 
 (spec/def :config.type.selector/name keyword?)
 (spec/def :config.type.selector/arg  string?)
-(spec/def :config.type/selectors  (spec/every-kv :config.type.selector/name :config.type.selector/arg))
 
-(spec/def :config.type/definition (spec/keys :req [:config.type/selectors]))
-(spec/def :config/types (spec/every-kv keyword? :config.type/definition))
+(spec/def :config.type/selectors  (spec/coll-of (spec/map-of :config.type.selector/name :config.type.selector/arg)  :min-count 1))
+
+(spec/def :config.type/name     string?)
+(spec/def :config.type/definition (spec/keys :req [:config.type/name]
+                                             :opt [:config.type/selectors]))
+(spec/def :config/types (spec/coll-of :config.type/definition :min-count 1)
+  #_(spec/every-kv keyword? :config.type/definition))
 
 ;; app config : key are required
 
@@ -134,7 +138,7 @@
        (apply f maps)))
    maps))
 
-(defn merge-configs 
+(defn merge-configs
   "Merge default config with possibly *nil* user config map and returns the result.
    
    When the user config defines a *server-port* value but no *browse-url* value, the default
@@ -187,7 +191,7 @@
 
 ;; create config -----------------------------------------------------------------------------
 
-(defn create-config 
+(defn create-config
   "Creates and return a valid configuration map.
    
    When *user-config-file-path* is not nil, read user configuration from the file and merges it with the

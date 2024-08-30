@@ -89,14 +89,14 @@
                                  [(add-ns-to-key "type" k2) v2]) v))]) identity m))
 
 
-  (defn add-ns-to-map 
+  (defn add-ns-to-map
     "Add *ns-name* namespace to all keys of map *m*.
      When a key is a string it is converted to a keyword.
      When a key is a keyword already with a namespace, it is replaced by the given ns"
     [ns-name m]
     (into {} (map (fn [[k2 v2]]
                     [(add-ns-to-key ns-name k2) v2]) m)))
-  
+
   (add-ns-to-map "bob" {:a 1})
   (add-ns-to-map "bob" {:my-ns/a 1})
   (add-ns-to-map "bob" {"a" 1})
@@ -117,9 +117,6 @@
 (comment
   ;; reading and parsing yaml file into clojure map and then serializing it into EDN
   ;; adds reader tags
-
-  (s/split (slurp "./test/back/fixtures/file-1.yaml") #"\n")
-  (def yaml-str "# This Deployment runs our API component\n\nroot-dir-path: c:\\dev\\ws\\lab\\fs-explorer\\test\\back\\fixtures\nserver-port: 8882\nopen-browser : true\nbrowse-url: http://localhost:8882\ncommands :\n  MY_FIRST_COMMAND:\n    program: c:\\program file\\notepad.exe   # this is an inline comment\n    label: run first command\n    args : \n      - arg 1\n      - 12\n      - arg 3\n  # this is another comment\n  MY_SECOND_COMMAND:\n    program: notepad.exe\n    label: run second command\n    args: \n      - arg 1\n      - arg 2\n      - {INPUT_FILE}\ntypes:\n  MY_FIRST_TYPE:\n    selector:\n      match-regexp: .*/README.md$\n      ends-with: md\n      starts-with: /R\n      equals: /README.md\n      equals-ignore-case: /ReadMe.MD\n    actions:\n      - MY_FIRST_COMMAND : \n        trigger:\n          on-click: true\n          on-double-click: false \n      - MY_SECOND_COMMAND\n  MY_SECOND_TYPE:\n    selector:\n      ends-with-ignore-case: txt\n      ")
 
   (def yaml-input  [""
                     "root-dir-path: c:\\dev\\ws\\lab\\fs-explorer\\test\\back\\fixtures"
@@ -173,6 +170,42 @@
   ;;     [:commands #ordered/map ([:MY_FIRST_COMMAND #ordered/map ([:program "c:\\program file\\notepad.exe"] 
   ;;     etc ...
 
+  ;; To preserve order, we must use an array
+
+  ;; Order preservation is important for types, because type inference algo is going to
+  ;; process each type in the order they are configured, and will stop after first selector match
+  ;; Selector order is also important for the same reason.
+
+  (def yaml-input-2  ["types:"
+                      "  - name: MY_FIRST_TYPE"
+                      "    selector:"
+                      "      - match-regexp: .*/README.md$"
+                      "      - ends-with: md"
+                      "      - starts-with: /R"
+                      "      - equals: /README.md"
+                      "      - equals-ignore-case: /ReadMe.MD"
+                      "    actions:"
+                      "      - MY_FIRST_COMMAND : "
+                      "        trigger:"
+                      "          on-click: true"
+                      "          on-double-click: false "
+                      "      - MY_SECOND_COMMAND"
+                      "  - name: MY_SECOND_TYPE"
+                      "    selector:"
+                      "      - ends-with-ignore-case: txt"])
+
+  (yaml/parse-string (s/join "\n" yaml-input-2))
+
+  (def result {:types
+               ({:name "MY_FIRST_TYPE",
+                 :selector
+                 '({:match-regexp ".*/README.md$"}
+                   {:ends-with "md"}
+                   {:starts-with "/R"}
+                   {:equals "/README.md"}
+                   {:equals-ignore-case "/ReadMe.MD"}),
+                 :actions '({:MY_FIRST_COMMAND nil, :trigger {:on-click true, :on-double-click false}} "MY_SECOND_COMMAND")}
+                {:name "MY_SECOND_TYPE", :selector '({:ends-with-ignore-case "txt"})})})
   ;;
   )
 
