@@ -3,14 +3,14 @@
 root-dir-path: c:\tmp
 open-browser : true
 types:
-  MY_FIRST_TYPE:
+  - name: "MY_FIRST_TYPE"
     selectors:
-      match-regexp: .*/README.md$
-      ends-with: md
-      starts-with: /R
-      equals: /README.md
-      equals-ignore-case: /ReadMe.MD
-  MY_SECOND_TYPE:
+      - match-regexp: .*/README.md$
+      - ends-with: md
+      - starts-with: /R
+      - equals: /README.md
+      - equals-ignore-case: /ReadMe.MD
+  - name: "MY_SECOND_TYPE"
     selectors:
-      ends-with-ignore-case: txt
+      - ends-with-ignore-case: txt
       

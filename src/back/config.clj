@@ -26,8 +26,7 @@
 (spec/def :config.type/name     string?)
 (spec/def :config.type/definition (spec/keys :req [:config.type/name]
                                              :opt [:config.type/selectors]))
-(spec/def :config/types (spec/coll-of :config.type/definition :min-count 1)
-  #_(spec/every-kv keyword? :config.type/definition))
+(spec/def :config/types (spec/coll-of :config.type/definition :min-count 1))
 
 ;; app config : key are required
 
@@ -104,9 +103,28 @@
   (into {} (map (fn [[k v]]
                   [(add-ns-to-key ns-name k) v]) m)))
 
-(defn build-types [m]
+(defn build-single-type [m]
   (into {} (map (fn [[k v]]
-                  [k (add-ns-to-map "config.type" v)]) m)))
+                  [(add-ns-to-key "config.type" k) v]) m)))
+
+(defn build-types [m]
+  (map #(add-ns-to-map "config.type" %) m)
+  #_(map build-single-type m))
+
+(comment
+  (def no-ns-types [{:name "type"
+                     :selectors [{:equal "file"}]}
+                    {:name "type2"}])
+  (spec/valid? :config/types no-ns-types)
+
+  (def types-with-ns (build-types no-ns-types))
+  (spec/valid? :config/types types-with-ns)
+
+  (def cfg (read-from-file "./test/back/fixtures/config-1.yaml"))
+
+
+  ;;
+  )
 
 (defn add-ns-to-user-config
   "Given *m* a user config map with no namespace, returns a new map where keywords
@@ -117,6 +135,12 @@
               [ns-key (case ns-key
                         :config/types     (build-types   v)
                         v)])) identity m))
+
+(comment
+  (add-ns-to-user-config {:root-dir-path "d:/tmp"
+                          :types   []})
+  ;;
+  )
 
 ;; merge user config and default config -----------------------------------------------------
 
@@ -225,15 +249,20 @@
 
 (comment
 
-  (create-config nil)
-  (create-config "./test/back/fixtures/config-1.yaml")
+  (def cfg (read-from-file "./test/back/fixtures/config-1.yaml"))
 
-  (try
-    (create-config "./test/back/fixtures/config-1.json")
-    (catch Exception ex
-      (println (format "error message : %s\ncause : %s"
-                       (ex-message ex)
-                       (ex-data ex)))))
+  (spec/valid? :user-config/map cfg)
+  ;; success because all ns keys are optionals
+
+  (spec/valid? :config/map cfg)
+  ;; fails because keys are not namespaced 
+
+  (server-port cfg)
+  (root-dir-path cfg)
+
+
+
+
 
   ;;
   )
