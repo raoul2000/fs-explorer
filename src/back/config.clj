@@ -23,7 +23,7 @@
 
 (spec/def :config.type/selectors  (spec/coll-of (spec/map-of :config.type.selector/name :config.type.selector/arg)  :min-count 1))
 
-(spec/def :config.type/name     string?)
+(spec/def :config.type/name      :string/not-blank)
 (spec/def :config.type/definition (spec/keys :req [:config.type/name]
                                              :opt [:config.type/selectors]))
 (spec/def :config/types (spec/coll-of :config.type/definition :min-count 1))
@@ -103,19 +103,15 @@
   (into {} (map (fn [[k v]]
                   [(add-ns-to-key ns-name k) v]) m)))
 
-(defn build-single-type [m]
-  (into {} (map (fn [[k v]]
-                  [(add-ns-to-key "config.type" k) v]) m)))
-
 (defn build-types [m]
-  (map #(add-ns-to-map "config.type" %) m)
-  #_(map build-single-type m))
+  (map #(add-ns-to-map "config.type" %) m))
 
 (comment
   (def no-ns-types [{:name "type"
                      :selectors [{:equal "file"}]}
                     {:name "type2"}])
   (spec/valid? :config/types no-ns-types)
+  (spec/explain :config/types no-ns-types)
 
   (def types-with-ns (build-types no-ns-types))
   (spec/valid? :config/types types-with-ns)

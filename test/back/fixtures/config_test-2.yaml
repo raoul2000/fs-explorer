@@ -1,0 +1,14 @@
+# This Deployment runs our API component
+
+root-dir-path: c:\tmp
+open-browser : true
+server-port: INVALID_VALUE
+types:
+  - name: "MY_FIRST_TYPE"
+    selectors:
+      - match-regexp: .*/README.md$
+      - ends-with: md
+  - name: "MY_SECOND_TYPE"
+    selectors:
+      - ends-with-ignore-case: txt
+      
