@@ -13,10 +13,3 @@
              :root-dir-path root-dir-path})
       (response/ok (exp/explore (or dir-path "/") {:root-dir-path root-dir-path})))))
 
-(comment
-  ((create {:a 1}) nil)
-  (response/ok (exp/explore "" {:root-dir-path "c:\\tmp"}))
-
-  (exp/explore "" {:root-dir-path "C:\\Users\\emmanuel.deveze"})
-  ;;
-  )

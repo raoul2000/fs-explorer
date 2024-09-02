@@ -13,7 +13,7 @@
   ;; set when the application starts, before initialising the system
   {:app/cli-args    []
 
-   ;; the default configuration - some parameters can be over written by user-config
+   ;; the default configuration - some parameters can be over written by user config
    :app/config      {:cli-args                 (ig/ref :app/cli-args)}
 
    :server/routes    {:config                  (ig/ref :app/config)
