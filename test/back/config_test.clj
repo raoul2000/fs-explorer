@@ -9,6 +9,7 @@
      (are [result arg-map] (= result (spec/valid? :config/server-port (:port arg-map)))
        true      {:port 3000}
        false     {:port -1}
+       false     {:port 65353}
        false     {:port 1.25}
        false     {:port "8888"}))
 

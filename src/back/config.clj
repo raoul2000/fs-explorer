@@ -13,7 +13,7 @@
 (spec/def :string/not-blank (spec/and string? (complement s/blank?)))
 (spec/def :coll/non-empty-string-list (spec/coll-of :string/not-blank :min-count 1))
 
-(spec/def :config/server-port    pos-int?)
+(spec/def :config/server-port    (spec/and int? #(< 0 % 65353)))
 (spec/def :config/root-dir-path  string?)
 (spec/def :config/open-browser   boolean?)
 (spec/def :config/browse-url     string?)
