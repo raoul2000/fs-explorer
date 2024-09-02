@@ -1,7 +1,6 @@
 (ns core
   "Main namespace. Include the application entry point function"
-  (:require [system :as  sys]
-            [user-config.core :as user-config])
+  (:require [system :as  sys])
   (:gen-class))
 
 (defn -main [& args]

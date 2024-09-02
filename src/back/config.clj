@@ -1,5 +1,8 @@
 (ns config
-  "Manage app configuration"
+  "Manage app configuration creation.
+   
+   Loads config from file (if given), validate, marge with default config, validate and return
+   "
   (:require [clj-yaml.core :as yaml]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as spec]
@@ -8,7 +11,7 @@
             [babashka.fs :as fs]
             [clojure.string :as s]))
 
-;; spec ----------------------------------------------------------------------------------------------------------------
+;; spec ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (spec/def :string/not-blank (spec/and string? (complement s/blank?)))
 (spec/def :coll/non-empty-string-list (spec/coll-of :string/not-blank :min-count 1))
@@ -46,7 +49,7 @@
                                              :config/browse-url
                                              :config/types]))
 
-;; default config --------------------------------------------------------------------------------------
+;; default config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def default-port 8890)
 (defn create-browse-url [port]
@@ -57,7 +60,8 @@
                              :open-browser  true
                              :browse-url    (create-browse-url default-port)})
 
-;; getters ---------------------------------------------------------------------------------------------
+;; getters ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (defn server-port   [config] (:config/server-port   config))
 (defn root-dir-path [config] (:config/root-dir-path config))
@@ -65,7 +69,7 @@
 (defn browse-url    [config] (:config/browse-url    config))
 
 
-;; read user config from YAML/JSON file ----------------------------------------------------------------
+;; read user config from YAML/JSON file ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- read-from-file
   "Read the given *file-path* and parse its YAML or JSON content to the returned map.
@@ -79,25 +83,27 @@
       (println (format "Loading user configuration from %s ..." abs-file-path))
 
       (let [ext           (s/lower-case (fs/extension abs-file-path))
-            config-reader (io/reader    (fs/file abs-file-path))]
+            config-reader (io/reader    (fs/file      abs-file-path))]
 
         (cond
           (#{"yml" "yaml"} ext)  (yaml/parse-stream config-reader)
-          (= "json"        ext)  (json/read  config-reader :key-fn keyword)
+          (= "json"        ext)  (json/read         config-reader :key-fn keyword)
           :else                  (throw (ex-info "File type not supported " {:ext ext}))))
 
       (catch Exception e
         (throw (ex-info "Failed to read configuration file" {:file (str abs-file-path)
                                                              :msg  (.getMessage e)}))))))
 
-;; add namespace ---------------------------------------------------------------------------------
+;; add namespace ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn add-ns-to-key [ns-name k]
   (keyword ns-name (name k)))
 
 (defn add-ns-to-map
   "Add *ns-name* namespace to all keys of map *m*.
+   
    When a key is a string it is converted into a keyword.
+
    When a key is a keyword already with a namespace, it is replaced by the given ns"
   [ns-name m]
   (into {} (map (fn [[k v]]
@@ -138,9 +144,10 @@
   ;;
   )
 
-;; merge user config and default config -----------------------------------------------------
+;; merge user config and default config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  ;; see https://clojure.github.io/clojure-contrib/map-utils-api.html#clojure.contrib.map-utils/deep-merge-with
+
+;; see https://clojure.github.io/clojure-contrib/map-utils-api.html#clojure.contrib.map-utils/deep-merge-with
 (defn deep-merge-with
   "Like merge-with, but merges maps recursively, applying the given fn
   only when there's a non-map at a particular level.
@@ -189,7 +196,7 @@
   ;;
   )
 
-;; validate config --------------------------------------------------------------------------
+;; validate config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn config-error
   "Validate *m* against spec *config-spec* and returns explain when not valid otherwise returns *nil*"
@@ -209,7 +216,7 @@
   )
 
 
-;; create config -----------------------------------------------------------------------------
+;; create config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn create-config
   "Creates and return a valid configuration map.
@@ -256,13 +263,5 @@
   (server-port cfg)
   (root-dir-path cfg)
 
-
-
-
-
   ;;
   )
-
-
-
-

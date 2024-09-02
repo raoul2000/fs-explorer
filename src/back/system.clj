@@ -4,10 +4,9 @@
             [io.pedestal.http :as http]
             [server.routes :as server-routes]
             [clojure.java.browse :refer [browse-url]]
-            [babashka.fs :as fs]
             [config :as conf]))
 
-;; system config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; system config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def config
   ;; set when the application starts, before initialising the system
@@ -26,7 +25,7 @@
                       ::http/type              :jetty
                       ::http/join?             true}})
 
-;; key initializers function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; key initializers function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn init-config [{:keys [cli-args]}]
   (conf/create-config (first cli-args)))
@@ -45,7 +44,7 @@
       http/create-server
       http/start))
 
-;; integrant Key initializer ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; integrant Key initializer ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod ig/init-key :app/cli-args
   [_ cli-args]
