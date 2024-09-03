@@ -76,11 +76,10 @@
   #_(require 'server.routes-test
              'server.handler.greet-test :reload-all)
 
-  #_(test/run-tests 'server.routes-test
+  (test/run-tests 'server.routes-test
                     'server.handler.greet-test)
 
-  #_(test/run-all-tests)
-
+  (test/run-all-tests)
 
   ;;
   )

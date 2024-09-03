@@ -35,8 +35,8 @@ Accept: application/json
 
 ### GET /explore
 
-GET {{baseUrl}}/explore?dir=barcode
-Accept: application/edn
+GET {{baseUrl}}/explore?dir=__SecureFXDrop__
+Accept: application/json
 
 ### GET /download
 
