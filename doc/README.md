@@ -2,7 +2,7 @@
 
 ## Configuration
 
-When the default application settings must be changed, they can be defined in a JSON file whose path must be added as command line argument : 
+When the default application settings must be changed, they can be defined in a YAML file whose path must be added as command line argument : 
 
 ```bash
 $ java -jar xxx.jar <configuration file path>
