@@ -13,6 +13,15 @@
        false     {:port 1.25}
        false     {:port "8888"}))
 
+   (testing "browse url validation"
+     (are [result arg-map] (= result (spec/valid? :config/browse-url (:url arg-map)))
+       true      {:url "http://host:8888/path/to/index.html"}
+       true      {:url "http://host"}
+       true      {:url "https://host:8888/path/to/index.html"}
+       false     {:url "http://host:XXX/path/to/index.html"}
+       true      {:url "ftp://host:8888/path/to/index.html"}
+       false     {:url "hp://host:8888/path/to/index.html"}))
+
    (testing "selectors"
      (is (not (spec/valid? :config.type/selectors {:starts-with "str"
                                                    :ends-with  "txt"}))

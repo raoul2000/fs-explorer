@@ -13,13 +13,22 @@
 
 ;; spec ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(spec/def :string/not-blank (spec/and string? (complement s/blank?)))
+(defn can-be-converted-to-url?
+  "Returns TRUE if *s* can be converted into a java.net.URL object"
+  [s]
+  (try
+    (new java.net.URL s)
+    true
+    (catch Throwable _t false)))
+
+
+(spec/def :string/not-blank           (spec/and string? (complement s/blank?)))
 (spec/def :coll/non-empty-string-list (spec/coll-of :string/not-blank :min-count 1))
 
 (spec/def :config/server-port    (spec/and int? #(< 0 % 65353)))
 (spec/def :config/root-dir-path  string?)
 (spec/def :config/open-browser   boolean?)
-(spec/def :config/browse-url     string?)
+(spec/def :config/browse-url     can-be-converted-to-url?)
 
 (spec/def :config.type.selector/name keyword?)
 (spec/def :config.type.selector/arg  string?)
