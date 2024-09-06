@@ -77,6 +77,8 @@
 (defn open-broser?  [config] (:config/open-browser  config))
 (defn browse-url    [config] (:config/browse-url    config))
 
+(defn type-definition [config] (:config/types    config))
+
 
 ;; read user config from YAML/JSON file ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

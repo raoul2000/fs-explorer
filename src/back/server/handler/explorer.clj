@@ -6,10 +6,12 @@
 (defn create
   [{:keys [config]}]
   (fn [request]
-    (let [dir-path      (get-in request [:params :dir])
-          root-dir-path (config/root-dir-path config)]
+    (let [dir-path         (get-in request [:params :dir])
+          root-dir-path    (config/root-dir-path config)
+          type-definitions (config/type-definition config)]
       (tap> {:config        config
              :dir-path      dir-path
              :root-dir-path root-dir-path})
-      (response/ok (exp/explore (or dir-path "/") {:root-dir-path root-dir-path})))))
+      (response/ok (exp/explore (or dir-path "/") {:root-dir-path root-dir-path
+                                                   :types         type-definitions})))))
 

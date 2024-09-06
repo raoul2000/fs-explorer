@@ -73,10 +73,14 @@
   (update result :model/content (fn [old]
                                   (map #(assoc % :file/action "") old))))
 
+(defn add-types [type-def result]
+  result
+  )
 ;; explore  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn explore [fs-path {:keys [root-dir-path] :as options}]
+(defn explore [fs-path {:keys [root-dir-path types] :as options}]
   {:post [(s/valid? :model/read-result %)]}
+  (tap> {:options options})
   (let [abs-path (absolutize-path (or fs-path "") root-dir-path)]
 
     (when-not (fs/exists? abs-path)
@@ -88,7 +92,9 @@
       (read-file-content abs-path)
       #_(list-dir-content abs-path root-dir-path)
       (->> (list-dir-content abs-path root-dir-path)
-           (add-actions (:user-config/actions options))))))
+           (add-actions (:user-config/actions options))
+           (add-types   types)
+           ))))
 
 (comment
   (explore "" {:root-dir-path "c:\\tmp"})
