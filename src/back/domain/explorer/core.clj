@@ -73,9 +73,38 @@
   (update result :model/content (fn [old]
                                   (map #(assoc % :file/action "") old))))
 
-(defn add-types [type-def result]
-  result
-  )
+
+;; types ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def file-selectors-catalog {:equals (fn [{:keys [name]} val-s]
+                                       (= name val-s))})
+
+(defn selector-match [file-m selector-m]
+  (when-let [selector-fn])
+  false)
+
+(defn all-selectors-match [selectors-xs file-m]
+  (let [selector-match? (partial selector-match file-m)]
+    (every? selector-match? selectors-xs)))
+
+(defn type-match [type-def-m file-m]
+  (or
+   ;; type with no selector always match
+   (not (:selectors type-def-m))
+   ;; all selectors must match 
+   (all-selectors-match (:selectors type-def-m) file-m)))
+(def type-no-match (complement type-match))
+
+(defn infer-type [type-def-xs file-m]
+  (tap> {:type-def-xs type-def-xs})
+  (if-let [infered-type (first (drop-while #(type-no-match % file-m) type-def-xs))]
+    (assoc file-m :type  (:config.type/name infered-type))
+    file-m))
+
+(defn add-types [type-def-xs result]
+
+  (update result :model/content (fn [old]
+                                  (map #(infer-type type-def-xs %) old))))
 ;; explore  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn explore [fs-path {:keys [root-dir-path types] :as options}]
@@ -93,8 +122,7 @@
       #_(list-dir-content abs-path root-dir-path)
       (->> (list-dir-content abs-path root-dir-path)
            (add-actions (:user-config/actions options))
-           (add-types   types)
-           ))))
+           (add-types   types)))))
 
 (comment
   (explore "" {:root-dir-path "c:\\tmp"})
