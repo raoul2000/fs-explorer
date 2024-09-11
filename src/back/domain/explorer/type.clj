@@ -8,7 +8,11 @@
 
                              :starts-with ;; -----------------------------
                              (fn [val options file-m]
-                               (s/starts-with? (:name file-m) val))})
+                               (s/starts-with? (:name file-m) val))
+
+                             :ends-with ;; ------------------------------
+                             (fn [val options file-m]
+                               (s/ends-with? (:name file-m) val))})
 
 (def file-selector-keys (keys file-selectors-catalog))
 
@@ -36,13 +40,16 @@
    (all-selectors-match (:selectors type-def-m) file-m)))
 (def type-no-match (complement type-match))
 
+(defn select-type [file-m type-def-xs]
+  (first (drop-while #(type-no-match % file-m) type-def-xs)))
+
 (defn infer-type
   "Given a map *file-m* and a seq of type definitions, add key `:type` to *file-m* if
      it matches a type definition or returns it unchanged."
   [type-def-xs file-m]
 
   (tap> {:type-def-xs type-def-xs})
-  (if-let [infered-type (first (drop-while #(type-no-match % file-m) type-def-xs))]
+  (if-let [infered-type (select-type file-m type-def-xs)]
     (assoc file-m :type (:config.type/name infered-type))
     file-m))
 
