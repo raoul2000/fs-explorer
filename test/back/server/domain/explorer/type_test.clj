@@ -1,5 +1,5 @@
-(ns server.domain.explorer.type-test
-  (:require [clojure.test :refer (deftest testing is  are)]
+(ns domain.explorer.type-test
+  (:require [clojure.test :refer (deftest testing is)]
             [domain.explorer.type :as t]))
 
 
@@ -102,52 +102,52 @@
     (is (t/type-match {}  {:name "val"})))
 
   (testing "match when one type definition is provided"
-    (is (t/type-match {:name "type1"
-                       :selectors [{:equals "val"}]}
+    (is (t/type-match #:config.type{:name      "type1"
+                                    :selectors [{:equals "val"}]}
                       {:name "val"})))
 
   (testing "match when two type definition is provided"
-    (is (t/type-match {:name "type1"
-                       :selectors [{:equals "val"}
-                                   {:starts-with "va"}]}
+    (is (t/type-match #:config.type{:name      "type1"
+                                    :selectors [{:equals      "val"}
+                                                {:starts-with "va"}]}
                       {:name "val"})))
 
   (testing "does not match when not all selectors match"
-    (is (not (t/type-match {:name "type1"
-                            :selectors [{:equals "val"}
-                                        {:starts-with "other"}]}
+    (is (not (t/type-match #:config.type{:name      "type1"
+                                         :selectors [{:equals      "val"}
+                                                     {:starts-with "other"}]}
                            {:name "val"})))))
 
 (deftest select-type-test
   (testing "select a type for a given file"
-    (is (= "type1" (:name (t/select-type {:name "file.txt"}
-                                         [{:name "type1"
-                                           :selectors [{:equals "file.txt"}]}])))
+    (is (= "type1" (:config.type/name (t/select-type {:name "file.txt"}
+                                                     [#:config.type{:name      "type1"
+                                                                    :selectors [{:equals "file.txt"}]}])))
         "returns the matching type map")
 
-    (is (= "type1" (:name (t/select-type {:name "file.txt"}
-                                         [{:name "type1"
-                                           :selectors [{:starts-with "file"}
-                                                       {:ends-with "txt"}]}])))
+    (is (= "type1" (:config.type/name (t/select-type {:name "file.txt"}
+                                                     [#:config.type{:name      "type1"
+                                                                    :selectors [{:starts-with "file"}
+                                                                                {:ends-with   "txt"}]}])))
         "returns the matching type map when all selectors match")
 
-    (is (= "type1" (:name (t/select-type {:name "file.txt"}
-                                         [{:name "type2"
-                                           :selectors [{:starts-with "file"}
-                                                       {:ends-with "md"}]}
-                                          {:name "type1"
-                                           :selectors [{:starts-with "file"}
-                                                       {:ends-with "txt"}]}])))
+    (is (= "type1" (:config.type/name (t/select-type {:name "file.txt"}
+                                                     [#:config.type{:name      "type2"
+                                                                    :selectors [{:starts-with "file"}
+                                                                                {:ends-with   "md"}]}
+                                                      #:config.type{:name      "type1"
+                                                                    :selectors [{:starts-with "file"}
+                                                                                {:ends-with   "txt"}]}])))
         "ignore type with no matching selectors")
 
-    (is (= "type1" (:name (t/select-type {:name "file.txt"}
-                                         [{:name "type1"
-                                           :selectors [{:starts-with "file"}
-                                                       {:ends-with "txt"}]}
-                                          {:name "type2"
-                                           :selectors [{:equals "file.txt"}]}])))
+    (is (= "type1" (:config.type/name (t/select-type {:name "file.txt"}
+                                                     [#:config.type{:name      "type1"
+                                                                    :selectors [{:starts-with "file"}
+                                                                                {:ends-with   "txt"}]}
+                                                      #config.type{:name      "type2"
+                                                                   :selectors [{:equals "file.txt"}]}])))
         "selects first type that match in seq order"))
 
   (testing "when no type definition is provided returns nil"
-    (is (nil? (t/select-type {:name "file.txt"} nil)))
-    (is (nil? (t/select-type {:name "file.txt"} []))))) 
+    (is (nil? (t/select-type {:config.type/name "file.txt"} nil)))
+    (is (nil? (t/select-type {:config.type/name "file.txt"} []))))) 

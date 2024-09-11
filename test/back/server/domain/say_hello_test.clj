@@ -1,4 +1,4 @@
-(ns server.domain.say-hello-test
+(ns domain.say-hello-test
   (:require [clojure.test :refer (deftest testing is)]
             [domain.say-hello :refer (say-hello)]))
 

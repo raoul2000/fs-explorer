@@ -1,4 +1,4 @@
-(ns server.domain.explorer.core-test
+(ns domain.explorer.core-test
   (:require [clojure.test :refer (deftest testing is use-fixtures are)]
             [domain.explorer.core :as exp]
             [babashka.fs :as fs]))
@@ -37,14 +37,12 @@
                    [#:file{:name   "dir1",
                            :dir?   true,
                            :path   (str (fs/path fixture-base-path "dir1"))
-                           :id     "dir1"
-                           :action ""}
+                           :id     "dir1"}
 
                     #:file{:name   "dir2",
                            :dir?   true,
                            :path   (str (fs/path fixture-base-path "dir2"))
-                           :id     "dir2"
-                           :action ""}]}
+                           :id     "dir2"}]}
            (exp/explore (str fixture-base-path) {:root-dir-path fixture-base-path}))
         "returns 2 absolute path")))
 

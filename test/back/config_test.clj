@@ -108,7 +108,7 @@
     (is (= conf/default-config (conf/create-config nil))
         "when no file path is given, app config is default config")
 
-    (is (= #:config{:server-port 7777,
+    (is (= #:config{:server-port   7777,
                     :root-dir-path "c:\\tmp",
                     :open-browser  true,
                     :browse-url    "http://localhost:7777/",

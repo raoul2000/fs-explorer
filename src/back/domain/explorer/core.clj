@@ -82,7 +82,7 @@
 ;; explore  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn explore [fs-path {:keys [root-dir-path types] :as options}]
-  {:post [(s/valid? :model/read-result %)]}
+  #_{:post [(s/valid? :model/read-result %)]}
   (tap> {:options options})
   (let [abs-path (absolutize-path (or fs-path "") root-dir-path)]
 
@@ -93,13 +93,15 @@
 
     (if (fs/regular-file? abs-path)
       (read-file-content abs-path)
-      #_(list-dir-content abs-path root-dir-path)
       (->> (list-dir-content abs-path root-dir-path)
-           (add-actions (:user-config/actions options))
+           #_(add-actions (:user-config/actions options))
            (add-types   types)))))
 
 (comment
   (explore "" {:root-dir-path "c:\\tmp"})
+  (explore "" {:root-dir-path "c:\\tmp"
+                       :types [{:name "TYPE1"
+                                :selectors [{:equals "README.md"}]}]})
   ;;
   )
 

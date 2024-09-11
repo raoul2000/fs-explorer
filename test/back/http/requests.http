@@ -35,7 +35,7 @@ Accept: application/json
 
 ### GET /explore 1
 
-GET {{baseUrl}}/explore?dir=__SecureFXDrop__
+GET {{baseUrl}}/explore?dir=
 Accept: application/json
 
 ### GET /explore 2

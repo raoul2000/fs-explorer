@@ -35,21 +35,44 @@
 (defn type-match [type-def-m file-m]
   (or
    ;; type with no selector always match
-   (not (:selectors type-def-m))
+   (not (:config.type/selectors type-def-m))
    ;; ... or all selectors must match 
-   (all-selectors-match (:selectors type-def-m) file-m)))
+   (all-selectors-match (:config.type/selectors type-def-m) file-m)))
 (def type-no-match (complement type-match))
 
 (defn select-type [file-m type-def-xs]
   (first (drop-while #(type-no-match % file-m) type-def-xs)))
 
+(comment
+
+  (def m #:config.type{:name "type1"
+                       :selectors [{:starts-with "file"}
+                                   {:ends-with "txt"}]})
+  (keys m)
+
+  (:config.type/name m)
+
+  (select-type {:name "file.txt"}
+               [#:config.type{:name "type1"
+                              :selectors [{:starts-with "file"}
+                                          {:ends-with "txt"}]}])
+  (select-type {:name "file.txt"}
+               [{:name "type1"
+                 :selectors [{:starts-with "file"}
+                             {:ends-with "txt"}]}])
+  ;;
+  )
 (defn infer-type
   "Given a map *file-m* and a seq of type definitions, add key `:type` to *file-m* if
      it matches a type definition or returns it unchanged."
   [type-def-xs file-m]
 
-  (tap> {:type-def-xs type-def-xs})
+  #_(tap> {:type-def-xs type-def-xs
+           :file-m file-m})
   (if-let [infered-type (select-type file-m type-def-xs)]
-    (assoc file-m :type (:config.type/name infered-type))
+    (do
+      (tap> {:infered-type infered-type})
+      (assoc file-m :type (:config.type/name infered-type)))
+
     file-m))
 
