@@ -6,45 +6,45 @@
 (deftest equals-selector-test
   (let [equals-pred (:equals t/file-selectors-catalog)]
     (testing "the :equals selector"
-      (is (equals-pred "val" nil {:name "val"})
+      (is (equals-pred "val" nil #:file{:name "val"})
           "test :name key value equals arg")
 
-      (is (not (equals-pred "val" nil {:k "val"}))
+      (is (not (equals-pred "val" nil #:file{:k "val"}))
           "returns false when map has no :name key")
 
-      (is (not (equals-pred "val" nil {:name "VAL"}))
+      (is (not (equals-pred "val" nil #:file{:name "VAL"}))
           "is case sensitive"))))
 
 (deftest starts-with-selector-test
   (let [starts-with-pred (:starts-with t/file-selectors-catalog)]
     (testing "the :starts-with selector"
-      (is (starts-with-pred "val" nil {:name "value"})
+      (is (starts-with-pred "val" nil #:file{:name "value"})
           "true when :name value starts with arg")
 
-      (is (starts-with-pred "val" nil {:name "val"})
+      (is (starts-with-pred "val" nil #:file{:name "val"})
           "true when :name value equals arg")
 
-      (is (not (starts-with-pred "val" nil {:name "some value"}))
+      (is (not (starts-with-pred "val" nil #:file{:name "some value"}))
           "false  when :name value does not starts with arg")
 
-      (is (not (starts-with-pred "val" nil {:name "VAL"}))
+      (is (not (starts-with-pred "val" nil #:file{:name "VAL"}))
           "is case sensitive"))))
 
 
 (deftest ends-with-selector-test
   (let [ends-with-pred (:ends-with t/file-selectors-catalog)]
-    (testing "the :endss-with selector"
+    (testing "the :ends-with selector"
 
-      (is (ends-with-pred "val" nil {:name "the val"})
+      (is (ends-with-pred "val" nil #:file{:name "the val"})
           "true when :name value ends with arg")
 
-      (is (ends-with-pred "val" nil {:name "val"})
+      (is (ends-with-pred "val" nil #:file{:name "val"})
           "true when :name value equals arg")
 
-      (is (not (ends-with-pred "val" nil {:name "some value"}))
+      (is (not (ends-with-pred "val" nil #:file{:name "some value"}))
           "false  when :name value does not end with arg")
 
-      (is (not (ends-with-pred "val" nil {:name "the VAL"}))
+      (is (not (ends-with-pred "val" nil #:file{:name "the VAL"}))
           "is case sensitive"))))
 
 
@@ -79,59 +79,59 @@
 
 (deftest selector-match-test
   (testing "When a selector matches a file"
-    (is (t/selector-match {:name "val"} {:equals "val"})
+    (is (t/selector-match #:file{:name "val"} {:equals "val"})
         "file should match (1)")
 
-    (is (t/selector-match {:name "val"} {:option 1
-                                         :equals "val"})
+    (is (t/selector-match #:file{:name "val"} {:option 1
+                                               :equals "val"})
         "file should match (2)")
 
-    (is (not (t/selector-match {:name "val"} {:equals "something"}))
+    (is (not (t/selector-match #:file{:name "val"} {:equals "something"}))
         "file not should match")
 
-    (is (not (t/selector-match {:name "val"} nil))
+    (is (not (t/selector-match #:file{:name "val"} nil))
         "does not match when selector is nil")
 
-    (is (not (t/selector-match {:name "val"} {}))
+    (is (not (t/selector-match #:file{:name "val"} {}))
         "does not match when selector is empty map")))
 
 (deftest type-match-test
   (testing "match when no type definition is provided"
-    (is (t/type-match nil {:name "val"}))
-    (is (t/type-match []  {:name "val"}))
-    (is (t/type-match {}  {:name "val"})))
+    (is (t/type-match nil #:file{:name "val"}))
+    (is (t/type-match []  #:file{:name "val"}))
+    (is (t/type-match {}  #:file{:name "val"})))
 
   (testing "match when one type definition is provided"
     (is (t/type-match #:config.type{:name      "type1"
                                     :selectors [{:equals "val"}]}
-                      {:name "val"})))
+                      #:file{:name "val"})))
 
   (testing "match when two type definition is provided"
     (is (t/type-match #:config.type{:name      "type1"
                                     :selectors [{:equals      "val"}
                                                 {:starts-with "va"}]}
-                      {:name "val"})))
+                      #:file{:name "val"})))
 
   (testing "does not match when not all selectors match"
     (is (not (t/type-match #:config.type{:name      "type1"
                                          :selectors [{:equals      "val"}
                                                      {:starts-with "other"}]}
-                           {:name "val"})))))
+                           #:file{:name "val"})))))
 
 (deftest select-type-test
   (testing "select a type for a given file"
-    (is (= "type1" (:config.type/name (t/select-type {:name "file.txt"}
+    (is (= "type1" (:config.type/name (t/select-type #:file{:name "file.txt"}
                                                      [#:config.type{:name      "type1"
                                                                     :selectors [{:equals "file.txt"}]}])))
         "returns the matching type map")
 
-    (is (= "type1" (:config.type/name (t/select-type {:name "file.txt"}
+    (is (= "type1" (:config.type/name (t/select-type #:file{:name "file.txt"}
                                                      [#:config.type{:name      "type1"
                                                                     :selectors [{:starts-with "file"}
                                                                                 {:ends-with   "txt"}]}])))
         "returns the matching type map when all selectors match")
 
-    (is (= "type1" (:config.type/name (t/select-type {:name "file.txt"}
+    (is (= "type1" (:config.type/name (t/select-type #:file{:name "file.txt"}
                                                      [#:config.type{:name      "type2"
                                                                     :selectors [{:starts-with "file"}
                                                                                 {:ends-with   "md"}]}
@@ -140,14 +140,35 @@
                                                                                 {:ends-with   "txt"}]}])))
         "ignore type with no matching selectors")
 
-    (is (= "type1" (:config.type/name (t/select-type {:name "file.txt"}
+    (is (= "type1" (:config.type/name (t/select-type #:file{:name "file.txt"}
                                                      [#:config.type{:name      "type1"
                                                                     :selectors [{:starts-with "file"}
                                                                                 {:ends-with   "txt"}]}
-                                                      #config.type{:name      "type2"
-                                                                   :selectors [{:equals "file.txt"}]}])))
+                                                      #:config.type{:name      "type2"
+                                                                    :selectors [{:equals "file.txt"}]}])))
         "selects first type that match in seq order"))
 
   (testing "when no type definition is provided returns nil"
     (is (nil? (t/select-type {:config.type/name "file.txt"} nil)))
-    (is (nil? (t/select-type {:config.type/name "file.txt"} []))))) 
+    (is (nil? (t/select-type {:config.type/name "file.txt"} [])))))
+
+(deftest infer-type-test
+  (testing "Infer type for file map"
+    (is (= {:file/name "file_to_test.txt"
+            :file/type "type1"}
+           (t/infer-type [#:config.type{:name      "type1"
+                                        :selectors [{:starts-with "file"}
+                                                    {:ends-with   "txt"}]}
+                          #:config.type{:name      "type2"
+                                        :selectors [{:equals "file.txt"}]}]
+                         #:file{:name "file_to_test.txt"}))
+        "adds key :file/type with the inferred type as value")
+
+    (is (= {:file/name "no_match.txt"}
+           (t/infer-type [#:config.type{:name      "type1"
+                                        :selectors [{:starts-with "file"}
+                                                    {:ends-with   "txt"}]}
+                          #:config.type{:name      "type2"
+                                        :selectors [{:equals "file.txt"}]}]
+                         #:file{:name "no_match.txt"}))
+        "does not modify the file map"))) 

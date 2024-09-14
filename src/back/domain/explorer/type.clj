@@ -4,19 +4,22 @@
 
 (def file-selectors-catalog {:equals ;; ----------------------------------
                              (fn [val options file-m]
-                               (= val (:name file-m)))
+                               (= val (:file/name file-m)))
 
                              :starts-with ;; -----------------------------
                              (fn [val options file-m]
-                               (s/starts-with? (:name file-m) val))
+                               (s/starts-with? (:file/name file-m) val))
 
                              :ends-with ;; ------------------------------
                              (fn [val options file-m]
-                               (s/ends-with? (:name file-m) val))})
+                               (s/ends-with? (:file/name file-m) val))})
 
 (def file-selector-keys (keys file-selectors-catalog))
 
-(defn create-selector-pred [m]
+(defn create-selector-pred 
+  "When *m* contains a key in the file-selectors-catalog, returns a predicate function
+   to evaluate if a *file-m* matches this selector. Otherwise returns *nil*."
+  [m]
   (when-let [selector-key (some (set (keys m)) file-selector-keys)]
     (fn [file-m]
       (let [selector-val (get m selector-key)
@@ -32,7 +35,9 @@
   (let [selector-match? (partial selector-match file-m)]
     (every? selector-match? selectors-xs)))
 
-(defn type-match [type-def-m file-m]
+(defn type-match 
+  "Returns True if type definition *type-def-map* matches *file-m*."
+  [type-def-m file-m] 
   (or
    ;; type with no selector always match
    (not (:config.type/selectors type-def-m))
@@ -40,39 +45,16 @@
    (all-selectors-match (:config.type/selectors type-def-m) file-m)))
 (def type-no-match (complement type-match))
 
-(defn select-type [file-m type-def-xs]
+(defn select-type 
+  "Returns the type definition map that matches *file-m* or *nil* if no type match is found."
+  [file-m type-def-xs]
   (first (drop-while #(type-no-match % file-m) type-def-xs)))
 
-(comment
-
-  (def m #:config.type{:name "type1"
-                       :selectors [{:starts-with "file"}
-                                   {:ends-with "txt"}]})
-  (keys m)
-
-  (:config.type/name m)
-
-  (select-type {:name "file.txt"}
-               [#:config.type{:name "type1"
-                              :selectors [{:starts-with "file"}
-                                          {:ends-with "txt"}]}])
-  (select-type {:name "file.txt"}
-               [{:name "type1"
-                 :selectors [{:starts-with "file"}
-                             {:ends-with "txt"}]}])
-  ;;
-  )
 (defn infer-type
-  "Given a map *file-m* and a seq of type definitions, add key `:type` to *file-m* if
-     it matches a type definition or returns it unchanged."
+  "Given a map *file-m* and a seq of type definitions, add key `:file/type` to *file-m* if
+   it matches a type definition or returns it unchanged."
   [type-def-xs file-m]
-
-  #_(tap> {:type-def-xs type-def-xs
-           :file-m file-m})
   (if-let [infered-type (select-type file-m type-def-xs)]
-    (do
-      (tap> {:infered-type infered-type})
-      (assoc file-m :type (:config.type/name infered-type)))
-
+    (assoc file-m :file/type (:config.type/name infered-type))
     file-m))
 

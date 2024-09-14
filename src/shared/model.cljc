@@ -11,8 +11,10 @@
 ;; caonical path id
 (s/def :file/id   string?)
 (s/def :file/action   string?)
+(s/def :file/type   string?)
 ;; information map describing a file or a folder
-(s/def :file/info (s/keys :req [:file/name :file/dir? :file/path :file/id :file/action]))
+(s/def :file/info (s/keys :req [:file/name :file/dir? :file/path :file/id]
+                          :opt [:file/action :file/type]))
 
 (s/def ::content (s/coll-of :file/info))
 

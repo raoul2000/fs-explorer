@@ -68,22 +68,15 @@
                                                   :root-path root-path})))
       (str abs-path))))
 
-;; actions  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn add-actions [config-actions result]
-  (update result :model/content (fn [old]
-                                  (map #(assoc % :file/action "") old))))
-
 ;; type ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn add-types [type-def-xs result]
-  (update result :model/content (fn [old]
-                                  (map #(infer-type type-def-xs %) old))))
+  (update result :model/content (fn [file-xs]
+                                  (map #(infer-type type-def-xs %) file-xs))))
 ;; explore  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn explore [fs-path {:keys [root-dir-path types] :as options}]
-  #_{:post [(s/valid? :model/read-result %)]}
-  (tap> {:options options})
+  {:post [(s/valid? :model/read-result %)]}
   (let [abs-path (absolutize-path (or fs-path "") root-dir-path)]
 
     (when-not (fs/exists? abs-path)
@@ -94,16 +87,7 @@
     (if (fs/regular-file? abs-path)
       (read-file-content abs-path)
       (->> (list-dir-content abs-path root-dir-path)
-           #_(add-actions (:user-config/actions options))
-           (add-types   types)))))
-
-(comment
-  (explore "" {:root-dir-path "c:\\tmp"})
-  (explore "" {:root-dir-path "c:\\tmp"
-                       :types [{:name "TYPE1"
-                                :selectors [{:equals "README.md"}]}]})
-  ;;
-  )
+           (add-types        types)))))
 
 ;; index ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
