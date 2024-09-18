@@ -94,7 +94,8 @@
      [:td
       (if is-dir
         [render-dir item]
-        [render-file item config-actions])]]))
+        [render-file item config-actions])]
+     [:td (:type item)]]))
 
 (defn explorer-view []
   (let [loading? (<loading?)]
