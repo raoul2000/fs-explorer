@@ -55,7 +55,25 @@
 
      (is (spec/valid? :config/types [#:config.type{:name "type name"}
                                      #:config.type{:name "other type name"}])
-         "type config maps must be namespaced"))))
+         "type config maps must be namespaced"))
+
+   (testing "actions config"
+     (is (not (spec/valid? :config/actions []))
+         "empty actions config is not allowed")
+
+     (is (spec/valid? :config/actions [#:config.action{:name "action1"
+                                                       :exec "prog.exe"}
+                                       #:config.action{:name "action2"
+                                                       :exec "prog.exe"}])
+         "actions are valid")
+
+     (is (not (spec/valid? :config/actions [#:config.action{:name "action1"}]))
+         "key :exec is required")
+
+     (is (not (spec/valid? :config/actions [#:config.action{:name "action1"
+                                                            :exec "prog.exe"
+                                                            :args "scalar"}]))
+         "key :arg must be a seq"))))
 
 (deftest add-ns-to-user-config-test
   (testing "adding namespace to user config map"

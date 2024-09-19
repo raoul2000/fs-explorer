@@ -162,7 +162,7 @@
   ;; json is ok ..
 
   (print (pr-str parsed-data))
-  ;; bnut EDN includes reader tag that can't be evaluated by clojurescript
+  ;; but EDN includes reader tag that can't be evaluated by clojurescript
   ;; For example ':#ordered/map' below
   ;;
   ;; =>  #ordered/map ([:root-dir-path "c:\\dev\\ws\\lab\\fs-explorer\\test\\back\\fixtures"] 
@@ -206,6 +206,30 @@
                    {:equals-ignore-case "/ReadMe.MD"}),
                  :actions '({:MY_FIRST_COMMAND nil, :trigger {:on-click true, :on-double-click false}} "MY_SECOND_COMMAND")}
                 {:name "MY_SECOND_TYPE", :selector '({:ends-with-ignore-case "txt"})})})
+  ;;
+  )
+
+(comment
+  ;; work on the action (or command) config
+
+  (def yaml-input-2  ["actions:"
+                      "  - name: notepad"
+                      "    exec: notepad.exe"
+                      "    args: "
+                      "    - arg1 "
+                      "    - 112.32 "
+                      "    - \"spaces char\" "
+                      "    - true "
+                      "  - name: send_request"
+                      "    exec: \"c:\\\\program file\\\\photoshop.exe\""
+                      "    args: "
+                      "    - --output-file "
+                      "    - --debug-mode "])
+
+  (yaml/parse-string (s/join "\n" yaml-input-2))
+  ;; reading from file ..
+
+  (def conf (yaml/parse-stream (io/reader "./test/back/fixtures/config-2.yaml")))
   ;;
   )
 

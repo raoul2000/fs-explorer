@@ -40,6 +40,18 @@
                                              :opt [:config.type/selectors]))
 (spec/def :config/types (spec/coll-of :config.type/definition :min-count 1))
 
+(spec/def :config.action/name :string/not-blank)
+(spec/def :config.action/exec :string/not-blank)
+(spec/def :config.action/args (spec/coll-of (spec/or :string string?
+                                                     :number number?
+                                                     :boolean boolean?)
+                                            :min-count 1))
+
+(spec/def :config.action/definition (spec/keys :req [:config.action/name
+                                                     :config.action/exec]
+                                               :opt [:config.action/args]))
+
+(spec/def :config/actions (spec/coll-of :config.action/definition :min-count 1))
 ;; app config : key are required
 
 (spec/def :config/map  (spec/keys :req [:config/server-port
@@ -47,7 +59,8 @@
                                         :config/open-browser
                                         :config/browse-url]
 
-                                  :opt [:config/types]))
+                                  :opt [:config/types
+                                        :config/actions]))
 
 ;; conf settings provided by the user and dedicated to overloads default settings
 ;; all keys are optionals
@@ -123,6 +136,9 @@
 (defn build-types [m]
   (map #(add-ns-to-map "config.type" %) m))
 
+(defn build-actions [m]
+  (map #(add-ns-to-map "config.action" %) m))
+
 (comment
   (def no-ns-types [{:name "type"
                      :selectors [{:equal "file"}]}
@@ -147,6 +163,7 @@
             (let [ns-key (add-ns-to-key "config" k)]
               [ns-key (case ns-key
                         :config/types     (build-types   v)
+                        :config/actions   (build-actions v)
                         v)])) identity m))
 
 (comment
@@ -251,6 +268,7 @@
                           add-ns-to-user-config))]
     (when user-config
       (when-let [validation-error (user-config-error user-config)]
+        (print validation-error)
         (throw (ex-info "Invalid User Configuration" {:file  user-config-file-path
                                                       :error validation-error}))))
 
