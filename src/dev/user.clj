@@ -56,7 +56,9 @@
                                   :user-config/open-browser  false})
 
   ;; start the system 
+  
   (def system (ig/init system-config))
+
 
   ;; stop the system
   (ig/halt! system)

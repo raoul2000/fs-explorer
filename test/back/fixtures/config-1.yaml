@@ -12,10 +12,6 @@ types:
     selectors:
       - equals: README.md
   - name: "DOCKER_COMPOSE"
-    actions: 
-     - notepad
-     - name: Notepad ++
-       label: Run Notepad ++
     selectors:
       - starts-with: docker-compose
       - ends-with : yaml
