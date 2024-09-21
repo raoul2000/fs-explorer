@@ -105,11 +105,63 @@
   ;; using juxt ?
 
   (into {}
-        (map (juxt  (comp (partial add-ns-to-key "my-ns") first ) second)
+        (map (juxt  (comp (partial add-ns-to-key "my-ns") first) second)
              {:a 1
               :b 2}))
   ;; ok
+
+  ;;
+  )
+
+
+(comment
+  ;; refactor / improve map ns adding to config map
+  ;; use update-in to add namespace on deeply nested maps
+
+  (def m1 {:browse-url "http://hostname"
+           :actions [{:name "notepad"
+                      :exec "notepad.exe"}
+                     {:name "photoshop"
+                      :exec "c:\\programs\\photoshop.exe"}]
+           :types [{:name      "type1"
+                    :selectors [{:starts-with "file"}
+                                {:ends-with "txt"}]
+                    :actions    [{:name "notepad"}]}]})
+
+  (defn add-ns-to-map
+    "Add *ns-name* namespace to all keys of map *m*.
+     When a key is a string it is converted into a keyword.
+     When a key is a keyword already with a namespace, it is replaced by the given ns"
+    [m ns-name]
+    (into {} (map (fn [[k v]]
+                    [(add-ns-to-key ns-name k) v]) m)))
+
+  (update-in m1 [:actions] (fn [actions]
+                             (map #(add-ns-to-map % "action") actions)))
+
+  (update-in m1 [:types] (fn [actions]
+                           (map #(add-ns-to-map % "type") actions)))
+
+  (defn add-config-ns [m]
+    (add-ns-to-map m "config"))
+
+  (defn add-type-action-ns [m]
+    (add-ns-to-map m "action"))
   
+  (defn add-type-ns [k m]
+    (update m k (fn [type-m]
+                  (map #(add-ns-to-map % "type") type-m))))
+
+  (defn add-action-ns [k m]
+    (update m k (fn [action-m]
+                  (map #(add-ns-to-map % "action") action-m))))
+
+  (->> m1
+       add-config-ns
+       (add-type-ns   :config/types)
+       (add-action-ns :config/actions))
+
+
   ;;
   )
 
