@@ -147,7 +147,7 @@
 
   (defn add-type-action-ns [m]
     (add-ns-to-map m "action"))
-  
+
   (defn add-type-ns [k m]
     (update m k (fn [type-m]
                   (map #(add-ns-to-map % "type") type-m))))
@@ -160,6 +160,50 @@
        add-config-ns
        (add-type-ns   :config/types)
        (add-action-ns :config/actions))
+
+  ;; let's try something else
+
+  (defn add-ns [ns-name k]
+    (keyword ns-name (name k)))
+
+
+  (defn process-type-selectors [selectors-xs]
+    (map #(into {} (map (fn [[k v]]
+                          (vector (add-ns "selector" k) v)) %)) selectors-xs))
+
+  (defn process-config-types [types-xs]
+    (map #(into {} (map (fn [[k v]]
+                          (vector (add-ns "type" k)
+                                  (case k
+                                    :selectors (process-type-selectors v)
+                                    v))) %)) types-xs))
+
+  (defn process-config-actions [actions-xs]
+    (map #(into {} (map (fn [[k v]]
+                          (vector (add-ns "action" k) v)) %)) actions-xs))
+
+
+  (defn process-config [m]
+    (into {} (map (fn [[k v]]
+                    (vector (add-ns "config" k)
+                            (case k
+                              :types   (process-config-types v)
+                              :actions (process-config-actions v)
+                              v))) m)))
+
+  (def m-ns (process-config {:k "v"
+                             :k2 {:k22 "22"}
+                             :actions [{:name "noptepad"
+                                        :exec "notepad.exe"}]
+                             :types [{:name "type1"}
+                                     {:name "type2"
+                                      :selectors [{:starts-with "file"}]}]}))
+
+  (:config/k m-ns)
+  (:type/name (first (:config/types m-ns)))
+
+  (-> m-ns :config/types first :type/name)
+  (-> m-ns :config/types second :type/selectors first :selector/starts-with)
 
 
   ;;

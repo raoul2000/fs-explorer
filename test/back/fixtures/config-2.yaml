@@ -16,6 +16,9 @@ types:
   - name: "MARKDOWN_README"
     selectors:
       - equals: README.md
+    actions:
+      - name: notepad
+      - name: photoshop
   - name: "DOCKER_COMPOSE"
     selectors:
       - starts-with: docker-compose

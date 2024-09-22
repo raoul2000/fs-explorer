@@ -49,6 +49,13 @@
                                                                        {:ends-with  "txt"}]})
          "selectors when configured must not be empty"))
 
+   (testing "types action"
+     (is (not (spec/valid? :config.type/actions []))
+         "empty type actions is not allowed")
+
+     (is (spec/valid? :config.type/actions [{:name "action1"}
+                                            {:name "action2"}])))
+
    (testing "types config"
      (is (not (spec/valid? :config/types []))
          "empty type config is not allowed")
@@ -130,11 +137,18 @@
                     :root-dir-path "c:\\tmp",
                     :open-browser  true,
                     :browse-url    "http://localhost:7777/",
+                    :actions       '(#:config.action{:name "action1",
+                                                     :exec "notepad.exe",
+                                                     :args ("arg1")}
+                                     #:config.action{:name "action2",
+                                                     :exec "notepad.exe no arg"}),
+
                     :types         '(#:config.type{:name "MY_FIRST_TYPE",
                                                    :selectors ({:match-regexp ".*/README.md$"}
                                                                {:ends-with "md"})}
                                      #:config.type{:name "MY_SECOND_TYPE",
-                                                   :selectors ({:ends-with-ignore-case "txt"})})}
+                                                   :selectors ({:ends-with-ignore-case "txt"})
+                                                   :actions ({:name "action1"})})}
 
            (conf/create-config "./test/back/fixtures/config_test-1.yaml"))
         "when file path is given, merge with default config")

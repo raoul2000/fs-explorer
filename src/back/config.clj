@@ -33,19 +33,31 @@
 (spec/def :config.type.selector/name keyword?)
 (spec/def :config.type.selector/arg  string?)
 
-(spec/def :config.type/selectors  (spec/coll-of (spec/map-of :config.type.selector/name :config.type.selector/arg)  :min-count 1))
+(spec/def :config.type/selectors  (spec/coll-of (spec/map-of :config.type.selector/name 
+                                                             :config.type.selector/arg)  :min-count 1))
+
+;; actions properties
+
+(spec/def :config.action/name      :string/not-blank)
+(spec/def :config.action/label     :string/not-blank)
+(spec/def :config.action/exec      :string/not-blank)
+(spec/def :config.action/args      (spec/coll-of (spec/or :string string?
+                                                          :number number?
+                                                          :boolean boolean?)
+                                                 :min-count 1))
+
+;; action ref from type definition
+(spec/def :config.type/action-ref  (spec/keys :req-un  [:config.action/name]
+                                              :opt-un  [:config.action/label]))
+(spec/def :config.type/actions     (spec/coll-of :config.type/action-ref :min-count 1))
 
 (spec/def :config.type/name      :string/not-blank)
 (spec/def :config.type/definition (spec/keys :req [:config.type/name]
-                                             :opt [:config.type/selectors]))
+                                             :opt [:config.type/selectors
+                                                   :config.type/actions]))
 (spec/def :config/types (spec/coll-of :config.type/definition :min-count 1))
 
-(spec/def :config.action/name :string/not-blank)
-(spec/def :config.action/exec :string/not-blank)
-(spec/def :config.action/args (spec/coll-of (spec/or :string string?
-                                                     :number number?
-                                                     :boolean boolean?)
-                                            :min-count 1))
+
 
 (spec/def :config.action/definition (spec/keys :req [:config.action/name
                                                      :config.action/exec]
@@ -69,7 +81,8 @@
                                              :config/root-dir-path
                                              :config/open-browser
                                              :config/browse-url
-                                             :config/types]))
+                                             :config/types
+                                             :config/actions]))
 
 ;; default config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -283,11 +296,23 @@
 (comment
 
   (def cfg (read-from-file "./test/back/fixtures/config-1.yaml"))
+  (def cfg (read-from-file "./test/back/fixtures/config_test-1.yaml"))
+  
+  (def cfg-ns (add-ns-to-user-config cfg))
 
-  (spec/valid? :user-config/map cfg)
+  (:config/types cfg-ns)
+  (-> (get-in cfg-ns [:config/types])
+      second
+      :config.type/actions
+      first
+      :name)
+  
+  (spec/valid? :user-config/map cfg-ns)
+  (spec/explain :user-config/map cfg-ns)
   ;; success because all ns keys are optionals
 
-  (spec/valid? :config/map cfg)
+  (spec/valid? :config/map cfg-ns)
+  (spec/explain :config/map  cfg-ns)
   ;; fails because keys are not namespaced 
 
   (server-port cfg)

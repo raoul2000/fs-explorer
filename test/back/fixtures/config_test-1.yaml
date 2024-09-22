@@ -3,12 +3,22 @@
 root-dir-path: c:\tmp
 open-browser : true
 server-port: 7777
+actions:
+  - name: action1
+    exec: notepad.exe
+    args: 
+      - "arg1"
+  - name: action2
+    exec: notepad.exe no arg
 types:
   - name: "MY_FIRST_TYPE"
     selectors:
       - match-regexp: .*/README.md$
       - ends-with: md
+  # -------------------------------------------
   - name: "MY_SECOND_TYPE"
     selectors:
       - ends-with-ignore-case: txt
+    actions:
+      - name: action1
       
