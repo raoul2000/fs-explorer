@@ -171,11 +171,16 @@
     (map #(into {} (map (fn [[k v]]
                           (vector (add-ns "selector" k) v)) %)) selectors-xs))
 
+  (defn process-type-actions [actions-xs]
+    (map #(into {} (map (fn [[k v]]
+                          (vector (add-ns "action" k) v)) %)) actions-xs))
+
   (defn process-config-types [types-xs]
     (map #(into {} (map (fn [[k v]]
                           (vector (add-ns "type" k)
                                   (case k
                                     :selectors (process-type-selectors v)
+                                    :actions   (process-type-actions v)
                                     v))) %)) types-xs))
 
   (defn process-config-actions [actions-xs]
@@ -197,6 +202,9 @@
                                         :exec "notepad.exe"}]
                              :types [{:name "type1"}
                                      {:name "type2"
+                                      :selectors [{:starts-with "file"}]}
+                                     {:name "type3"
+                                      :actions [{:name "notepad"}]
                                       :selectors [{:starts-with "file"}]}]}))
 
   (:config/k m-ns)
@@ -204,6 +212,48 @@
 
   (-> m-ns :config/types first :type/name)
   (-> m-ns :config/types second :type/selectors first :selector/starts-with)
+
+  ;; and lets spec the config map 
+
+  ;; some generic specs
+  (defn can-be-converted-to-url?
+    "Returns TRUE if *s* can be converted into a java.net.URL object"
+    [s]
+    (try
+      (new java.net.URL s)
+      true
+      (catch Throwable _t false)))
+
+  (spec/def :string/not-blank           (spec/and string? (complement str/blank?)))
+  (spec/def :coll/non-empty-string-list (spec/coll-of :string/not-blank :min-count 1))
+
+  (spec/def :action/name string?)
+  (spec/def :action/exec string?)
+  (spec/def :action/args (spec/coll-of (spec/coll-of (spec/or :string  string?
+                                                              :number  number?
+                                                              :boolean boolean?)
+                                                     :min-count 1)))
+  (spec/def :action/def (spec/keys :req [:action/name
+                                         :action/exec]
+                                   :opt [:action/args]))
+
+  (spec/def :selector/starts-with string?)
+  (spec/def :selector/ends-with   string?)
+  (spec/def :selector/equals      string?)
+  (spec/def :selector/def         (spec/keys :req [(spec/or :starts-with :selector/starts-with
+                                                            :ends-with   :selector/ends-with
+                                                            :equals      :selector/equals)]))
+
+
+  (spec/def :selector/def (spec/keys :req [::a ::b (spec/or ::n :selector/starts-with  
+                                                            ::s  :selector/ends-with)]))
+  
+  (spec/def :config/server-port    (spec/and int? #(< 0 % 65353)))
+  (spec/def :config/root-dir-path  string?)
+  (spec/def :config/open-browser   boolean?)
+  (spec/def :config/browse-url     can-be-converted-to-url?)
+
+  (spec/dev :config/types (spec/coll-of (spec/k)))
 
 
   ;;
