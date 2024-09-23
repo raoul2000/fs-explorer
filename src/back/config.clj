@@ -6,12 +6,12 @@
   (:require [clj-yaml.core :as yaml]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as spec]
-            [clojure.walk :as w]
             [clojure.data.json :as json]
             [babashka.fs :as fs]
             [clojure.string :as s]))
 
 ;; spec ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (defn can-be-converted-to-url?
   "Returns TRUE if *s* can be converted into a java.net.URL object"
@@ -21,70 +21,57 @@
     true
     (catch Throwable _t false)))
 
-
 (spec/def :string/not-blank           (spec/and string? (complement s/blank?)))
 (spec/def :coll/non-empty-string-list (spec/coll-of :string/not-blank :min-count 1))
+
+(spec/def :action/name  :string/not-blank)
+(spec/def :action/exec  :string/not-blank)
+(spec/def :action/args  (spec/coll-of (spec/or :string  string?
+                                               :number  number?
+                                               :boolean boolean?)
+                                      :min-count 1))
+(spec/def :action/def   (spec/keys :req [:action/name
+                                         :action/exec]
+                                   :opt [:action/args]))
+
+(spec/def :selector/starts-with :string/not-blank)
+(spec/def :selector/ends-with   :string/not-blank)
+(spec/def :selector/equals      :string/not-blank)
+(spec/def :selector/def         (spec/keys :req [(or :selector/starts-with
+                                                     :selector/ends-with
+                                                     :selector/equals)]))
+
+(spec/def :type/name       :string/not-blank)
+(spec/def :type/selectors  (spec/coll-of :selector/def :min-count 1))
+(spec/def :type/action-ref (spec/keys :req [:action/name]))
+(spec/def :type/actions    (spec/coll-of  :type/action-ref :min-count 1))
+(spec/def :type/def        (spec/keys :req [:type/name
+                                            :type/selectors]
+                                      :opt [:type/actions]))
 
 (spec/def :config/server-port    (spec/and int? #(< 0 % 65353)))
 (spec/def :config/root-dir-path  string?)
 (spec/def :config/open-browser   boolean?)
 (spec/def :config/browse-url     can-be-converted-to-url?)
+(spec/def :config/types          (spec/coll-of :type/def   :min-count 1))
+(spec/def :config/actions        (spec/coll-of :action/def :min-count 1))
 
-(spec/def :config.type.selector/name keyword?)
-(spec/def :config.type.selector/arg  string?)
+(spec/def :config/map            (spec/keys :req [:config/server-port
+                                                  :config/root-dir-path
+                                                  :config/open-browser
+                                                  :config/browse-url]
+                                            :opt [:config/types
+                                                  :config/actions]))
 
-(spec/def :config.type/selectors  (spec/coll-of (spec/map-of :config.type.selector/name 
-                                                             :config.type.selector/arg)  :min-count 1))
-
-;; actions properties
-
-(spec/def :config.action/name      :string/not-blank)
-(spec/def :config.action/label     :string/not-blank)
-(spec/def :config.action/exec      :string/not-blank)
-(spec/def :config.action/args      (spec/coll-of (spec/or :string string?
-                                                          :number number?
-                                                          :boolean boolean?)
-                                                 :min-count 1))
-
-;; action ref from type definition
-(spec/def :config.type/action-ref  (spec/keys :req-un  [:config.action/name]
-                                              :opt-un  [:config.action/label]))
-(spec/def :config.type/actions     (spec/coll-of :config.type/action-ref :min-count 1))
-
-(spec/def :config.type/name      :string/not-blank)
-(spec/def :config.type/definition (spec/keys :req [:config.type/name]
-                                             :opt [:config.type/selectors
-                                                   :config.type/actions]))
-(spec/def :config/types (spec/coll-of :config.type/definition :min-count 1))
-
-
-
-(spec/def :config.action/definition (spec/keys :req [:config.action/name
-                                                     :config.action/exec]
-                                               :opt [:config.action/args]))
-
-(spec/def :config/actions (spec/coll-of :config.action/definition :min-count 1))
-;; app config : key are required
-
-(spec/def :config/map  (spec/keys :req [:config/server-port
-                                        :config/root-dir-path
-                                        :config/open-browser
-                                        :config/browse-url]
-
-                                  :opt [:config/types
-                                        :config/actions]))
-
-;; conf settings provided by the user and dedicated to overloads default settings
-;; all keys are optionals
-
-(spec/def :user-config/map  (spec/keys :opt [:config/server-port
-                                             :config/root-dir-path
-                                             :config/open-browser
-                                             :config/browse-url
-                                             :config/types
-                                             :config/actions]))
+(spec/def :user-config/map       (spec/keys :opt [:config/server-port
+                                                  :config/root-dir-path
+                                                  :config/open-browser
+                                                  :config/browse-url
+                                                  :config/types
+                                                  :config/actions]))
 
 ;; default config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (def default-port 8890)
 (defn create-browse-url [port]
@@ -108,6 +95,7 @@
 
 
 ;; read user config from YAML/JSON file ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (defn- read-from-file
   "Read the given *file-path* and parse its YAML or JSON content to the returned map.
@@ -134,57 +122,40 @@
 
 ;; add namespace ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn add-ns-to-key [ns-name k]
+
+(defn add-ns [ns-name k]
   (keyword ns-name (name k)))
 
-(defn add-ns-to-map
-  "Add *ns-name* namespace to all keys of map *m*.
-   
-   When a key is a string it is converted into a keyword.
+(defn process-type-selectors [selectors-xs]
+  (map #(into {} (map (fn [[k v]]
+                        (vector (add-ns "selector" k) v)) %)) selectors-xs))
 
-   When a key is a keyword already with a namespace, it is replaced by the given ns"
-  [ns-name m]
-  (into {} (map (fn [[k v]]
-                  [(add-ns-to-key ns-name k) v]) m)))
+(defn process-type-actions [actions-xs]
+  (map #(into {} (map (fn [[k v]]
+                        (vector (add-ns "action" k) v)) %)) actions-xs))
 
-(defn build-types [m]
-  (map #(add-ns-to-map "config.type" %) m))
+(defn process-config-types [types-xs]
+  (map #(into {} (map (fn [[k v]]
+                        (vector (add-ns "type" k)
+                                (case k
+                                  :selectors (process-type-selectors v)
+                                  :actions   (process-type-actions v)
+                                  v))) %)) types-xs))
 
-(defn build-actions [m]
-  (map #(add-ns-to-map "config.action" %) m))
-
-(comment
-  (def no-ns-types [{:name "type"
-                     :selectors [{:equal "file"}]}
-                    {:name "type2"}])
-  (spec/valid? :config/types no-ns-types)
-  (spec/explain :config/types no-ns-types)
-
-  (def types-with-ns (build-types no-ns-types))
-  (spec/valid? :config/types types-with-ns)
-
-  (def cfg (read-from-file "./test/back/fixtures/config-1.yaml"))
-
-
-  ;;
-  )
+(defn process-config-actions [actions-xs]
+  (map #(into {} (map (fn [[k v]]
+                        (vector (add-ns "action" k) v)) %)) actions-xs))
 
 (defn add-ns-to-user-config
   "Given *m* a user config map with no namespace, returns a new map where keywords
    have been namespaced."
   [m]
-  (w/walk (fn [[k v]]
-            (let [ns-key (add-ns-to-key "config" k)]
-              [ns-key (case ns-key
-                        :config/types     (build-types   v)
-                        :config/actions   (build-actions v)
-                        v)])) identity m))
-
-(comment
-  (add-ns-to-user-config {:root-dir-path "d:/tmp"
-                          :types   []})
-  ;;
-  )
+  (into {} (map (fn [[k v]]
+                  (vector (add-ns "config" k)
+                          (case k
+                            :types   (process-config-types v)
+                            :actions (process-config-actions v)
+                            v))) m)))
 
 ;; merge user config and default config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -297,7 +268,7 @@
 
   (def cfg (read-from-file "./test/back/fixtures/config-1.yaml"))
   (def cfg (read-from-file "./test/back/fixtures/config_test-1.yaml"))
-  
+
   (def cfg-ns (add-ns-to-user-config cfg))
 
   (:config/types cfg-ns)
@@ -306,7 +277,7 @@
       :config.type/actions
       first
       :name)
-  
+
   (spec/valid? :user-config/map cfg-ns)
   (spec/explain :user-config/map cfg-ns)
   ;; success because all ns keys are optionals

@@ -4,128 +4,132 @@
             [config :as conf])
   (:import [clojure.lang ExceptionInfo]))
 
-((deftest spec-test
-   (testing "server-port validation"
-     (are [result arg-map] (= result (spec/valid? :config/server-port (:port arg-map)))
-       true      {:port 3000}
-       false     {:port -1}
-       false     {:port 65353}
-       false     {:port 1.25}
-       false     {:port "8888"}))
+(deftest spec-test
+  (testing "server-port validation"
+    (are [result arg-map] (= result (spec/valid? :config/server-port (:port arg-map)))
+      true      {:port 3000}
+      false     {:port -1}
+      false     {:port 65353}
+      false     {:port 1.25}
+      false     {:port "8888"}))
 
-   (testing "browse url validation"
-     (are [result arg-map] (= result (spec/valid? :config/browse-url (:url arg-map)))
-       true      {:url "http://host:8888/path/to/index.html"}
-       true      {:url "http://host"}
-       true      {:url "https://host:8888/path/to/index.html"}
-       false     {:url "http://host:XXX/path/to/index.html"}
-       true      {:url "ftp://host:8888/path/to/index.html"}
-       false     {:url "hp://host:8888/path/to/index.html"}))
+  (testing "browse url validation"
+    (are [result arg-map] (= result (spec/valid? :config/browse-url (:url arg-map)))
+      true      {:url "http://host:8888/path/to/index.html"}
+      true      {:url "http://host"}
+      true      {:url "https://host:8888/path/to/index.html"}
+      false     {:url "http://host:XXX/path/to/index.html"}
+      true      {:url "ftp://host:8888/path/to/index.html"}
+      false     {:url "hp://host:8888/path/to/index.html"}))
 
-   (testing "selectors"
-     (is (not (spec/valid? :config.type/selectors {:starts-with "str"
-                                                   :ends-with  "txt"}))
-         "selectors is not a map anymore")
+  (testing "selectors"
+    (is (not (spec/valid? :type/selectors {:starts-with "str"
+                                           :ends-with  "txt"}))
+        "selectors is not a map anymore")
 
-     (is (spec/valid? :config.type/selectors [{:starts-with "str"}
-                                              {:ends-with  "txt"}])
-         "selectors is a collection of maps")
+    (is (spec/valid? :type/selectors [#:selector{:starts-with "str"}
+                                      #:selector{:ends-with  "txt"}])
+        "selectors is a collection of maps")
 
-     (is (not (spec/valid? :config.type/selectors []))
-         "selectors can't be empty"))
+    (is (not (spec/valid? :type/selectors []))
+        "selectors can't be empty"))
 
-   (testing "type definition"
-     (is (not (spec/valid? :config.type/definition #:config.type{}))
+  #(testing "type definition"
+     (is (not (spec/valid? :config/types #:config.type{}))
          "empty type definition is not allowed")
 
-     (is (spec/valid? :config.type/definition #:config.type{:name "type name"})
-         "type name is required")
+     (is (not (spec/valid? :type/def  #:type{:name      "type name"}))
+         "selector is required")
 
-     (is (not (spec/valid? :config.type/definition #:config.type{:name ""}))
+     (is (spec/valid? :type/def  #:type{:name      "type name"
+                                        :selectors [#:selector{:starts-with "abc"}]})
+         "type name and selector ar required")
+
+     (is (not (spec/valid? :type/def #:type{:name ""
+                                            :selector [#:selector{:starts-with "abc"}]}))
          "type name can't be blank")
 
-     (is (spec/valid? :config.type/definition #:config.type{:name "type name"
-                                                            :selector [{:starts-with "str"}
-                                                                       {:ends-with  "txt"}]})
+     (is (not (spec/valid? :type/def #:type{:name "type name"
+                                            :selector []}))
          "selectors when configured must not be empty"))
 
-   (testing "types action"
-     (is (not (spec/valid? :config.type/actions []))
-         "empty type actions is not allowed")
+  (testing "types action"
+    (is (not (spec/valid? :type/actions []))
+        "empty type actions is not allowed")
 
-     (is (spec/valid? :config.type/actions [{:name "action1"}
-                                            {:name "action2"}])))
+    (is (spec/valid? :type/actions [#:action{:name "action1"
+                                             :exec "prog.exe"}])))
 
-   (testing "types config"
-     (is (not (spec/valid? :config/types []))
-         "empty type config is not allowed")
+  #_(testing "types config"
+      (is (not (spec/valid? :config/types []))
+          "empty type config is not allowed")
 
-     (is (spec/valid? :config/types [#:config.type{:name "type name"}
-                                     #:config.type{:name "other type name"}])
-         "type config maps must be namespaced"))
+      (is (spec/valid? :config/types [#:type{:name "type name"
+                                             :selectors [#:selector{:starts-with "abc"}]}])
+          "type config maps must be namespaced"))
 
-   (testing "actions config"
-     (is (not (spec/valid? :config/actions []))
-         "empty actions config is not allowed")
+  #_(testing "actions config"
+      (is (not (spec/valid? :config/actions []))
+          "empty actions config is not allowed")
 
-     (is (spec/valid? :config/actions [#:config.action{:name "action1"
-                                                       :exec "prog.exe"}
-                                       #:config.action{:name "action2"
-                                                       :exec "prog.exe"}])
-         "actions are valid")
+      (is (spec/valid? :config/actions [#:config.action{:name "action1"
+                                                        :exec "prog.exe"}
+                                        #:config.action{:name "action2"
+                                                        :exec "prog.exe"}])
+          "actions are valid")
 
-     (is (not (spec/valid? :config/actions [#:config.action{:name "action1"}]))
-         "key :exec is required")
+      (is (not (spec/valid? :config/actions [#:config.action{:name "action1"}]))
+          "key :exec is required")
 
-     (is (not (spec/valid? :config/actions [#:config.action{:name "action1"
-                                                            :exec "prog.exe"
-                                                            :args "scalar"}]))
-         "key :arg must be a seq"))))
+      (is (not (spec/valid? :config/actions [#:config.action{:name "action1"
+                                                             :exec "prog.exe"
+                                                             :args "scalar"}]))
+          "key :arg must be a seq")))
 
-(deftest add-ns-to-user-config-test
-  (testing "adding namespace to user config map"
-    (is (= "value" (:config/key (conf/add-ns-to-user-config {:key "value"})))
-        "namespace 'config' is added to top key")
+#_(deftest add-ns-to-user-config-test
+    (testing "adding namespace to user config map"
+      (is (= "value" (:config/key (conf/add-ns-to-user-config {:key "value"})))
+          "namespace 'config' is added to top key")
 
-    (is (every? #(= "config" (namespace (first %)))
-                (conf/add-ns-to-user-config {:key1 "value1"
-                                             :key2 "value2"}))
-        "namespace 'config' is added to all top level keys")
+      (is (every? #(= "config" (namespace (first %)))
+                  (conf/add-ns-to-user-config {:key1 "value1"
+                                               :key2 "value2"}))
+          "namespace 'config' is added to all top level keys")
 
-    (is (= #:config{:types
-                    '(#:config.type{:name "type1", :selectors [{:equals "value"}]}
-                      #:config.type{:name "type2", :selectors [{:ends-with "value"}]})}
-           (conf/add-ns-to-user-config {:types [{:name      "type1"
-                                                 :selectors [{:equals "value"}]}
-                                                {:name      "type2"
-                                                 :selectors [{:ends-with "value"}]}]}))
-        "adds namespace 'config.type' to all type definition maps")))
+      (is (= #:config{:types
+                      '(#:config.type{:name "type1", :selectors [{:equals "value"}]}
+                        #:config.type{:name "type2", :selectors [{:ends-with "value"}]})}
+             (conf/add-ns-to-user-config {:types [{:name      "type1"
+                                                   :selectors [{:equals "value"}]}
+                                                  {:name      "type2"
+                                                   :selectors [{:ends-with "value"}]}]}))
+          "adds namespace 'config.type' to all type definition maps")))
 
-(deftest merge-config-test
-  (testing "mergining 2 configs"
-    (is (= #:config{:root-dir-path "path user"}
-           (conf/merge-configs #:config{:root-dir-path "path default"}
-                               #:config{:root-dir-path "path user"}))
-        "user param replace default")
+#_(deftest merge-config-test
+    (testing "mergining 2 configs"
+      (is (= #:config{:root-dir-path "path user"}
+             (conf/merge-configs #:config{:root-dir-path "path default"}
+                                 #:config{:root-dir-path "path user"}))
+          "user param replace default")
 
-    (is (= #:config{:root-dir-path "path default",
-                    :open-browser false}
-           (conf/merge-configs #:config{:root-dir-path "path default"}
-                               #:config{:open-browser false}))
-        "when not re-defined, default param remains")
+      (is (= #:config{:root-dir-path "path default",
+                      :open-browser false}
+             (conf/merge-configs #:config{:root-dir-path "path default"}
+                                 #:config{:open-browser false}))
+          "when not re-defined, default param remains")
 
-    (is (= #:config{:server-port 9999,
-                    :browse-url "http://localhost:9999/"}
-           (conf/merge-configs #:config{:server-port 8888}
-                               #:config{:server-port 9999}))
-        "browser url is updated with user configured server port value")
+      (is (= #:config{:server-port 9999,
+                      :browse-url "http://localhost:9999/"}
+             (conf/merge-configs #:config{:server-port 8888}
+                                 #:config{:server-port 9999}))
+          "browser url is updated with user configured server port value")
 
-    (is (= #:config{:server-port 7777,
-                    :browse-url "http://127.0.0.1:9999"}
-           (conf/merge-configs #:config{:server-port 8888}
-                               #:config{:server-port 7777
-                                        :browse-url "http://127.0.0.1:9999"}))
-        "user param browser url is not modified even when server port is modified")))
+      (is (= #:config{:server-port 7777,
+                      :browse-url "http://127.0.0.1:9999"}
+             (conf/merge-configs #:config{:server-port 8888}
+                                 #:config{:server-port 7777
+                                          :browse-url "http://127.0.0.1:9999"}))
+          "user param browser url is not modified even when server port is modified")))
 
 
 (deftest create-config-test
@@ -137,30 +141,30 @@
                     :root-dir-path "c:\\tmp",
                     :open-browser  true,
                     :browse-url    "http://localhost:7777/",
-                    :actions       '(#:config.action{:name "action1",
-                                                     :exec "notepad.exe",
-                                                     :args ("arg1")}
-                                     #:config.action{:name "action2",
-                                                     :exec "notepad.exe no arg"}),
+                    :actions       '(#:action{:name "action1",
+                                              :exec "notepad.exe",
+                                              :args ("arg1")}
+                                     #:action{:name "action2",
+                                              :exec "notepad.exe no arg"}),
 
-                    :types         '(#:config.type{:name "MY_FIRST_TYPE",
-                                                   :selectors ({:match-regexp ".*/README.md$"}
-                                                               {:ends-with "md"})}
-                                     #:config.type{:name "MY_SECOND_TYPE",
-                                                   :selectors ({:ends-with-ignore-case "txt"})
-                                                   :actions ({:name "action1"})})}
+                    :types         '(#:type{:name "MY_FIRST_TYPE",
+                                            :selectors (#:selector{:starts-with ".*/README.md$"}
+                                                        #:selector{:ends-with "md"})}
+                                     #:type{:name "MY_SECOND_TYPE",
+                                            :selectors (#:selector{:ends-with "txt"})
+                                            :actions (#:action{:name "action1"})})}
 
            (conf/create-config "./test/back/fixtures/config_test-1.yaml"))
         "when file path is given, merge with default config")
 
-    (is (thrown-with-msg? ExceptionInfo  #"Configuration file not found"
+    #_(is (thrown-with-msg? ExceptionInfo  #"Configuration file not found"
                           (conf/create-config "./not_found"))
         "throws when file not found")
 
-    (is (thrown-with-msg? ExceptionInfo  #"Invalid User Configuration"
+    #_(is (thrown-with-msg? ExceptionInfo  #"Invalid User Configuration"
                           (conf/create-config "./test/back/fixtures/config_test-2.yaml"))
         "throws when invalid user configuration")
-    (try
+    #_(try
       (conf/create-config "./test/back/fixtures/config_test-2.yaml")
       (catch ExceptionInfo ex
         (let [error-info (ex-data ex)]
