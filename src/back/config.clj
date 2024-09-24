@@ -91,7 +91,7 @@
 (defn browse-url    [config] (:config/browse-url    config))
 
 (defn types-definition   [config] (:config/types    config))
-(defn actions-definition [config] (:config/actions    config))
+(defn actions-definition [config] (:config/actions  config))
 
 
 ;; read user config from YAML/JSON file ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

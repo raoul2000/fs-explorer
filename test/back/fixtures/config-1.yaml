@@ -8,11 +8,16 @@ actions:
   - name : Notepad ++
     exec: C:\Program Files\Notepad++\notepad++.exe
 types:
-  - name: "MARKDOWN_README"
+  - name: MARKDOWN_README
     selectors:
       - equals: README.md
-  - name: "DOCKER_COMPOSE"
+  - name: BASH_SCRIPT
     selectors:
-      - starts-with: docker-compose
-      - ends-with : yaml
+      - ends-with: .bash
+  - name: EXECUTABLE
+    selectors:
+      - ends-with: .exe
+  - name: XML_FILE
+    selectors:
+      - ends-with: .xml
       

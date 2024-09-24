@@ -23,10 +23,15 @@ Accept: application/edn
 GET {{baseUrl}}/info
 Accept: application/json
 
-### GET /config
+### GET /config JSON
 
 GET {{baseUrl}}/config
 Accept: application/json
+
+### GET /config EDN
+
+GET {{baseUrl}}/config
+Accept: application/edn
 
 ### GET /explore (default)
 
