@@ -2,9 +2,9 @@
   (:require [re-frame.core :as re-frame]))
 
 (re-frame/reg-sub
- ::user-config
+ ::config
  (fn [db _]
-   (:user-config db)))
+   (:config db)))
 
-(defn <user-config []
-  @(re-frame/subscribe [::user-config]))
+(defn <config []
+  @(re-frame/subscribe [::config]))

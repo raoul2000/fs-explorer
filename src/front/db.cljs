@@ -11,7 +11,7 @@
 ;; spec db ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (s/def ::explore     :model/content)
-(s/def ::user-config :user-config/config)
+(s/def ::config :user-config/config)
 (s/def ::current-dir string?)
 (s/def ::loading?    boolean?)
 
@@ -30,7 +30,7 @@
                                       ::explore
                                       ::current-dir
                                       ::search
-                                      ::user-config]))
+                                      ::config]))
 
 ;; Default db ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -41,7 +41,7 @@
                  :search        {:visible?         false
                                  :text-filter      ""
                                  :dir-index        []}
-                 :user-config   {}
+                 :config       {}
                  :server-event  {}})
 (comment
   (s/valid? ::db default-db)
@@ -55,7 +55,7 @@
   [a-spec db]
   true
   #_(when-not (s/valid? a-spec db)
-    (throw (ex-info (str "spec check failed: " {:cause (s/explain-data a-spec db)}) {}))))
+      (throw (ex-info (str "spec check failed: " {:cause (s/explain-data a-spec db)}) {}))))
 
 ;; now we create an interceptor using `after`
 (def check-spec-interceptor (re-frame/after (partial check-and-throw ::db)))
@@ -89,31 +89,30 @@
                        :on-success      [::load-index-success]
                        :on-failure      [::load-index-failure]}]]}))
 
-;; loading user-config  ...
+;; loading config  ...
 
 (re-frame/reg-event-db
- ::load-user-config-success
+ ::load-config-success
  [check-spec-interceptor]
  (fn [db [_ success-response]]
-   (-> db
-       (assoc :user-config  (:response success-response)))))
+   (assoc db :config  (get-in success-response [:response :config]))))
 
 
 (re-frame/reg-event-db
- ::load-user-config-failure
+ ::load-config-failure
  [check-spec-interceptor]
  (fn [db [_ _error-response]]
    db))
 
 (re-frame/reg-event-fx
- ::load-user-config
+ ::load-config
  (fn [_cofx _event]
    {:fx [[:http-xhrio {:method          :get
                        :uri             (str "/config")
                        :format          (json-request-format)
                        :response-format (json-response-format {:keywords? true})
-                       :on-success      [::load-user-config-success]
-                       :on-failure      [::load-user-config-failure]}]]}))
+                       :on-success      [::load-config-success]
+                       :on-failure      [::load-config-failure]}]]}))
 
 ;; initialize db  ...
 
@@ -122,7 +121,7 @@
  (fn [_cofx _event]
    {:db  default-db
     :fx [[:dispatch [::load-index]]
-         [:dispatch [::load-user-config]]]}))
+         [:dispatch [::load-config]]]}))
 
 (defn >initialize-db []
   (re-frame/dispatch [::initialize]))
@@ -132,19 +131,19 @@
 ;; the complete configuration
 
 (re-frame/reg-sub
- ::user-config
+ ::config
  (fn [db _]
-   (:user-config db)))
+   (:config db)))
 
-(defn <user-config []
-  @(re-frame/subscribe [::user-config]))
+(defn <config []
+  @(re-frame/subscribe [::config]))
 
 
 ;; part of the configuration
 
 (re-frame/reg-sub
  ::config-actions
- :<- [::user-config]
+ :<- [::config]
  (fn [user-config]
    (:actions user-config)))
 

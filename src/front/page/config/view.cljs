@@ -1,5 +1,5 @@
 (ns page.config.view
-  (:require [page.config.subs :refer [<user-config]]
+  (:require [page.config.subs :refer [<config]]
             [components.message :refer [error-message info-message]]))
 
 
@@ -42,7 +42,7 @@
    [field-root-dir-path (:root-dir-path user-config)]])
 
 (defn page []
-  (let [config (<user-config)]
+  (let [config (<config)]
     [:div.title "Configuration"
      [:hr]
      (if (seq config)

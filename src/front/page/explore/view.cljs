@@ -1,114 +1,106 @@
 (ns page.explore.view
-  (:require [clojure.spec.alpha :as spec]
-            [page.explore.subs :refer [<loading? <sorted-explore <breadcrumbs]]
-            [page.explore.event :refer [>run-command]]
-            [db :refer [<config-actions]]
-            [route.helper :refer [>navigate-to-explore create-url-explore]]
-            [reagent.core :as r]
-            [components.icon :refer [folder-icon file-icon home-icon]]
+  (:require [components.icon :refer [file-icon folder-icon home-icon]]
             [components.message :refer [warning-message]]
+            [page.config.subs :refer [<config]]
+            [page.explore.event :refer [>run-command]]
+            [page.explore.subs :refer [<breadcrumbs <loading? <sorted-explore]]
+            [reagent.core :as r]
+            [route.helper :refer [>navigate-to-explore create-url-explore]]
             [utils :refer [cancel-event]]))
 
-(defn eval-selector-rule [[rule-name rule-arg] s]
-  (cond
-    (= rule-name :action.selector/equals)  (= rule-arg s)
-    (= rule-name :action.selector/match)   (re-find (re-pattern rule-arg) s)
-    :else (throw (ex-info "unkown selector rule type" {:selector-rule-name rule-name
-                                                       :selector-rule-arg  rule-arg}))))
+#_(defn eval-selector-rule [[rule-name rule-arg] s]
+    (cond
+      (= rule-name :action.selector/equals)  (= rule-arg s)
+      (= rule-name :action.selector/match)   (re-find (re-pattern rule-arg) s)
+      :else (throw (ex-info "unkown selector rule type" {:selector-rule-name rule-name
+                                                         :selector-rule-arg  rule-arg}))))
 
-(defn selector-match [{id :file/id} selector-val]
-  #_(tap> {:selector-match true
-         :id id
-         :sel selector-val
-         :map? (map? selector-val)
-         :filter (when (map? selector-val)
-                   (filter #(eval-selector-rule % id) selector-val))})
-  (cond
-    (string? selector-val)   (= selector-val id)
-    (map?    selector-val)   (filter #(eval-selector-rule % id) selector-val)
-    :else                    (throw (ex-info "failed to apply selector" {:selector selector-val}))))
-
-(comment
-  (selector-match #:file{:id "filename.txt"}
-                  #:action.selector{:dummy "dummy-value"})
-
-  (selector-match #:file{:id "filename.txt"}
-                  #:action.selector{:equals "filename.txt"})
-  (selector-match #:file{:id "filename.txt"}
-                  #:action.selector{:dummy "dummy-value"})
-  (map identity #:action.selector{:dummy "dummy-value"})
-
-  (filter (fn [n]
-            (when (= 2 n)
-              (throw (ex-info "boum" {:n n})))
-            true) [1 2 3])
-  ;;
-  )
-
-(defn find-matching-command [config-actions item]
-  (js/console.log config-actions)
-  (->> config-actions
-       (take-while #(selector-match item (:selector %)))
-       (first)
-       :command))
+#_(defn selector-match [{id :file/id} selector-val]
+    #_(tap> {:selector-match true
+             :id id
+             :sel selector-val
+             :map? (map? selector-val)
+             :filter (when (map? selector-val)
+                       (filter #(eval-selector-rule % id) selector-val))})
+    (cond
+      (string? selector-val)   (= selector-val id)
+      (map?    selector-val)   (filter #(eval-selector-rule % id) selector-val)
+      :else                    (throw (ex-info "failed to apply selector" {:selector selector-val}))))
 
 
-(comment
-  (def cfg-actions [#:user-config{:selector "readme.txt"
-                                  :command "CMD1"}])
-
-  (try
-    #_(find-matching-command cfg-actions #:file{:id "readme.txt"})
-    (find-matching-command cfg-actions #:file{:id "filename.txt"})
-    (catch ExceptionInfo ex (ex-data ex)))
 
 
-  ;;
-  )
-
-(defn file-action [item config-actions]
-  (if-let   [{:keys [command]} (find-matching-command config-actions item)
-             #_(first (filter (fn [{:keys [selector]}]
-                                (= (:file/name item) selector)) config-actions))]
+#_(defn file-action [item config-actions]
+    (if-let   [{:keys [command]} (find-matching-command config-actions item)
+               #_(first (filter (fn [{:keys [selector]}]
+                                  (= (:file/name item) selector)) config-actions))]
     ;; create anchor element's attributes for the selected action
-    {:href  ""
-     :on-click (fn [event]
-                 (cancel-event event)
-                 (js/console.log (str "running command " command))
-                 (>run-command command (:id item)))}
+      {:href  ""
+       :on-click (fn [event]
+                   (cancel-event event)
+                   (js/console.log (str "running command " command))
+                   (>run-command command (:id item)))}
 
     ;; default action on files : download inline
-    {:href (str "/download?path=" (:path item) "&disposition=inline")
-     :target (:name item)}))
+      {:href (str "/download?path=" (:path item) "&disposition=inline")
+       :target (:name item)}))
 
-(defn render-file [item config-actions]
-  [:a  (file-action item config-actions) (:name item)])
+(defn render-file [item-m]
+  [:a {:href   (str "/download?path=" (:path item-m) "&disposition=inline")
+       :target (:name item-m)}
+   (:name item-m)])
 
-(defn render-dir [item]
-  [:a {:href (create-url-explore (:id item))} (:name item)])
+(defn render-dir [item-m]
+  [:a {:href (create-url-explore (:id item-m))}
+   (:name item-m)])
 
-(defn view-item [config-actions item]
+(defn render-action-item [item-m action-m]
+  [:li
+   [:a {:href  ""
+        :on-click (fn [event]
+                    (cancel-event event)
+                    (js/console.log (str "running command " (:name action-m)))
+                    (>run-command (:name action-m) (:id item-m)))}
+    (:name action-m)]])
+
+(defn actions-for [item-m config]
+  (when-let [item-type (:type item-m)]
+    [:ul
+     (->> config
+          :types
+          (filter #(= item-type (:name %)))
+          first
+          :actions
+          (map #(render-action-item item-m %)))]))
+
+(defn render-item-row [config item]
   (let [is-dir (:dir? item)]
     [:tr  {:key (:path item)}
-     [:td {:width "40px"} (if is-dir folder-icon file-icon)]
+     [:td {:width "40px"}
+      (if is-dir
+        folder-icon
+        file-icon)]
+
      [:td
       (if is-dir
-        [render-dir item]
-        [render-file item config-actions])]
-     [:td (:type item)]]))
+        [render-dir  item]
+        [render-file item])]
+
+     [:td (:type item)]
+     [:td (actions-for item config)]]))
 
 (defn explorer-view []
   (let [loading? (<loading?)]
     [:div
      (when-not loading?
-       (let [list-items     (<sorted-explore)
-             config-actions (<config-actions)]
-         (tap> {:config-actions config-actions
+       (let [list-items (<sorted-explore)
+             config     (<config)]
+         (tap> {:config config
                 :list-items list-items})
          (if-not  (zero? (count list-items))
            [:table.table.is-hoverable.is-fullwidth
             [:tbody
-             (map (partial view-item config-actions) list-items)]]
+             (map #(render-item-row config %) list-items)]]
            [:div [warning-message "This folder is empty"]])))]))
 
 (defn toolbar []
