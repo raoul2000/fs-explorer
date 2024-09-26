@@ -11,9 +11,14 @@ types:
   - name: MARKDOWN_README
     selectors:
       - equals: README.md
+    actions:
+      - name: notepad
+      - name: Notepad ++
   - name: BASH_SCRIPT
     selectors:
       - ends-with: .bash
+    actions:
+      - name: Notepad ++      
   - name: EXECUTABLE
     selectors:
       - ends-with: .exe
