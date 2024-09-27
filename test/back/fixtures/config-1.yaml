@@ -7,6 +7,8 @@ actions:
     exec: notepad.exe
   - name : Notepad ++
     exec: C:\Program Files\Notepad++\notepad++.exe
+  - name: Open File
+    exec: open
 types:
   - name: MARKDOWN_README
     selectors:
@@ -14,6 +16,7 @@ types:
     actions:
       - name: notepad
       - name: Notepad ++
+      - name: Open File
   - name: BASH_SCRIPT
     selectors:
       - ends-with: .bash

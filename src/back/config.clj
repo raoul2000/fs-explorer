@@ -93,6 +93,11 @@
 (defn types-definition   [config] (:config/types    config))
 (defn actions-definition [config] (:config/actions  config))
 
+(defn find-action-by-name [name action-def-xs]
+  (first (filter #(= name (:action/name %)) action-def-xs)))
+
+(defn action-exec [action-m] (get action-m :action/exec))
+
 
 ;; read user config from YAML/JSON file ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

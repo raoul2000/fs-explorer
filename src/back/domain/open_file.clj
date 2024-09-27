@@ -16,7 +16,10 @@
                                                                :cause (.getMessage e)})))))
 
 
-(defn open [file-path {:keys [root-dir-path] :as options}]
+(defn open [file-path root-dir-path]
+  (tap> {:open {:file-path file-path
+                :root-dir-path root-dir-path
+                :abs-path (absolutize-path (or file-path "") root-dir-path)}})
   (let [abs-path (absolutize-path (or file-path "") root-dir-path)]
 
     (when-not (fs/regular-file? abs-path)
