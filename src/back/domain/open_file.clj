@@ -15,17 +15,11 @@
     (catch Exception e (throw (ex-info "failed to open file " {:file f
                                                                :cause (.getMessage e)})))))
 
-
 (defn open [file-path root-dir-path]
-  (tap> {:open {:file-path file-path
-                :root-dir-path root-dir-path
-                :abs-path (absolutize-path (or file-path "") root-dir-path)}})
   (let [abs-path (absolutize-path (or file-path "") root-dir-path)]
-
     (when-not (fs/regular-file? abs-path)
       (throw (ex-info "file not found" {:file-path  file-path
                                         :root-path  root-dir-path
                                         :abs-path   abs-path})))
-
     (open-in-default-app abs-path)
     {:success true}))

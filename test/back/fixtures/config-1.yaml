@@ -28,4 +28,9 @@ types:
   - name: XML_FILE
     selectors:
       - ends-with: .xml
+  - name: TEXT_FILE
+    selectors:
+      - ends-with: .txt
+    actions:
+      - name: Open File
       
