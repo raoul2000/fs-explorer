@@ -5,7 +5,7 @@ async function sleep(millis) {
 async function main() {
     for (let index = 0; index < 10; index++) {
         await sleep(1000);
-        console.log(index);
+        console.log(`index = ${index}`);
     }
 }
 

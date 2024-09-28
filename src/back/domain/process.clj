@@ -43,11 +43,12 @@
   
   (def proc-with-output (p/process "node" (fs/absolutize "test/back/process/long-proc-with-output.js")))
   
-  ;; read max 10 lines from proc output
+  ;; read max 15 times from proc output
   (with-open [rdr (io/reader (:out proc-with-output))]
     (binding [*in* rdr]
-      (loop [max 2]
+      (loop [max 15]
         (when-let [line (read-line)]
+          (tap> line)
           (println :line line)
           (when (pos? max)
             (recur (dec max)))))))
