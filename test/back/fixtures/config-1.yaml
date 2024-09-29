@@ -9,6 +9,8 @@ actions:
     exec: C:\Program Files\Notepad++\notepad++.exe
   - name: Open File
     exec: open
+  - name: Download File
+    exec: download
 types:
   - name: MARKDOWN_README
     selectors:
@@ -22,6 +24,7 @@ types:
       - ends-with: .bash
     actions:
       - name: Notepad ++      
+      - name: Download File      
   - name: EXECUTABLE
     selectors:
       - ends-with: .exe
@@ -31,6 +34,12 @@ types:
   - name: TEXT_FILE
     selectors:
       - ends-with: .txt
+    actions:
+      - name: Open File
+      - name: Download File
+  - name: IMAGE_JPG
+    selectors:
+      - ends-with: jpg
     actions:
       - name: Open File
       
