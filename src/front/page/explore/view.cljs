@@ -13,44 +13,41 @@
        :target (:name item-m)}
    (:name item-m)])
 
-(defn render-dir [item-m]
-  [:a {:href (create-url-explore (:id item-m))}
-   (:name item-m)])
+(defn render-dir [{:keys [id name] :as _item-m}]
+  [:a {:href (create-url-explore id)}
+   name])
 
-(defn render-action-item [item-m action-m]
-  [:li {:key (:name action-m)}
-   [:a {:href  ""
+(defn render-action-item [{item-id :id} {action-name :name}]
+  [:li {:key action-name}
+   [:a {:href      ""
         :on-click (fn [event]
                     (cancel-event event)
-                    (js/console.log (str "running command " (:name action-m)))
-                    (>run-command (:name action-m) (:id item-m)))}
-    (:name action-m)]])
+                    (js/console.log (str "running command " action-name))
+                    (>run-command action-name item-id))}
+    action-name]])
 
-(defn actions-for [item-m config]
-  (when-let [item-type (:type item-m)]
+(defn actions-for [{:keys [type] :as item-m} config]
+  (when type
     [:ul
      (->> config
           :types
-          (filter #(= item-type (:name %)))
+          (filter #(= type (:name %)))
           first
           :actions
           (map #(render-action-item item-m %)))]))
 
-(defn render-item-row [config item]
-  (let [is-dir (:dir? item)]
-    [:tr  {:key (:path item)}
-     [:td {:width "40px"}
-      (if is-dir
-        folder-icon
-        file-icon)]
-
-     [:td
-      (if is-dir
-        [render-dir  item]
-        [render-file item])]
-
-     [:td (:type item)]
-     [:td (actions-for item config)]]))
+(defn render-item-row [config {:keys [dir? path type] :as item}]
+  [:tr  {:key path}
+   [:td {:width "40px"}
+    (if dir?
+      folder-icon
+      file-icon)]
+   [:td
+    (if dir?
+      [render-dir  item]
+      [render-file item])]
+   [:td type]
+   [:td (actions-for item config)]])
 
 (defn explorer-view []
   (let [loading? (<loading?)]
@@ -58,8 +55,6 @@
      (when-not loading?
        (let [list-items (<sorted-explore)
              config     (<config)]
-         (tap> {:config config
-                :list-items list-items})
          (if-not  (zero? (count list-items))
            [:table.table.is-hoverable.is-fullwidth
             [:tbody
