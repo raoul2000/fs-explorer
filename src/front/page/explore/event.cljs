@@ -58,14 +58,17 @@
 (re-frame/reg-event-db
  ::run-command-success
  (fn [db [_ success-response]]
+   (tap> success-response)
+   (when-let [download-params (get-in success-response [:result :redirect])]
+     (.open js/window download-params (get-in success-response [:result :target] "_blank")))
    db))
-
 
 (re-frame/reg-event-db
  ::run-command-failure
  (fn [db [_ error-response]]
    db))
 
+;; voir https://github.com/JulianBirch/cljs-ajax/issues/167#issuecomment-293274030
 
 (re-frame/reg-event-fx
  ::run-command

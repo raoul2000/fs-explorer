@@ -6,6 +6,4 @@
   (fn [request]
     (let [command-name (get-in request [:params :name])
           path         (get-in request [:params :path])]
-      (command/run command-name path options)
-      (response/ok {:response {:command-name command-name
-                               :path         path}}))))
+      (response/ok {:result (command/run command-name path options)}))))

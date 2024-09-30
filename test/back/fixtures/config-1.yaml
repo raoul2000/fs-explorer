@@ -11,6 +11,8 @@ actions:
     exec: open
   - name: Download File
     exec: download
+  - name: View
+    exec: view
 types:
   - name: MARKDOWN_README
     selectors:
@@ -42,4 +44,12 @@ types:
       - ends-with: jpg
     actions:
       - name: Open File
+      - name: View
+  - name: PDF
+    selectors:
+      - ends-with: .pdf
+    actions:
+      - name: Open File
+      - name: View
+      - name: Download File
       

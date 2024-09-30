@@ -8,43 +8,6 @@
             [route.helper :refer [>navigate-to-explore create-url-explore]]
             [utils :refer [cancel-event]]))
 
-#_(defn eval-selector-rule [[rule-name rule-arg] s]
-    (cond
-      (= rule-name :action.selector/equals)  (= rule-arg s)
-      (= rule-name :action.selector/match)   (re-find (re-pattern rule-arg) s)
-      :else (throw (ex-info "unkown selector rule type" {:selector-rule-name rule-name
-                                                         :selector-rule-arg  rule-arg}))))
-
-#_(defn selector-match [{id :file/id} selector-val]
-    #_(tap> {:selector-match true
-             :id id
-             :sel selector-val
-             :map? (map? selector-val)
-             :filter (when (map? selector-val)
-                       (filter #(eval-selector-rule % id) selector-val))})
-    (cond
-      (string? selector-val)   (= selector-val id)
-      (map?    selector-val)   (filter #(eval-selector-rule % id) selector-val)
-      :else                    (throw (ex-info "failed to apply selector" {:selector selector-val}))))
-
-
-
-
-#_(defn file-action [item config-actions]
-    (if-let   [{:keys [command]} (find-matching-command config-actions item)
-               #_(first (filter (fn [{:keys [selector]}]
-                                  (= (:file/name item) selector)) config-actions))]
-    ;; create anchor element's attributes for the selected action
-      {:href  ""
-       :on-click (fn [event]
-                   (cancel-event event)
-                   (js/console.log (str "running command " command))
-                   (>run-command command (:id item)))}
-
-    ;; default action on files : download inline
-      {:href (str "/download?path=" (:path item) "&disposition=inline")
-       :target (:name item)}))
-
 (defn render-file [item-m]
   [:a {:href   (str "/download?path=" (:path item-m) "&disposition=inline")
        :target (:name item-m)}
@@ -55,7 +18,7 @@
    (:name item-m)])
 
 (defn render-action-item [item-m action-m]
-  [:li
+  [:li {:key (:name action-m)}
    [:a {:href  ""
         :on-click (fn [event]
                     (cancel-event event)
