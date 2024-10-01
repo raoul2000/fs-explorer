@@ -13,6 +13,18 @@ actions:
     exec: download
   - name: View
     exec: view
+  - name: node script
+    exec: node
+    args:
+      - C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
+      - true
+      - 3.41165
+      - --inputfile
+      - INPUT_FILE.txt
+    wait: true
+  - name: node script 2
+    exec: node
+    args: C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
 types:
   - name: MARKDOWN_README
     selectors:
@@ -21,6 +33,8 @@ types:
       - name: notepad
       - name: Notepad ++
       - name: Open File
+      - name: node script
+      - name: node script 2
   - name: BASH_SCRIPT
     selectors:
       - ends-with: .bash

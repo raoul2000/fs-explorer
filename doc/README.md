@@ -50,5 +50,19 @@ Example :
 }
 ```
 
+## Custom Actions
 
+Custom action are first declared by the `actions` key, and then associated with the type of object they should be applied to. For example, in the snippet below we first declare the action "Notepad" and then it is associated with all objects with type "txt file".
+
+```yaml
+actions:
+  - name: Notepad
+    exec: notepad.exe
+types:
+  - name: txt file
+    selectors:
+      - ends-with: .txt
+      - actions:
+        - name: Notepad
+```
 

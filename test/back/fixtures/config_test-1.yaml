@@ -11,11 +11,11 @@ actions:
   - name: action2
     exec: notepad.exe no arg
 types:
-  - name: MARKDOWN
+  - name: MY_FIRST_TYPE
     selectors:
       - ends-with: md
   # -------------------------------------------
-  - name: BASH_SCRIPT
+  - name: MY_SECOND_TYPE
     selectors:
       - ends-with: bash
     actions:

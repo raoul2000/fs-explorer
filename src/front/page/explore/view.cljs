@@ -9,7 +9,7 @@
             [utils :refer [cancel-event]]))
 
 (defn render-file [item-m]
-  [:a {:href   (str "/download?path=" (:path item-m) "&disposition=inline")
+  [:a {:href   (str "/download?path=" (:id item-m) "&disposition=inline")
        :target (:name item-m)}
    (:name item-m)])
 

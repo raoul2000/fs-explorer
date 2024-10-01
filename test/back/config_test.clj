@@ -34,24 +34,24 @@
     (is (not (spec/valid? :type/selectors []))
         "selectors can't be empty"))
 
-  #(testing "type definition"
-     (is (not (spec/valid? :config/types #:config.type{}))
-         "empty type definition is not allowed")
+  (testing "type definition"
+    (is (not (spec/valid? :config/types #:config.type{}))
+        "empty type definition is not allowed")
 
-     (is (not (spec/valid? :type/def  #:type{:name      "type name"}))
-         "selector is required")
+    (is (not (spec/valid? :type/def  #:type{:name      "type name"}))
+        "selector is required")
 
-     (is (spec/valid? :type/def  #:type{:name      "type name"
-                                        :selectors [#:selector{:starts-with "abc"}]})
-         "type name and selector ar required")
+    (is (spec/valid? :type/def  #:type{:name      "type name"
+                                       :selectors [#:selector{:starts-with "abc"}]})
+        "type name and selector ar required")
 
-     (is (not (spec/valid? :type/def #:type{:name ""
-                                            :selector [#:selector{:starts-with "abc"}]}))
-         "type name can't be blank")
+    (is (not (spec/valid? :type/def #:type{:name ""
+                                           :selector [#:selector{:starts-with "abc"}]}))
+        "type name can't be blank")
 
-     (is (not (spec/valid? :type/def #:type{:name "type name"
-                                            :selector []}))
-         "selectors when configured must not be empty"))
+    (is (not (spec/valid? :type/def #:type{:name "type name"
+                                           :selector []}))
+        "selectors when configured must not be empty"))
 
   (testing "types action"
     (is (not (spec/valid? :type/actions []))
@@ -81,10 +81,16 @@
     (is (not (spec/valid? :config/actions [#:action{:name "action1"}]))
         "key :exec is required")
 
-    (is (not (spec/valid? :config/actions [#:action{:name "action1"
-                                                    :exec "prog.exe"
-                                                    :args "scalar"}]))
-        "key :arg must be a seq")))
+    (is  (spec/valid? :config/actions [#:action{:name "action1"
+                                                :exec "prog.exe"
+                                                :args "scalar"}])
+         "key :arg can be a seq")
+    
+    (is  (spec/valid? :config/actions [#:action{:name "action1"
+                                                :exec "prog.exe"
+                                                :args ["string" true 3.14]}])
+         "key :arg can be a list")
+    ))
 
 (deftest add-ns-to-user-config-test
   (testing "adding namespace to user config map"
@@ -148,10 +154,9 @@
                                               :exec "notepad.exe no arg"}),
 
                     :types         '(#:type{:name "MY_FIRST_TYPE",
-                                            :selectors (#:selector{:starts-with ".*/README.md$"}
-                                                        #:selector{:ends-with "md"})}
+                                            :selectors (#:selector{:ends-with "md"})}
                                      #:type{:name "MY_SECOND_TYPE",
-                                            :selectors (#:selector{:ends-with "txt"})
+                                            :selectors (#:selector{:ends-with "bash"})
                                             :actions (#:action{:name "action1"})})}
 
            (conf/create-config "./test/back/fixtures/config_test-1.yaml"))

@@ -26,13 +26,19 @@
 
 (spec/def :action/name  :string/not-blank)
 (spec/def :action/exec  :string/not-blank)
-(spec/def :action/args  (spec/coll-of (spec/or :string  string?
-                                               :number  number?
-                                               :boolean boolean?)
-                                      :min-count 1))
+(spec/def :action/wait  boolean?)
+
+(spec/def :action/arg-item (spec/or :string  string?
+                                    :number  number?
+                                    :boolean boolean?))
+
+(spec/def :action/args (spec/or :scalar :action/arg-item
+                                :list   (spec/coll-of :action/arg-item
+                                                      :min-count 1)))
 (spec/def :action/def   (spec/keys :req [:action/name
                                          :action/exec]
-                                   :opt [:action/args]))
+                                   :opt [:action/args
+                                         :action/wait]))
 
 (spec/def :selector/starts-with :string/not-blank)
 (spec/def :selector/ends-with   :string/not-blank)
@@ -97,6 +103,7 @@
   (first (filter #(= name (:action/name %)) action-def-xs)))
 
 (defn action-exec [action-m] (get action-m :action/exec))
+(defn action-args [action-m] (get action-m :action/args))
 
 
 ;; read user config from YAML/JSON file ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
