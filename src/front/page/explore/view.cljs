@@ -17,13 +17,13 @@
   [:a {:href (create-url-explore id)}
    name])
 
-(defn render-action-item [{item-id :id} {action-name :name}]
+(defn render-action-item [{item-id :id, item-type :type} {action-name :name}]
   [:li {:key action-name}
    [:a {:href      ""
         :on-click (fn [event]
                     (cancel-event event)
                     (js/console.log (str "running command " action-name))
-                    (>run-command action-name item-id))}
+                    (>run-command action-name item-id item-type))}
     action-name]])
 
 (defn actions-for [{:keys [type] :as item-m} config]
