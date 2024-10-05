@@ -14,9 +14,8 @@ actions:
   - name: View
     exec: view
   - name: node script
-    exec: node
+    exec: node C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
     args:
-      - C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
       - true
       - 3.41165
       - --inputfile
@@ -25,6 +24,11 @@ actions:
   - name: node script 2
     exec: node
     args: C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
+  - name: overload args
+    exec: node
+    args: 
+      - C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
+      - param from DEF
 types:
   - name: MARKDOWN_README
     selectors:
@@ -35,6 +39,10 @@ types:
       - name: Open File
       - name: node script
       - name: node script 2
+      - name: overload args
+        args: 
+          - C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
+          - param from TYPE
   - name: BASH_SCRIPT
     selectors:
       - ends-with: .bash

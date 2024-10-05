@@ -112,12 +112,23 @@
                                  (run-process  action-m abs-path))))))
 
 (defn run-string-as-cmd [action-name path type  {:keys [config] :as _options}]
-  (if-let [action-m (cfg/find-action action-name config)]
+  (if-let [action-m (merge (cfg/find-action       action-name config)
+                           (cfg/find-type-action  type action-name config))]
     (execute-action  action-m  path config)
-    (throw (ex-info "action not found" {:action-name action-name}))))
+    (throw (ex-info "action not found for given type" {:action-name action-name
+                                                       :type        type}))))
 
 (defn run [cmd-name path type options]
   (if (string? cmd-name)
     (run-string-as-cmd cmd-name path type options)
     (throw (ex-info "don't know how to run command" {:command-name cmd-name
                                                      :path         path}))))
+
+(comment
+  (merge {:a 1 :b 2 :d 44} {:a 11 :c 33})
+  (merge #:action{:a 1 :b 2 :d 44} #:dummy{:a 11 :c 33})
+  (merge {:a 1 :b 2} nil)
+  (merge  nil {:a 1 :b 2})
+  (merge  nil nil)
+  ;;
+  )
