@@ -99,8 +99,20 @@
 (defn types-definition   [config] (:config/types    config))
 (defn actions-definition [config] (:config/actions  config))
 
-(defn find-action-by-name [name action-def-xs]
-  (first (filter #(= name (:action/name %)) action-def-xs)))
+(defn find-type [type-name config]
+  (first (filter #(= type-name (:type/name %)) (types-definition config))))
+
+(defn find-action 
+  "Returns the action definition given its name, or nil if not found"
+  [action-name config]
+  (first (filter #(= action-name (:action/name %)) (actions-definition config))))
+
+(defn find-type-action 
+  "Returns the action linked with a type or nil if not found"
+  [type-name action-name config]
+  (let [type-def-m   (find-type type-name config)
+        type-actions (get type-def-m  :type/actions)]
+    (first (filter #(= action-name (:action/name %)) type-actions))))
 
 (defn action-exec [action-m] (get action-m :action/exec))
 (defn action-args [action-m] (get action-m :action/args))

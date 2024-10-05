@@ -85,12 +85,11 @@
                                                 :exec "prog.exe"
                                                 :args "scalar"}])
          "key :arg can be a seq")
-    
+
     (is  (spec/valid? :config/actions [#:action{:name "action1"
                                                 :exec "prog.exe"
                                                 :args ["string" true 3.14]}])
-         "key :arg can be a list")
-    ))
+         "key :arg can be a list")))
 
 (deftest add-ns-to-user-config-test
   (testing "adding namespace to user config map"
@@ -176,5 +175,50 @@
             (is (= "./test/back/fixtures/config_test-2.yaml" (:file error-info))
                 "error info includes filename")
             (is  (:error error-info)
-                 "error info includes reason")))))) 
+                 "error info includes reason"))))))
 
+
+(deftest find-type-by-name-test
+  (testing "Find type definition"
+    (is (= #:type{:name "TYPE1"}
+           (conf/find-type-by-name "TYPE1" #:config{:types [#:type{:name "TYPE2"}
+                                                            #:type{:name "TYPE1"}]}))
+        "returns the type definition for the given name")
+    (is (nil?
+         (conf/find-type-by-name "TYPE_NOT_FOUND" #:config{:types [#:type{:name "TYPE2"}
+                                                                   #:type{:name "TYPE1"}]}))
+        "returns nil when type definition is not found")
+
+    (is (nil?
+         (conf/find-type-by-name "TYPE_NOT_FOUND" {}))
+        "returns nil when empty config map is provided")
+    (is (nil?
+         (conf/find-type-by-name nil {}))
+        "returns nil when no type name  is provided")))
+
+(deftest find-type-action-test
+  (let [config-1 #:config{:types [#:type{:name "TYPE2"
+                                         :actions [#:action{:name "ACTION1"
+                                                            :exec "for type 2"}
+                                                   #:action{:name "ACTION2"}]}
+                                  #:type{:name "TYPE1"
+                                         :actions [#:action{:name "ACTION1"
+                                                            :exec "for type 1"}
+                                                   #:action{:name "ACTION2"}]}]}]
+    (testing "Find action by name for given type"
+      (is (= #:action{:name "ACTION1"
+                      :exec "for type 1"}
+             (conf/find-type-action   "TYPE1" "ACTION1" config-1))
+          "Returns the action definition linked to the given type")
+
+      (is (nil?
+           (conf/find-type-action   "TYPE_NOT_FOUND" "ACTION1"  config-1))
+          "Returns nil when the type is not found")
+
+      (is (nil?
+           (conf/find-type-action   "TYPE1" "ACTION_NOT_FOUND"  config-1))
+          "Returns nil when the action is not found")
+
+      (is (nil?
+           (conf/find-type-action   "TYPE_NOT_FOUND" "ACTION_NOT_FOUND"  config-1))
+          "Returns nil when the action and the type are  not found")))) 

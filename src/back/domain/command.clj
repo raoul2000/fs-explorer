@@ -112,7 +112,7 @@
                                  (run-process  action-m abs-path))))))
 
 (defn run-string-as-cmd [action-name path type  {:keys [config] :as _options}]
-  (if-let [action-m (cfg/find-action-by-name action-name (cfg/actions-definition config))]
+  (if-let [action-m (cfg/find-action action-name config)]
     (execute-action  action-m  path config)
     (throw (ex-info "action not found" {:action-name action-name}))))
 
