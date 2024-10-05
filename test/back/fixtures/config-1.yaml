@@ -29,6 +29,13 @@ actions:
     args: 
       - C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
       - param from DEF
+  - name: placeholder
+    exec: node
+    args: 
+      - C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
+      - FILE_PATH
+      - param from DEF
+    wait: true
 types:
   - name: MARKDOWN_README
     selectors:
@@ -43,6 +50,7 @@ types:
         args: 
           - C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
           - param from TYPE
+      - name: placeholder
   - name: BASH_SCRIPT
     selectors:
       - ends-with: .bash

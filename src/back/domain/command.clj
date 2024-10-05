@@ -32,29 +32,26 @@
   ;;
   )
 
-(defn create-args-vec [action-m abs-path]
-  (let [exec (cfg/action-exec action-m)
-        args (cfg/action-args action-m)]
-    (->> (cond
-           (coll? args)   (conj (vec args) abs-path)
-           (string? args) (vector args abs-path)
-           :else  [])
+(def abs-path-placeholder "FILE_PATH")
+
+(defn create-args-vec
+  "Creates and returns a vector suitable to be passed to the p/shell or p/process
+   function.
+   
+   All occurences of the *abs-path-placholder* are replaced with actual value.
+   "
+  [action-m abs-path]
+  (let [exec        (cfg/action-exec action-m)
+        args        (cfg/action-args action-m)
+        interpolate (partial map #(if (= abs-path-placeholder %) abs-path %))
+        args-v      (cond
+                      (coll? args)   (vec args)
+                      (string? args) (vector args)
+                      :else          [])]
+    (->> (if (first (filter #{abs-path-placeholder} args-v))
+           (interpolate args-v)
+           (conj args-v abs-path))
          (into [exec]))))
-
-(comment
-
-  (create-args-vec #:action{:name "My Action"
-                            :exec "notepad"} "")
-  (create-args-vec #:action{:name "My Action"
-                            :exec "notepad"
-                            :args "arg1"} "")
-  (create-args-vec #:action{:name "My Action"
-                            :exec "notepad"
-                            :args ["arg1" "arg2"]} "")
-
-  ;;
-  )
-
 
 (defn run-process [action-m abs-path]
   (let [arg-xs  (create-args-vec action-m abs-path)
@@ -63,9 +60,9 @@
                  :err       :string
                  :extra-env {"MY_VAR" "__MY_VALUE"
                              "MY Other Var" "my Other Value"}}
-        result (if (:action/wait action-m)
-                 (apply (partial p/shell options) arg-xs)
-                 (apply (partial p/process options) arg-xs))]
+        result  (if (:action/wait action-m)
+                  (apply (partial p/shell   options) arg-xs)
+                  (apply (partial p/process options) arg-xs))]
 
     (tap> {:result result
            :arg-xs arg-xs
@@ -111,6 +108,8 @@
                                         :abs-path abs-path})
                                  (run-process  action-m abs-path))))))
 
+;; TODO: based on the path, search the matching type and on this type, search the action
+;; This would remove the need of the type param.
 (defn run-string-as-cmd [action-name path type  {:keys [config] :as _options}]
   (if-let [action-m (merge (cfg/find-action       action-name config)
                            (cfg/find-type-action  type action-name config))]
