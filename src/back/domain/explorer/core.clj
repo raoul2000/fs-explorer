@@ -40,13 +40,36 @@
 (defn- read-file-content [file-path]
   {:model/content (slurp file-path)})
 
+(defn create-file-item [abs-path root-dir-path]
+  (when (fs/exists? abs-path)
+    {:file/name (fs/file-name abs-path)
+     :file/dir? (fs/directory? abs-path)
+     :file/path (str abs-path)
+     :file/id   (fs-path->db-path root-dir-path abs-path)}))
+
 (defn- list-dir-content [dir-path root-dir-path]
   {:model/content (->> (fs/list-dir dir-path)
-                       (map (fn [file]
-                              {:file/name (fs/file-name file)
-                               :file/dir? (fs/directory? file)
-                               :file/path (str file)
-                               :file/id   (fs-path->db-path root-dir-path file)})))})
+                       (map #(create-file-item % root-dir-path)))})
+
+(defn create-file-item 
+  "Returns a map describing the file at *abs-path* given the *root-dir-path*. Returns `nil` if
+   *abs-path* does not exist."
+  [root-dir-path abs-path]
+  (when (fs/exists? abs-path)
+    {:file/name (fs/file-name abs-path)
+     :file/dir? (fs/directory? abs-path)
+     :file/path (str abs-path)
+     :file/id   (fs-path->db-path root-dir-path abs-path)}))
+
+(comment
+  (fs/file-name "c:\\tmp\\folder\\README.md")
+  (fs/directory? "c:\\tmp\\folder\\README.md")
+  (fs/directory? "c:\\tmp")
+  (fs-path->db-path  "c:\\tmp" "c:\\tmp\\folder\\README.md")
+
+  (create-file-item "c:\\tmp" "c:\\tmp\\README.md")
+  ;;
+  )
 
 (defn absolutize-path
   "when *this-path* refers to a file or folder that is under *root-path* returns its absolute path 
