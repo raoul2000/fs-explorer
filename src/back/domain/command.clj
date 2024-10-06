@@ -1,8 +1,10 @@
 (ns domain.command
   (:require [babashka.process :as p]
-            [domain.explorer.core :refer [absolutize-path]]
+            [domain.explorer.core :refer [absolutize-path create-file-item]]
+            [domain.explorer.type :as type]
             [domain.open-file :refer [open]]
             [config :as cfg]
+            [clojure.string :as s]
             [babashka.fs :as fs])
   (:import [java.net URLEncoder]))
 
@@ -110,18 +112,44 @@
 
 ;; TODO: based on the path, search the matching type and on this type, search the action
 ;; This would remove the need of the type param.
-(defn run-string-as-cmd [action-name path type  {:keys [config] :as _options}]
-  (if-let [action-m (merge (cfg/find-action       action-name config)
-                           (cfg/find-type-action  type action-name config))]
-    (execute-action  action-m  path config)
-    (throw (ex-info "action not found for given type" {:action-name action-name
-                                                       :type        type}))))
+(defn run-string-as-cmd [type-action-m path config]
+  (if-let [merged-action-m (merge (cfg/find-action  (cfg/action-name type-action-m) config)
+                                  type-action-m)]
+    (execute-action  merged-action-m  path config)
+    (throw (ex-info "action not found for given type" {:action-name (cfg/action-name type-action-m)}))))
 
-(defn run [cmd-name path type options]
-  (if (string? cmd-name)
-    (run-string-as-cmd cmd-name path type options)
-    (throw (ex-info "don't know how to run command" {:command-name cmd-name
-                                                     :path         path}))))
+(comment
+
+
+  (def path "c:\\tmp\\README.md")
+  (def root-dir-path "c:\\tmp")
+
+  (def file-m (create-file-item root-dir-path path))
+  (type/select-type file-m [#:type{:name "type1"
+                                   :selectors [#:selector{:ends-with "md"}]}])
+
+
+  ;;
+  )
+
+(defn run [action-name path type {:keys [config] :as _options}]
+  (when (s/blank? action-name)
+    (throw (ex-info "don't know how to run command" {:command-name action-name})))
+
+  (let [root-dir-path (cfg/root-dir-path config)
+        abs-path      (absolutize-path path root-dir-path)]
+
+    (when-not (fs/exists? abs-path)
+      (throw (ex-info "file not found" {:path          path
+                                        :absolute-path abs-path})))
+
+    (if-let [type-m (type/select-type (create-file-item root-dir-path abs-path) (cfg/types-definition config))]
+      (if-let [type-action-m (cfg/find-type-action (cfg/type-name type-m) action-name config)]
+        (run-string-as-cmd type-action-m abs-path config)
+        (throw (ex-info "action name not found for type" {:action-name action-name
+                                                          :type-name   (cfg/type-name type-m)})))
+      (throw (ex-info "no type found for file" {:path path
+                                                :absolute-path abs-path})))))
 
 (comment
   (merge {:a 1 :b 2 :d 44} {:a 11 :c 33})
@@ -129,5 +157,9 @@
   (merge {:a 1 :b 2} nil)
   (merge  nil {:a 1 :b 2})
   (merge  nil nil)
+  (def action-name "")
+  (cond-> {}
+    (s/blank? action-name) (assoc :error {:msg "missing axction naùme"})
+    (and (not (:error))))
   ;;
   )

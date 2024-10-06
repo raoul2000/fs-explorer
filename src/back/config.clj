@@ -97,6 +97,7 @@
 (defn browse-url    [config] (:config/browse-url    config))
 
 (defn types-definition   [config] (:config/types    config))
+(defn type-name          [type-m] (:type/name       type-m))
 (defn actions-definition [config] (:config/actions  config))
 
 (defn find-type [type-name config]
@@ -114,6 +115,7 @@
         type-actions (get type-def-m  :type/actions)]
     (first (filter #(= action-name (:action/name %)) type-actions))))
 
+(defn action-name [action-m] (get action-m :action/name))
 (defn action-exec [action-m] (get action-m :action/exec))
 (defn action-args [action-m] (get action-m :action/args))
 
