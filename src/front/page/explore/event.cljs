@@ -53,10 +53,10 @@
 (defn >select-dir [path]
   (re-frame/dispatch [::select-dir path]))
 
-;; run a command -------------------------------------------------------------------------------------------------------
+;; run an action  -------------------------------------------------------------------------------------------------------
 
 (re-frame/reg-event-db
- ::run-command-success
+ ::run-action-success
  (fn [db [_ success-response]]
    (tap> success-response)
    (when-let [download-params (get-in success-response [:result :redirect])]
@@ -64,22 +64,22 @@
    db))
 
 (re-frame/reg-event-db
- ::run-command-failure
+ ::run-action-failure
  (fn [db [_ error-response]]
    db))
 
 ;; voir https://github.com/JulianBirch/cljs-ajax/issues/167#issuecomment-293274030
 
 (re-frame/reg-event-fx
- ::run-command
- (fn [{db :db} [_ command-name path]]
+ ::run-action
+ (fn [{db :db} [_ action-name path]]
    {:http-xhrio {:method          :get
                  :uri             (str "/action?path=" (js/encodeURIComponent path)
-                                       "&name=" (js/encodeURIComponent command-name))
+                                       "&name=" (js/encodeURIComponent action-name))
                  :format          (json-request-format)
                  :response-format (json-response-format {:keywords? true})
-                 :on-success      [::run-command-success]
-                 :on-failure      [::run-command-failure]}}))
+                 :on-success      [::run-action-success]
+                 :on-failure      [::run-action-failure]}}))
 
-(defn >run-command [command-name path]
-  (re-frame/dispatch [::run-command command-name path]))
+(defn >run-action [action-name path]
+  (re-frame/dispatch [::run-action action-name path]))

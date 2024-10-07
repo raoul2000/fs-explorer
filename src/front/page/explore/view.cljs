@@ -2,7 +2,7 @@
   (:require [components.icon :refer [file-icon folder-icon home-icon]]
             [components.message :refer [warning-message]]
             [page.config.subs :refer [<config]]
-            [page.explore.event :refer [>run-command]]
+            [page.explore.event :refer [>run-action]]
             [page.explore.subs :refer [<breadcrumbs <loading? <sorted-explore]]
             [reagent.core :as r]
             [route.helper :refer [>navigate-to-explore create-url-explore]]
@@ -22,8 +22,8 @@
    [:a {:href      ""
         :on-click (fn [event]
                     (cancel-event event)
-                    (js/console.log (str "running command " action-name))
-                    (>run-command action-name item-id))}
+                    (js/console.log (str "running action " action-name))
+                    (>run-action action-name item-id))}
     action-name]])
 
 (defn actions-for [{:keys [type] :as item-m} config]
