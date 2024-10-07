@@ -72,15 +72,14 @@
 
 (re-frame/reg-event-fx
  ::run-command
- (fn [{db :db} [_ command-name path type]]
+ (fn [{db :db} [_ command-name path]]
    {:http-xhrio {:method          :get
                  :uri             (str "/cmd?path=" (js/encodeURIComponent path)
-                                       "&name=" (js/encodeURIComponent command-name)
-                                       "&type=" (js/encodeURIComponent type))
+                                       "&name=" (js/encodeURIComponent command-name))
                  :format          (json-request-format)
                  :response-format (json-response-format {:keywords? true})
                  :on-success      [::run-command-success]
                  :on-failure      [::run-command-failure]}}))
 
-(defn >run-command [command-name path type]
-  (re-frame/dispatch [::run-command command-name path type]))
+(defn >run-command [command-name path]
+  (re-frame/dispatch [::run-command command-name path]))

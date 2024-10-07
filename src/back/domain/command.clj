@@ -118,21 +118,8 @@
     (execute-action  merged-action-m  path config)
     (throw (ex-info "action not found for given type" {:action-name (cfg/action-name type-action-m)}))))
 
-(comment
 
-
-  (def path "c:\\tmp\\README.md")
-  (def root-dir-path "c:\\tmp")
-
-  (def file-m (create-file-item root-dir-path path))
-  (type/select-type file-m [#:type{:name "type1"
-                                   :selectors [#:selector{:ends-with "md"}]}])
-
-
-  ;;
-  )
-
-(defn run [action-name path type {:keys [config] :as _options}]
+(defn run [action-name path {:keys [config] :as _options}]
   (when (s/blank? action-name)
     (throw (ex-info "don't know how to run command" {:command-name action-name})))
 
@@ -143,7 +130,7 @@
       (throw (ex-info "file not found" {:path          path
                                         :absolute-path abs-path})))
 
-    (if-let [type-m (type/select-type (create-file-item root-dir-path abs-path) (cfg/types-definition config))]
+    (if-let [type-m (type/select-type (create-file-item abs-path root-dir-path ) (cfg/types-definition config))]
       (if-let [type-action-m (cfg/find-type-action (cfg/type-name type-m) action-name config)]
         (run-string-as-cmd type-action-m abs-path config)
         (throw (ex-info "action name not found for type" {:action-name action-name
@@ -151,15 +138,3 @@
       (throw (ex-info "no type found for file" {:path path
                                                 :absolute-path abs-path})))))
 
-(comment
-  (merge {:a 1 :b 2 :d 44} {:a 11 :c 33})
-  (merge #:action{:a 1 :b 2 :d 44} #:dummy{:a 11 :c 33})
-  (merge {:a 1 :b 2} nil)
-  (merge  nil {:a 1 :b 2})
-  (merge  nil nil)
-  (def action-name "")
-  (cond-> {}
-    (s/blank? action-name) (assoc :error {:msg "missing axction naùme"})
-    (and (not (:error))))
-  ;;
-  )
