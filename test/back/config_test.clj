@@ -158,7 +158,7 @@
                                             :selectors (#:selector{:ends-with "bash"})
                                             :actions (#:action{:name "action1"})})}
 
-           (conf/create-config "./test/back/fixtures/config_test-1.yaml"))
+           (conf/create-config "./test/fixture/config/test-1.yaml"))
         "when file path is given, merge with default config")
 
     #_(is (thrown-with-msg? ExceptionInfo  #"Configuration file not found"
@@ -166,13 +166,13 @@
           "throws when file not found")
 
     #_(is (thrown-with-msg? ExceptionInfo  #"Invalid User Configuration"
-                            (conf/create-config "./test/back/fixtures/config_test-2.yaml"))
+                            (conf/create-config "./test/fixture/config/config_test-2.yaml"))
           "throws when invalid user configuration")
     #_(try
-        (conf/create-config "./test/back/fixtures/config_test-2.yaml")
+        (conf/create-config "./test/fixture/config/config_test-2.yaml")
         (catch ExceptionInfo ex
           (let [error-info (ex-data ex)]
-            (is (= "./test/back/fixtures/config_test-2.yaml" (:file error-info))
+            (is (= "./test/fixture/config/config_test-2.yaml" (:file error-info))
                 "error info includes filename")
             (is  (:error error-info)
                  "error info includes reason"))))))
@@ -181,19 +181,19 @@
 (deftest find-type-by-name-test
   (testing "Find type definition"
     (is (= #:type{:name "TYPE1"}
-           (conf/find-type-by-name "TYPE1" #:config{:types [#:type{:name "TYPE2"}
+           (conf/find-type "TYPE1" #:config{:types [#:type{:name "TYPE2"}
                                                             #:type{:name "TYPE1"}]}))
         "returns the type definition for the given name")
     (is (nil?
-         (conf/find-type-by-name "TYPE_NOT_FOUND" #:config{:types [#:type{:name "TYPE2"}
+         (conf/find-type "TYPE_NOT_FOUND" #:config{:types [#:type{:name "TYPE2"}
                                                                    #:type{:name "TYPE1"}]}))
         "returns nil when type definition is not found")
 
     (is (nil?
-         (conf/find-type-by-name "TYPE_NOT_FOUND" {}))
+         (conf/find-type "TYPE_NOT_FOUND" {}))
         "returns nil when empty config map is provided")
     (is (nil?
-         (conf/find-type-by-name nil {}))
+         (conf/find-type nil {}))
         "returns nil when no type name  is provided")))
 
 (deftest find-type-action-test

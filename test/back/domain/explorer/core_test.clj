@@ -6,7 +6,7 @@
 ;; fixtures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(def fixture-base-path  (fs/absolutize "test/back/fixtures/fs"))
+(def fixture-base-path  (fs/absolutize "test/fixture/fs"))
 (defn make-dirs [dirs]
   (doseq [dir dirs]
     (fs/create-dirs (fs/path fixture-base-path dir))))

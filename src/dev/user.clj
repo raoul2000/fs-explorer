@@ -48,7 +48,7 @@
 
   (def system-config (-> sys/config
                          (assoc-in [:server/server ::http/join?]   false)
-                         (assoc :app/cli-args ["./test/back/fixtures/config-1.yaml"])))
+                         (assoc :app/cli-args ["./test/fixture/config/config-1.yaml"])))
 
   (s/valid? :user-config/config {:user-config/root-dir-path "tmp"
                                  :user-config/open-browser  false})
