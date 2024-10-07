@@ -1,6 +1,6 @@
 (ns domain.command-test
   (:require [clojure.test :refer (deftest testing is are)]
-            [domain.command :as cmd]))
+            [domain.action :as cmd]))
 
 (deftest create-args-vec-test
   (testing "Creating arguments vector"

@@ -13,7 +13,7 @@
             [server.handler.index :as index-handler]
             [server.handler.event :as event-handler]
             [server.handler.open-file :as open-file]
-            [server.handler.run-command :as run-command]
+            [server.handler.action :as run-command]
             ;; sse
             [io.pedestal.http.sse :as sse]))
 

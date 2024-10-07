@@ -1,4 +1,4 @@
-(ns domain.command
+(ns domain.action
   (:require [babashka.process :as p]
             [domain.explorer.core :refer [absolutize-path create-file-item]]
             [domain.explorer.type :as type]
@@ -121,7 +121,7 @@
 
 (defn run [action-name path {:keys [config] :as _options}]
   (when (s/blank? action-name)
-    (throw (ex-info "don't know how to run command" {:command-name action-name})))
+    (throw (ex-info "don't know how to run action" {:action-name action-name})))
 
   (let [root-dir-path (cfg/root-dir-path config)
         abs-path      (absolutize-path path root-dir-path)]
@@ -130,7 +130,7 @@
       (throw (ex-info "file not found" {:path          path
                                         :absolute-path abs-path})))
 
-    (if-let [type-m (type/select-type (create-file-item abs-path root-dir-path ) (cfg/types-definition config))]
+    (if-let [type-m (type/select-type (create-file-item abs-path root-dir-path) (cfg/types-definition config))]
       (if-let [type-action-m (cfg/find-type-action (cfg/type-name type-m) action-name config)]
         (run-string-as-cmd type-action-m abs-path config)
         (throw (ex-info "action name not found for type" {:action-name action-name

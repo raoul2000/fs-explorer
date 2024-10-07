@@ -1,9 +1,9 @@
-(ns server.handler.run-command
+(ns server.handler.action
   (:require [server.response :as response]
-            [domain.command :as command]))
+            [domain.action :as action]))
 
 (defn create [options]
   (fn [request]
     (let [command-name (get-in request [:params :name])
           path         (get-in request [:params :path])]
-      (response/ok {:result (command/run command-name path options)}))))
+      (response/ok {:result (action/run command-name path options)}))))
