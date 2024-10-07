@@ -84,7 +84,7 @@
     (is  (spec/valid? :config/actions [#:action{:name "action1"
                                                 :exec "prog.exe"
                                                 :args "scalar"}])
-         "key :arg can be a seq")
+         "key :arg can be a string")
 
     (is  (spec/valid? :config/actions [#:action{:name "action1"
                                                 :exec "prog.exe"

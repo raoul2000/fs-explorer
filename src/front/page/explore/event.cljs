@@ -74,7 +74,7 @@
  ::run-command
  (fn [{db :db} [_ command-name path]]
    {:http-xhrio {:method          :get
-                 :uri             (str "/cmd?path=" (js/encodeURIComponent path)
+                 :uri             (str "/action?path=" (js/encodeURIComponent path)
                                        "&name=" (js/encodeURIComponent command-name))
                  :format          (json-request-format)
                  :response-format (json-response-format {:keywords? true})

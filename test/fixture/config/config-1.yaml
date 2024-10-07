@@ -14,7 +14,7 @@ actions:
   - name: View
     exec: view
   - name: node script
-    exec: node C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
+    exec: node C:\dev\ws\lab\fs-explorer\test\fixture\node-script\prog1.js
     args:
       - true
       - 3.41165
@@ -23,16 +23,16 @@ actions:
     wait: true
   - name: node script 2
     exec: node
-    args: C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
+    args: C:\dev\ws\lab\fs-explorer\test\fixture\node-script\prog1.js
   - name: overload args
     exec: node
     args: 
-      - C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
+      - C:\dev\ws\lab\fs-explorer\test\fixture\node-script\prog1.js
       - param from DEF
   - name: placeholder
     exec: node
     args: 
-      - C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
+      - C:\dev\ws\lab\fs-explorer\test\fixture\node-script\prog1.js
       - FILE_PATH
       - param from DEF
     wait: true
@@ -48,12 +48,12 @@ types:
       - name: node script 2
       - name: overload args
         args: 
-          - C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
+          - C:\dev\ws\lab\fs-explorer\test\fixture\node-script\prog1.js
           - param from TYPE
       - name: placeholder
       - name: Type level
         exec: node
-        args: C:\dev\ws\lab\fs-explorer\test\back\process\prog1.js
+        args: C:\dev\ws\lab\fs-explorer\test\fixture\node-script\prog1.js
   - name: BASH_SCRIPT
     selectors:
       - ends-with: .bash
