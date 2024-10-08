@@ -40,9 +40,13 @@
                                    :opt [:action/args
                                          :action/wait]))
 
-(spec/def :selector/starts-with :string/not-blank)
-(spec/def :selector/ends-with   :string/not-blank)
-(spec/def :selector/equals      :string/not-blank)
+(spec/def :selector/arg (spec/or :string      :string/not-blank
+                                 :string-list :coll/non-empty-string-list))
+
+(spec/def :selector/starts-with :selector/arg)
+(spec/def :selector/ends-with   :selector/arg)
+(spec/def :selector/equals      :selector/arg)
+
 (spec/def :selector/def         (spec/keys :req [(or :selector/starts-with
                                                      :selector/ends-with
                                                      :selector/equals)]))
@@ -103,12 +107,12 @@
 (defn find-type [type-name config]
   (first (filter #(= type-name (:type/name %)) (types-definition config))))
 
-(defn find-action 
+(defn find-action
   "Returns the action definition given its name, or nil if not found"
   [action-name config]
   (first (filter #(= action-name (:action/name %)) (actions-definition config))))
 
-(defn find-type-action 
+(defn find-type-action
   "Returns the action linked with a type or nil if not found"
   [type-name action-name config]
   (let [type-def-m   (find-type type-name config)

@@ -110,8 +110,6 @@
                                         :abs-path abs-path})
                                  (run-process  action-m abs-path))))))
 
-;; TODO: based on the path, search the matching type and on this type, search the action
-;; This would remove the need of the type param.
 (defn run-string-as-cmd [type-action-m path config]
   (if-let [merged-action-m (merge (cfg/find-action  (cfg/action-name type-action-m) config)
                                   type-action-m)]

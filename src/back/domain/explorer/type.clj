@@ -4,15 +4,18 @@
 
 (def file-selectors-catalog #:selector{:equals ;; ----------------------------------
                                        (fn [val options file-m]
-                                         (= val (:file/name file-m)))
+                                         (when-let [file-name (get file-m :file/name)]
+                                           (some #(= file-name %) (if (coll? val) val [val]))))
 
                                        :starts-with ;; -----------------------------
                                        (fn [val options file-m]
-                                         (s/starts-with? (:file/name file-m) val))
+                                         (when-let [file-name (get file-m :file/name)]
+                                           (some #(s/starts-with? file-name %) (if (coll? val) val [val]))))
 
                                        :ends-with ;; ------------------------------
                                        (fn [val options file-m]
-                                         (s/ends-with? (:file/name file-m) val))})
+                                         (when-let [file-name (get file-m :file/name)]
+                                           (some #(s/ends-with? file-name %) (if (coll? val) val [val]))))})
 
 (def file-selector-keys (keys file-selectors-catalog))
 

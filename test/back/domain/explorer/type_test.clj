@@ -13,7 +13,16 @@
           "returns false when map has no :name key")
 
       (is (not (equals-pred "val" nil #:file{:name "VAL"}))
-          "is case sensitive"))))
+          "is case sensitive")
+
+      (is (equals-pred ["ab" "val" "cd"] nil #:file{:name "val"})
+          "accept a list ofr string and returns true if one match is found")
+
+      (is (not (equals-pred ["ab" "bc" "cd"] nil #:file{:name "val"}))
+          "returns false if not match is found")
+
+      (is (not (equals-pred [] nil #:file{:name "val"}))
+          "returns false if no val is provided"))))
 
 (deftest starts-with-selector-test
   (let [starts-with-pred (:selector/starts-with t/file-selectors-catalog)]
@@ -28,7 +37,16 @@
           "false  when :name value does not starts with arg")
 
       (is (not (starts-with-pred "val" nil #:file{:name "VAL"}))
-          "is case sensitive"))))
+          "is case sensitive")
+
+      (is (starts-with-pred ["ab" "val" "cd"] nil #:file{:name "val filename"})
+          "accept a list ofr string and returns true if one match is found")
+
+      (is (not (starts-with-pred ["ab" "bc" "cd"] nil #:file{:name "val"}))
+          "returns false if not match is found")
+
+      (is (not (starts-with-pred [] nil #:file{:name "val"}))
+          "returns false if no val is provided"))))
 
 (deftest ends-with-selector-test
   (let [ends-with-pred (:selector/ends-with t/file-selectors-catalog)]
@@ -44,7 +62,16 @@
           "false  when :name value does not end with arg")
 
       (is (not (ends-with-pred "val" nil #:file{:name "the VAL"}))
-          "is case sensitive"))))
+          "is case sensitive")
+
+      (is (ends-with-pred ["ab" "val" "cd"] nil #:file{:name "filename val"})
+          "accept a list ofr string and returns true if one match is found")
+
+      (is (not (ends-with-pred ["ab" "bc" "cd"] nil #:file{:name "val"}))
+          "returns false if not match is found")
+
+      (is (not (ends-with-pred [] nil #:file{:name "val"}))
+          "returns false if no val is provided"))))
 
 (deftest create-selector-pred-test
   (testing "create a selector predicate"
