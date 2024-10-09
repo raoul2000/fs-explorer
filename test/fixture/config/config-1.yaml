@@ -74,7 +74,10 @@ types:
       - name: Download File
   - name: IMAGE_JPG
     selectors:
-      - ends-with: jpg
+      - ends-with: 
+        - jpg
+        - jpeg
+        - png
     actions:
       - name: Open File
       - name: View
