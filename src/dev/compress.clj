@@ -1,9 +1,10 @@
 (ns compress
   (:require [clojure.java.io :as io]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [babashka.fs :as fs])
   (:import java.util.zip.GZIPInputStream
            java.util.zip.GZIPOutputStream
-           java.util.zip.ZipEntry 
+           java.util.zip.ZipEntry
            java.util.zip.ZipOutputStream))
 
 ;; compress file and folder
@@ -31,13 +32,30 @@
 
   (io/copy "test/fixture/node-script/prog1.js" "c:\\tmp\\out.zip")
   (io/copy  (io/file "test/fixture/node-script/prog1.js") (io/file "c:\\tmp\\out.js"))
-  
+
   ;; works ok but the gzip archive cannot be decompressed with 7zip 
   (gzip (io/file "test/fixture/node-script/prog1.js") (io/file "c:\\tmp\\out.zip"))
 
   ;; works ok but the zip file contains folder  "test/fixture/node-script"
   (zip-folder "test/fixture/node-script" "c:\\tmp\\out-2.zip")
 
+  ;; using babashka fs ?
+  
+  (fs/zip "c:\\tmp\\out-2.zip" ["test/fixture/node-script"] 
+          {:root "test/fixture/node-script" })
+  
+  ; ok but using absolute path ?
+  (def entry (str (fs/absolutize "test/fixture/node-script")))
+  (fs/zip "c:\\tmp\\out-3.zip" [entry]) ;; 🤔 nope. Only relative entries
+
+  (def abs-entry (str (fs/absolutize "test/fixture/node-script")))
+  (str (fs/relativize (fs/cwd) abs-entry))
+
+  ;; what if cwd and entry path are on distinc drvies in Windows
+  (str (fs/relativize "d:\\" abs-entry)) ;; 😣 - fail : 'other has different root'
+
+  (fs/zip "c:\\tmp\\out-4.zip" ["file://e:/286.jpg"])
+  
 
   ;;
   )
