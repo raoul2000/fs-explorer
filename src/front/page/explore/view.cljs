@@ -17,14 +17,28 @@
   [:a {:href (create-url-explore id)}
    name])
 
-(defn render-action-item [{item-id :id} {action-name :name}]
-  [:li {:key action-name}
-   [:a {:href      ""
-        :on-click (fn [event]
-                    (cancel-event event)
-                    (js/console.log (str "running action " action-name))
-                    (>run-action action-name item-id))}
-    action-name]])
+(defn find-type-action
+  "Returns the map describing action *action-name* as defined in the action definition
+   list *actions-xs*."
+  [actions-xs action-name]
+  (->> actions-xs
+       (filter #(= action-name (:name %)))
+       first))
+
+(defn action-label [action-m actions-def-xs]
+  (when-let [action-name (get action-m :name)]
+    (or (get (merge (find-type-action actions-def-xs action-name) action-m) :label)
+        action-name)))
+
+(defn render-action-item [{item-id :id} action-m actions-def-xs]
+  (let [action-name    (:name action-m)]
+    [:li {:key action-name}
+     [:a {:href      ""
+          :on-click (fn [event]
+                      (cancel-event event)
+                      (js/console.log (str "running action " action-name))
+                      (>run-action action-name item-id))}
+      (action-label action-m actions-def-xs)]]))
 
 (defn actions-for [{:keys [type] :as item-m} config]
   (when type
@@ -34,7 +48,7 @@
           (filter #(= type (:name %)))
           first
           :actions
-          (map #(render-action-item item-m %)))]))
+          (map #(render-action-item item-m % (:actions config))))]))
 
 (defn render-item-row [config {:keys [dir? path type] :as item}]
   [:tr  {:key path}

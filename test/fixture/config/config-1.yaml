@@ -5,6 +5,7 @@ open-browser : true
 actions:
   - name: notepad
     exec: notepad.exe
+    label: Notepad label
   - name : Notepad ++
     exec: C:\Program Files\Notepad++\notepad++.exe
   - name: Open File
@@ -72,6 +73,8 @@ types:
     actions:
       - name: Open File
       - name: Download File
+      - name: notepad
+        label: run notepad
   - name: IMAGE_JPG
     selectors:
       - ends-with: 

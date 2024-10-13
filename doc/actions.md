@@ -2,7 +2,7 @@
 
 Actions can be configured to be associated with types (see [Types](./types.ms)).
 
-There is two kins of actions :
+There is two kinds of actions :
 
 - Built-in actions
 - Custom actions
@@ -61,7 +61,7 @@ You can use the configuration file to declare new actions. Following options are
 
 - `name` : required - the unique name of the action.
 - `exec` : required - the program that should be launched to run the action.
-- `args` : the argument or the list of arguments that will be passed to the program with the command line.
+- `args` : (optional) the argument or the list of arguments that will be passed to the program with the command line.
 - `wait` : (optional, boolean, default is *FALSE*) launch the program asynchronously or not.
 
 

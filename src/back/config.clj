@@ -26,6 +26,7 @@
 
 (spec/def :action/name  :string/not-blank)
 (spec/def :action/exec  :string/not-blank)
+(spec/def :action/label :string/not-blank)
 (spec/def :action/wait  boolean?)
 
 (spec/def :action/arg-item (spec/or :string  string?
@@ -38,7 +39,8 @@
 (spec/def :action/def   (spec/keys :req [:action/name
                                          :action/exec]
                                    :opt [:action/args
-                                         :action/wait]))
+                                         :action/wait
+                                         :action/label]))
 
 (spec/def :selector/arg (spec/or :string      :string/not-blank
                                  :string-list :coll/non-empty-string-list))
