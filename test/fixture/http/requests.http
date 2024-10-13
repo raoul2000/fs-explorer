@@ -48,9 +48,13 @@ Accept: application/json
 GET {{baseUrl}}/explore?type=file
 Accept: application/json
 
-### GET /download
+### GET /download file
 
 GET {{baseUrl}}/download?path=package.json&disposition=inline
+
+### GET /download folder
+
+GET {{baseUrl}}/download?path=bck
 
 ### GET /index
 

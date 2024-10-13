@@ -2,10 +2,28 @@
   (:require [babashka.fs :as fs]
             [server.response :as response]
             [domain.explorer.core :as explorer]
-            [config :as config]))
+            [config :as config]
+            [clojure.string :as str]
+            [clojure.java.io :as io])
+  (:import java.util.zip.ZipEntry
+           java.util.zip.ZipOutputStream))
+
+(defn zip-folder
+  "p input path, z output zip"
+  [dir-path zip-file-path]
+  (with-open [zip (ZipOutputStream. (io/output-stream zip-file-path))]
+    (doseq [f (file-seq (io/file dir-path)) :when (.isFile f)]
+      (.putNextEntry zip (ZipEntry.
+                          (->> (str/replace-first (.getPath f) dir-path "")
+                               fs/components
+                               (str/join "/"))))
+      (io/copy f zip)
+      (.closeEntry zip)))
+  (io/file zip-file-path))
 
 (def valid-dispositions #{"inline" "attachment"})
 (def default-disposition "attachment")
+
 
 (defn download-file [file-path disposition root-dir-path]
   (cond
@@ -19,16 +37,29 @@
 
     :else
     (let [abs-path (explorer/absolutize-path file-path root-dir-path)]
-      (if-not (fs/regular-file? abs-path)
-        (response/error-SERVER_ERROR (response/error-body "file not found"
-                                                          {:file abs-path}))
-        (response/ok (fs/file abs-path)
-                     {"Content-Disposition" (format "%s; filename=\"%s\"" disposition (fs/file-name abs-path))
-                              ;; Note that the Content-Type header is set by the ring-mw/file-info interceptor
-                              ;; (see route)
-                              ;; Other option is to force the Content-Type header :
-                              ;; "Content-Type" "image/jpg" 
-                      })))))
+      (cond
+        (not (fs/exists? abs-path))
+        (response/error-BAD_REQUEST  (response/error-body "file not found"
+                                                          {:file  abs-path}))
+
+        (fs/directory? abs-path)
+        (response/ok (->> (fs/create-temp-file {:prefix "fsx_" :suffix ".zip"})
+                          str
+                          (zip-folder abs-path))
+                     {"Content-Disposition" (format "attachment; filename=\"%s.zip\""  (fs/file-name abs-path))})
+
+        (fs/regular-file? abs-path)
+        (response/ok  (fs/file abs-path)
+                      {"Content-Disposition" (format "%s; filename=\"%s\"" disposition (fs/file-name abs-path))
+                                      ;; Note that the Content-Type header is set by the ring-mw/file-info interceptor
+                                      ;; (see route)
+                                      ;; Other option is to force the Content-Type header :
+                                      ;; "Content-Type" "image/jpg" 
+                       })
+
+        :else
+        (response/error-SERVER_ERROR (response/error-body "invalid file type"
+                                                          {:file abs-path}))))))
 
 (defn create [{:keys [config] :as _route-config}]
   (fn [request]

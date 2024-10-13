@@ -79,11 +79,18 @@
 
   (fs/create-temp-file)
   (fs/create-temp-file {:prefix "fs_"})
+  (io/output-stream (str (fs/create-temp-file {:prefix "fs_"})))
+  
   (fs/directory? "f:\\toto")
   (fs/exists? "f:\\toto")
   (zip-folder "e:\\tmp" "c:\\tmp\\out-4.zip")
   (zip-folder "c:\\tmp\\bck" "c:\\tmp\\out-4.zip")
-  (zip-folder "c:\\tmp\\bck" (fs/create-temp-file {:posix-file-permissions "rwx------"}))
+
+  (def tmp-zip (str (fs/create-temp-file {:prefix "fs_" :suffix ".zip"})))
+
+  (print tmp-zip)
+  (zip-folder "c:\\tmp\\bck" tmp-zip)
+  (io/copy (io/file tmp-zip) (io/file "c:\\tmp\\final.zip"))
 
   (->> (str/replace-first "e:\\tmp\\img.jpg" "e:\\tmp" "")
        #_(str/replace-first "e:\\tmp\\res\\img.jpg" "e:\\tmp" "")
