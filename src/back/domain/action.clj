@@ -94,21 +94,19 @@
         result-m      {:action action-m}]
     (case (cfg/action-exec action-m)
       "open"      (assoc result-m :result (open path (cfg/root-dir-path config)))
+      
       "download"  (-> result-m
-                      (assoc :redirect (str "/download?path="
-                                            (URLEncoder/encode path)
-                                            "&disposition=attachment"))
+                      (assoc :redirect (format "/download?path=%s&disposition=attachment"
+                                               (URLEncoder/encode path)))
                       (assoc :target "_self"))
 
       "view"      (-> result-m
-                      (assoc  :redirect (str "/download?path="
-                                             (URLEncoder/encode path)
-                                             "&disposition=inline"))
-                      (assoc :target "_blank"))
-      (assoc result-m :process (do
-                                 (tap> {:action-m action-m
-                                        :abs-path abs-path})
-                                 (run-process  action-m abs-path))))))
+                      (assoc  :redirect (format "/download?path=%s&disposition=%s"
+                                                (URLEncoder/encode path)
+                                                (if (fs/directory? abs-path) "attachment" "inline")))
+                      (assoc :target (if (fs/directory? abs-path) "_self" "_blank")))
+      
+      (assoc result-m :process (run-process  action-m abs-path)))))
 
 (defn run-string-as-cmd [type-action-m path config]
   (if-let [merged-action-m (merge (cfg/find-action  (cfg/action-name type-action-m) config)
