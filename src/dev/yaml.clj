@@ -222,6 +222,7 @@
                       "    - true "
                       "  - name: send_request"
                       "    exec: \"c:\\\\program file\\\\photoshop.exe\""
+                      "    is-directory: true"
                       "    args: "
                       "    - --output-file "
                       "    - --debug-mode "])

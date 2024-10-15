@@ -1,6 +1,56 @@
 (ns domain.explorer.type-test
-  (:require [clojure.test :refer (deftest testing is)]
-            [domain.explorer.type :as t]))
+  (:require [clojure.test :refer (deftest testing is use-fixtures)]
+            [domain.explorer.type :as t]
+            [babashka.fs :as fs]))
+
+;; fixtures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(def fixture-base-path  (fs/absolutize "test/fixture/fs"))
+(defn make-dirs [dirs]
+  (doseq [dir dirs]
+    (fs/create-dirs (fs/path fixture-base-path dir))))
+
+(defn make-files [files]
+  (doseq [file files]
+    (fs/create-file (fs/path fixture-base-path file))))
+
+(defn create-fs []
+  (make-dirs ["dir1/dir2-1"
+              "dir1/dir2-2"
+              "dir1/dir2-3"
+              "dir2/dir2-1"])
+  (make-files ["dir1/file.txt"]))
+
+(defn clean-fs []
+  (fs/delete-tree fixture-base-path))
+
+(defn with-fs-tree [f]
+  (create-fs)
+  (f)
+  (clean-fs))
+
+(use-fixtures :once with-fs-tree)
+
+;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(deftest is-directory-test
+  (let [is-directory-pred (:selector/is-directory t/file-selectors-catalog)]
+    (testing "the :is-directory selector"
+
+      (is (not
+           (is-directory-pred true nil #:file{:path (str (fs/path fixture-base-path "dir1/file.txt"))}))
+          "dir1/file.txt is not a dir, selector fails")
+
+      (is  (is-directory-pred false nil #:file{:path (str (fs/path fixture-base-path "dir1/file.txt"))})
+           "dir1/file.txt is not a dir, selector matches")
+
+      (is (not
+           (is-directory-pred false nil #:file{:path (str (fs/path fixture-base-path "dir1"))}))
+          "dir1 is a dir, selector fails")
+
+      (is (is-directory-pred true nil #:file{:path (str (fs/path fixture-base-path "dir1"))})
+          "dir1 is a dir, selector matches"))))
 
 
 (deftest equals-selector-test

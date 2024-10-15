@@ -1,5 +1,6 @@
 (ns domain.explorer.type
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as s]
+            [babashka.fs :as fs]))
 
 
 (def file-selectors-catalog #:selector{:equals ;; ----------------------------------
@@ -15,7 +16,11 @@
                                        :ends-with ;; ------------------------------
                                        (fn [val options file-m]
                                          (when-let [file-name (get file-m :file/name)]
-                                           (some #(s/ends-with? file-name %) (if (coll? val) val [val]))))})
+                                           (some #(s/ends-with? file-name %) (if (coll? val) val [val]))))
+
+                                       :is-directory ;; ----------------------------------
+                                       (fn [val options file-m]
+                                         (= val (fs/directory? (:file/path file-m))))})
 
 (def file-selector-keys (keys file-selectors-catalog))
 
@@ -32,7 +37,6 @@
 (defn selector-match [file-m selector-m]
   (when-let [selected? (create-selector-pred selector-m)]
     (selected? file-m)))
-
 
 (defn all-selectors-match [selectors-xs file-m]
   (let [selector-match? (partial selector-match file-m)]

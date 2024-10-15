@@ -41,6 +41,7 @@ types:
   - name: BACKUP_FOLDER
     selectors:
       - equals: bck
+      - is-directory: true
     actions:
       - name: View
         label: View Folder

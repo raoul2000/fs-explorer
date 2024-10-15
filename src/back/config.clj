@@ -45,13 +45,15 @@
 (spec/def :selector/arg (spec/or :string      :string/not-blank
                                  :string-list :coll/non-empty-string-list))
 
-(spec/def :selector/starts-with :selector/arg)
-(spec/def :selector/ends-with   :selector/arg)
-(spec/def :selector/equals      :selector/arg)
+(spec/def :selector/starts-with  :selector/arg)
+(spec/def :selector/ends-with    :selector/arg)
+(spec/def :selector/equals       :selector/arg)
+(spec/def :selector/is-directory boolean?)
 
 (spec/def :selector/def         (spec/keys :req [(or :selector/starts-with
                                                      :selector/ends-with
-                                                     :selector/equals)]))
+                                                     :selector/equals
+                                                     :selector/is-directory)]))
 
 (spec/def :type/name       :string/not-blank)
 (spec/def :type/selectors  (spec/coll-of :selector/def :min-count 1))
