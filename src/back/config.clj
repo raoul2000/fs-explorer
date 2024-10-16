@@ -50,10 +50,10 @@
 (spec/def :selector/equals       :selector/arg)
 (spec/def :selector/is-directory boolean?)
 
-(spec/def :selector/def         (spec/keys :req [(or :selector/starts-with
-                                                     :selector/ends-with
-                                                     :selector/equals
-                                                     :selector/is-directory)]))
+(spec/def :selector/def          (spec/keys :req [(or :selector/starts-with
+                                                      :selector/ends-with
+                                                      :selector/equals
+                                                      :selector/is-directory)]))
 
 (spec/def :type/name       :string/not-blank)
 (spec/def :type/selectors  (spec/coll-of :selector/def :min-count 1))
@@ -151,8 +151,8 @@
           :else                  (throw (ex-info "File type not supported " {:ext ext}))))
 
       (catch Exception e
-        (throw (ex-info "Failed to read configuration file" {:file (str abs-file-path)
-                                                             :msg  (.getMessage e)}))))))
+        (throw (ex-info "Failed to read configuration file"  {:file (str abs-file-path)
+                                                              :msg  (.getMessage e)}))))))
 
 ;; add namespace ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -278,13 +278,14 @@
   [user-config-file-path]
   ;; always validate default config
   (when-let [validation-error (default-config-error default-config)]
-    (throw (ex-info "Internal Error : invalid default settings" {:default-settings default-config
-                                                                 :error            validation-error})))
+    (throw (ex-info "Internal Error : invalid default settings"  {:default-settings default-config
+                                                                  :error            validation-error})))
 
   (let [user-config (when user-config-file-path
                       (-> user-config-file-path
                           read-from-file
                           add-ns-to-user-config))]
+    ;; validate user config
     (when user-config
       (when-let [validation-error (user-config-error user-config)]
         (print validation-error)
@@ -294,8 +295,8 @@
     ;; create final configuration and validate
     (let [final-config (merge-configs default-config user-config)]
       (when-let [validation-error (final-config-error final-config)]
-        (throw (ex-info "Invalid Configuration" {:file  user-config-file-path
-                                                 :error validation-error})))
+        (throw (ex-info "Invalid Configuration"  {:file  user-config-file-path
+                                                  :error validation-error})))
       final-config)))
 
 (comment

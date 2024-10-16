@@ -44,6 +44,8 @@
   "Returns a map describing the file at *abs-path* given the *root-dir-path*. Returns `nil` if
    *abs-path* does not exist."
   [abs-path root-dir-path]
+  {:post [(or (s/valid? :file/info %)
+              (nil? %))]}
   (when (fs/exists? abs-path)
     {:file/name (fs/file-name abs-path)
      :file/dir? (fs/directory? abs-path)

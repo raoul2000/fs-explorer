@@ -9,7 +9,8 @@
 (def fixture-base-path  (fs/absolutize "test/fixture/fs"))
 (defn make-dirs [dirs]
   (doseq [dir dirs]
-    (fs/create-dirs (fs/path fixture-base-path dir))))
+    (fs/create-dirs (fs/path fixture-base-path dir)))
+  (fs/create-file (fs/path fixture-base-path "dir1/file.txt")))
 
 (defn create-fs []
   (make-dirs ["dir1/dir2-1"
@@ -30,6 +31,32 @@
 
 ;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(deftest create-file-item-test
+  (testing "Create a file item map"
+    (is (= #:file{:name "dir1"
+                  :dir? true
+                  :path (str (fs/path fixture-base-path "dir1"))
+                  :id   "dir1"}
+           (exp/create-file-item (str (fs/path fixture-base-path "dir1"))
+                                 (str (fs/path fixture-base-path))))
+        "creates a map describing folder dir1")
+
+    (is (= #:file{:name "file.txt"
+                  :dir? false
+                  :path (str (fs/path fixture-base-path "dir1/file.txt"))
+                  :id   "dir1/file.txt"}
+           (exp/create-file-item (str (fs/path fixture-base-path "dir1/file.txt"))
+                                 (str (fs/path fixture-base-path))))
+        "creates a map describing file dir1/file.txt")
+
+    (is (nil?
+         (exp/create-file-item (str (fs/path fixture-base-path "dir1/not_found.txt"))
+                               (str (fs/path fixture-base-path))))
+        "returns nill if file not found")
+    (is (nil?
+         (exp/create-file-item (str (fs/path fixture-base-path "folder_not_founf"))
+                               (str (fs/path fixture-base-path))))
+        "returns nill if folder not found")))
 
 (deftest explore-test
   (testing "explore a file system tree"

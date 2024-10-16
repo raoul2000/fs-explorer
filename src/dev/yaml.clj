@@ -234,3 +234,16 @@
   ;;
   )
 
+(comment
+  ;; trying to work with regexp
+
+  (def yaml-input-2  ["actions: .*"])
+
+  (yaml/parse-string (s/join "\n" yaml-input-2))
+
+  (re-pattern ".*")
+  ;; reading from file ..
+
+  ;;
+  )
+
