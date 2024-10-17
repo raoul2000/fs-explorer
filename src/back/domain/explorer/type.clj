@@ -1,7 +1,16 @@
 (ns domain.explorer.type
-  (:require [clojure.string :as s]
-            [babashka.fs :as fs]))
+  (:require [babashka.fs :as fs]
+            [clojure.string :as s])
+  (:import [java.util.regex PatternSyntaxException]))
 
+(defn compile-regexp [s]
+  (try
+    (re-pattern s)
+    (catch PatternSyntaxException e
+      (throw (ex-info (format "invalid Regular Exception syntax") {:regexp s
+                                                                   :cause   (.getMessage e)})))))
+
+(def compile-regexp-memo (memoize compile-regexp))
 
 (def file-selectors-catalog #:selector{:equals ;; ----------------------------------
                                        (fn [val options file-m]
@@ -20,7 +29,44 @@
 
                                        :is-directory ;; ----------------------------------
                                        (fn [val options file-m]
-                                         (= val (fs/directory? (:file/path file-m))))})
+                                         (= val (fs/directory? (:file/path file-m))))
+
+                                       :matches-regexp ;; --------------------------------------
+                                       (fn sel [val options file-m]
+                                         (boolean (some #(re-matches (compile-regexp-memo %) (:file/path file-m))
+                                                        (if (coll? val) val [val]))))})
+
+(comment
+  (re-pattern ".*")
+  (re-pattern "*") ;; throws PatternSyntaxException
+
+
+  (compile-regexp ".*")
+  (try
+    (compile-regexp "*")
+    (catch Exception e
+      (println (ex-message e))
+      (println (ex-data e))))
+
+  (def compile-regexp-memo (memoize compile-regexp))
+
+
+  (compile-regexp-memo ".*")
+  (compile-regexp-memo "*")
+
+  (every? #(re-matches (compile-regexp-memo %) "hello") [".*" ".*"])
+  (every? #(re-matches (compile-regexp-memo %) "hello") [".*" "*"])
+  (every? #(re-matches (compile-regexp-memo %) "1234") ["\\d*" ".*"])
+  (every? #(re-matches (compile-regexp-memo %) "123b") ["\\d*" ".*"])
+
+  (boolean (some #(re-matches (compile-regexp-memo %) "123b") ["\\d*" ".*"]))
+  (boolean (some #(re-matches (compile-regexp-memo %) "123b") ["\\d*" "\\d*"]))
+
+
+  (re-matches (compile-regexp-memo "^\\d\\d\\d\\..*$") "123.jpg")
+  ;;
+  )
+
 
 (def file-selector-keys (keys file-selectors-catalog))
 

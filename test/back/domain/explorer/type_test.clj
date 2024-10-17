@@ -1,7 +1,8 @@
 (ns domain.explorer.type-test
   (:require [clojure.test :refer (deftest testing is use-fixtures)]
             [domain.explorer.type :as t]
-            [babashka.fs :as fs]))
+            [babashka.fs :as fs])
+  (:import [clojure.lang ExceptionInfo]))
 
 ;; fixtures ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -33,6 +34,32 @@
 (use-fixtures :once with-fs-tree)
 
 ;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(deftest matches-regexp-test
+  (let [matches-regexp-pred (:selector/matches-regexp t/file-selectors-catalog)]
+    (testing "the :matches-regexp selector"
+      (is (matches-regexp-pred ".*" nil #:file{:path "file.txt"})
+          "matches a single regexp")
+
+      (is (not (matches-regexp-pred "\\d+" nil #:file{:path "file.txt"}))
+          "does not matches a single regexp")
+
+      (is (matches-regexp-pred ["\\d+" ".*"] nil #:file{:path "file.txt"})
+          "matches one among several regexp")
+
+      (is (not (matches-regexp-pred ["\\d+" "\\w*"] nil #:file{:path "file.txt"}))
+          "does not match when all regexp don't match")
+
+      (is (thrown-with-msg? ExceptionInfo  #"invalid Regular Exception syntax"
+                            (matches-regexp-pred "*" nil #:file{:path "file.txt"}))
+          "throw when the regexp is invalid")
+
+      (is (thrown-with-msg? ExceptionInfo  #"invalid Regular Exception syntax"
+                            (matches-regexp-pred ["\\d*" "*"] nil #:file{:path "file.txt"}))
+          "throw when one regexp is invalid")))
+
+  ;;
+  )
 
 (deftest is-directory-test
   (let [is-directory-pred (:selector/is-directory t/file-selectors-catalog)]

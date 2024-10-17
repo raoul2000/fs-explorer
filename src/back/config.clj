@@ -12,6 +12,11 @@
 
 ;; spec ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn regexp? [s]
+  (try
+    (boolean (re-pattern s))
+    (catch Throwable _e
+      false)))
 
 (defn can-be-converted-to-url?
   "Returns TRUE if *s* can be converted into a java.net.URL object"
@@ -21,8 +26,12 @@
     true
     (catch Throwable _t false)))
 
-(spec/def :string/not-blank           (spec/and string? (complement s/blank?)))
+(spec/def :string/not-blank           (spec/and string?
+                                                (complement s/blank?)))
 (spec/def :coll/non-empty-string-list (spec/coll-of :string/not-blank :min-count 1))
+(spec/def :regexp/not-blank           (spec/and regexp?
+                                                (complement s/blank?)))
+(spec/def :coll/non-empty-regexp-list (spec/coll-of :regexp/not-blank :min-count 1))
 
 (spec/def :action/name  :string/not-blank)
 (spec/def :action/exec  :string/not-blank)
@@ -42,18 +51,22 @@
                                          :action/wait
                                          :action/label]))
 
-(spec/def :selector/arg (spec/or :string      :string/not-blank
-                                 :string-list :coll/non-empty-string-list))
+(spec/def :selector/arg        (spec/or :string      :string/not-blank
+                                        :string-list :coll/non-empty-string-list))
+(spec/def :selector/regexp-arg (spec/or :regexp      :regexp/not-blank
+                                        :regexp-list :coll/non-empty-regexp-list))
 
-(spec/def :selector/starts-with  :selector/arg)
-(spec/def :selector/ends-with    :selector/arg)
-(spec/def :selector/equals       :selector/arg)
-(spec/def :selector/is-directory boolean?)
+(spec/def :selector/starts-with    :selector/arg)
+(spec/def :selector/ends-with      :selector/arg)
+(spec/def :selector/equals         :selector/arg)
+(spec/def :selector/is-directory   boolean?)
+(spec/def :selector/matches-regexp :selector/regexp-arg)
 
 (spec/def :selector/def          (spec/keys :req [(or :selector/starts-with
                                                       :selector/ends-with
                                                       :selector/equals
-                                                      :selector/is-directory)]))
+                                                      :selector/is-directory
+                                                      :selector/matches-regexp)]))
 
 (spec/def :type/name       :string/not-blank)
 (spec/def :type/selectors  (spec/coll-of :selector/def :min-count 1))

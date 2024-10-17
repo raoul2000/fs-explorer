@@ -38,6 +38,15 @@ actions:
       - param from DEF
     wait: true
 types:
+  - name: IMG_NUM
+    selectors:
+      - ends-with: 
+        - jpg
+        - jpeg
+        - png
+      - matches-regexp: 
+        - ".*\\w..*"
+        - ".*\\d\\d\\d\\..*"
   - name: BACKUP_FOLDER
     selectors:
       - equals: bck
