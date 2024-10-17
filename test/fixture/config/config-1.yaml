@@ -44,7 +44,7 @@ types:
         - jpg
         - jpeg
         - png
-      - matches-regexp: 
+      - matches-regexp:   
         - ".*\\w..*"
         - ".*\\d\\d\\d\\..*"
   - name: BACKUP_FOLDER

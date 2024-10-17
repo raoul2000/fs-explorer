@@ -36,37 +36,6 @@
                                          (boolean (some #(re-matches (compile-regexp-memo %) (:file/path file-m))
                                                         (if (coll? val) val [val]))))})
 
-(comment
-  (re-pattern ".*")
-  (re-pattern "*") ;; throws PatternSyntaxException
-
-
-  (compile-regexp ".*")
-  (try
-    (compile-regexp "*")
-    (catch Exception e
-      (println (ex-message e))
-      (println (ex-data e))))
-
-  (def compile-regexp-memo (memoize compile-regexp))
-
-
-  (compile-regexp-memo ".*")
-  (compile-regexp-memo "*")
-
-  (every? #(re-matches (compile-regexp-memo %) "hello") [".*" ".*"])
-  (every? #(re-matches (compile-regexp-memo %) "hello") [".*" "*"])
-  (every? #(re-matches (compile-regexp-memo %) "1234") ["\\d*" ".*"])
-  (every? #(re-matches (compile-regexp-memo %) "123b") ["\\d*" ".*"])
-
-  (boolean (some #(re-matches (compile-regexp-memo %) "123b") ["\\d*" ".*"]))
-  (boolean (some #(re-matches (compile-regexp-memo %) "123b") ["\\d*" "\\d*"]))
-
-
-  (re-matches (compile-regexp-memo "^\\d\\d\\d\\..*$") "123.jpg")
-  ;;
-  )
-
 
 (def file-selector-keys (keys file-selectors-catalog))
 
