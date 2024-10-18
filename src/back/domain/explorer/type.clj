@@ -17,18 +17,18 @@
 
 (def file-selectors-catalog #:selector{:equals ;; ----------------------------------
                                        (fn [val options file-m]
-                                         (when-let [file-name (property-val file-m options "name")]
-                                           (some #(= file-name %) (if (coll? val) val [val]))))
+                                         (when-let [item-property-value (property-val file-m options "name")]
+                                           (some #(= item-property-value %) (if (coll? val) val [val]))))
 
                                        :starts-with ;; -----------------------------
                                        (fn [val options file-m]
-                                         (when-let [file-name (property-val file-m options "name")]
-                                           (some #(s/starts-with? file-name %) (if (coll? val) val [val]))))
+                                         (when-let [item-property-value (property-val file-m options "name")]
+                                           (some #(s/starts-with? item-property-value %) (if (coll? val) val [val]))))
 
                                        :ends-with ;; ------------------------------
                                        (fn [val options file-m]
-                                         (when-let [file-name (property-val file-m options "name")]
-                                           (some #(s/ends-with? file-name %) (if (coll? val) val [val]))))
+                                         (when-let [item-property-value (property-val file-m options "name")]
+                                           (some #(s/ends-with? item-property-value %) (if (coll? val) val [val]))))
 
                                        :is-directory ;; ----------------------------------
                                        (fn [val options file-m]
@@ -36,8 +36,9 @@
 
                                        :matches-regexp ;; --------------------------------------
                                        (fn [val options file-m]
-                                         (boolean (some #(re-matches (compile-regexp-memo %) (property-val file-m options "name"))
-                                                        (if (coll? val) val [val]))))})
+                                         (when-let [item-property-value (property-val file-m options "name")]
+                                           (boolean (some #(re-matches (compile-regexp-memo %) item-property-value)
+                                                          (if (coll? val) val [val])))))})
 
 (def file-selector-keys (keys file-selectors-catalog))
 
