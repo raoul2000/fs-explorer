@@ -12,19 +12,22 @@
 
 (def compile-regexp-memo (memoize compile-regexp))
 
+(defn property-val [file-m {property :selector/property} default-property]
+  (get file-m (keyword "file" (or property default-property))))
+
 (def file-selectors-catalog #:selector{:equals ;; ----------------------------------
                                        (fn [val options file-m]
-                                         (when-let [file-name (get file-m :file/name)]
+                                         (when-let [file-name (property-val file-m options "name")]
                                            (some #(= file-name %) (if (coll? val) val [val]))))
 
                                        :starts-with ;; -----------------------------
                                        (fn [val options file-m]
-                                         (when-let [file-name (get file-m :file/name)]
+                                         (when-let [file-name (property-val file-m options "name")]
                                            (some #(s/starts-with? file-name %) (if (coll? val) val [val]))))
 
                                        :ends-with ;; ------------------------------
                                        (fn [val options file-m]
-                                         (when-let [file-name (get file-m :file/name)]
+                                         (when-let [file-name (property-val file-m options "name")]
                                            (some #(s/ends-with? file-name %) (if (coll? val) val [val]))))
 
                                        :is-directory ;; ----------------------------------
@@ -32,10 +35,9 @@
                                          (= val (fs/directory? (:file/path file-m))))
 
                                        :matches-regexp ;; --------------------------------------
-                                       (fn sel [val options file-m]
-                                         (boolean (some #(re-matches (compile-regexp-memo %) (:file/path file-m))
+                                       (fn [val options file-m]
+                                         (boolean (some #(re-matches (compile-regexp-memo %) (property-val file-m options "name"))
                                                         (if (coll? val) val [val]))))})
-
 
 (def file-selector-keys (keys file-selectors-catalog))
 

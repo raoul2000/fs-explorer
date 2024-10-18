@@ -1,6 +1,6 @@
 # Actions
 
-Actions can be configured to be associated with types (see [Types](./types.ms)).
+Actions can be configured to be associated with [custom types](./types.md).
 
 There is two kinds of actions :
 

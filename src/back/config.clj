@@ -26,6 +26,8 @@
     true
     (catch Throwable _t false)))
 
+(def valid-selector-properties #{"name" "path" "id"})
+
 (spec/def :string/not-blank           (spec/and string?
                                                 (complement s/blank?)))
 (spec/def :coll/non-empty-string-list (spec/coll-of :string/not-blank :min-count 1))
@@ -61,12 +63,13 @@
 (spec/def :selector/equals         :selector/arg)
 (spec/def :selector/is-directory   boolean?)
 (spec/def :selector/matches-regexp :selector/regexp-arg)
-
-(spec/def :selector/def          (spec/keys :req [(or :selector/starts-with
-                                                      :selector/ends-with
-                                                      :selector/equals
-                                                      :selector/is-directory
-                                                      :selector/matches-regexp)]))
+(spec/def :selector/property       valid-selector-properties)
+(spec/def :selector/def            (spec/keys :req [(or :selector/starts-with
+                                                        :selector/ends-with
+                                                        :selector/equals
+                                                        :selector/is-directory
+                                                        :selector/matches-regexp)]
+                                              :opt [:selector/property]))
 
 (spec/def :type/name       :string/not-blank)
 (spec/def :type/selectors  (spec/coll-of :selector/def :min-count 1))

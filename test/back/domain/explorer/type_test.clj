@@ -33,31 +33,47 @@
 
 (use-fixtures :once with-fs-tree)
 
+(deftest property-option-test
+  (let [pred (:selector/starts-with t/file-selectors-catalog)]
+    (testing "apply selector on the configured file item property"
+      (is (pred "val" nil #:file{:name "val"})
+          "default property is 'name'")
+
+      (is (pred "val" #:selector{:property "path"} #:file{:name "val-1"
+                                                          :path "val"})
+          "property can be configured to be 'path'")
+
+      (is (nil? (pred "val" #:selector{:property "not_found"} #:file{:name "val-1"
+                                                                     :path "val"}))
+          "return nil when the property name is not found")
+
+      (is (nil? (pred "val" #:selector{:property "path"} #:file{:name "val-1"}))
+          "returns nil when the file-item does not contain the configured property"))))
+
 ;; tests ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (deftest matches-regexp-test
   (let [matches-regexp-pred (:selector/matches-regexp t/file-selectors-catalog)]
     (testing "the :matches-regexp selector"
-      (is (matches-regexp-pred ".*" nil #:file{:path "file.txt"})
+      (is (matches-regexp-pred ".*" nil #:file{:name "file.txt"})
           "matches a single regexp")
 
-      (is (not (matches-regexp-pred "\\d+" nil #:file{:path "file.txt"}))
+      (is (not (matches-regexp-pred "\\d+" nil #:file{:name "file.txt"}))
           "does not matches a single regexp")
 
-      (is (matches-regexp-pred ["\\d+" ".*"] nil #:file{:path "file.txt"})
+      (is (matches-regexp-pred ["\\d+" ".*"] nil #:file{:name "file.txt"})
           "matches one among several regexp")
 
-      (is (not (matches-regexp-pred ["\\d+" "\\w*"] nil #:file{:path "file.txt"}))
+      (is (not (matches-regexp-pred ["\\d+" "\\w*"] nil #:file{:name "file.txt"}))
           "does not match when all regexp don't match")
 
       (is (thrown-with-msg? ExceptionInfo  #"invalid Regular Exception syntax"
-                            (matches-regexp-pred "*" nil #:file{:path "file.txt"}))
+                            (matches-regexp-pred "*" nil #:file{:name "file.txt"}))
           "throw when the regexp is invalid")
 
       (is (thrown-with-msg? ExceptionInfo  #"invalid Regular Exception syntax"
-                            (matches-regexp-pred ["\\d*" "*"] nil #:file{:path "file.txt"}))
+                            (matches-regexp-pred ["\\d*" "*"] nil #:file{:name "file.txt"}))
           "throw when one regexp is invalid")))
-
   ;;
   )
 

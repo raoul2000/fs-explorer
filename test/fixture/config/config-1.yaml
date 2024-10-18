@@ -49,11 +49,20 @@ types:
         - ".*\\d\\d\\d\\..*"
   - name: BACKUP_FOLDER
     selectors:
-      - equals: bck
+      - property: name
+        equals: bck
       - is-directory: true
     actions:
       - name: View
         label: View Folder
+  - name: BACKUP_DATA
+    selectors:
+      - property: id
+        starts-with: bck/
+      - is-directory: false
+    actions:
+      - name: View
+        label: View Folder        
   - name: MARKDOWN_README
     selectors:
       - equals: README.md
