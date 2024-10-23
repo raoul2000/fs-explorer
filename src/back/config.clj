@@ -27,6 +27,7 @@
     (catch Throwable _t false)))
 
 (def valid-selector-properties #{"name" "path" "id"})
+(def valid-metadata-format     #{"json" "yaml" "mixed"})
 
 (spec/def :string/not-blank           (spec/and string?
                                                 (complement s/blank?)))
@@ -44,81 +45,93 @@
                                     :number  number?
                                     :boolean boolean?))
 
-(spec/def :action/args (spec/or :scalar :action/arg-item
-                                :list   (spec/coll-of :action/arg-item
-                                                      :min-count 1)))
-(spec/def :action/def   (spec/keys :req [:action/name
-                                         :action/exec]
-                                   :opt [:action/args
-                                         :action/wait
-                                         :action/label]))
+(spec/def :action/args              (spec/or :scalar :action/arg-item
+                                             :list   (spec/coll-of :action/arg-item
+                                                                   :min-count 1)))
+(spec/def :action/def               (spec/keys :req [:action/name
+                                                     :action/exec]
+                                               :opt [:action/args
+                                                     :action/wait
+                                                     :action/label]))
 
-(spec/def :selector/arg        (spec/or :string      :string/not-blank
-                                        :string-list :coll/non-empty-string-list))
-(spec/def :selector/regexp-arg (spec/or :regexp      :regexp/not-blank
-                                        :regexp-list :coll/non-empty-regexp-list))
+(spec/def :selector/arg             (spec/or :string      :string/not-blank
+                                             :string-list :coll/non-empty-string-list))
+(spec/def :selector/regexp-arg      (spec/or :regexp      :regexp/not-blank
+                                             :regexp-list :coll/non-empty-regexp-list))
 
-(spec/def :selector/starts-with    :selector/arg)
-(spec/def :selector/ends-with      :selector/arg)
-(spec/def :selector/equals         :selector/arg)
-(spec/def :selector/is-directory   boolean?)
-(spec/def :selector/matches-regexp :selector/regexp-arg)
-(spec/def :selector/property       valid-selector-properties)
-(spec/def :selector/def            (spec/keys :req [(or :selector/starts-with
-                                                        :selector/ends-with
-                                                        :selector/equals
-                                                        :selector/is-directory
-                                                        :selector/matches-regexp)]
-                                              :opt [:selector/property]))
+(spec/def :selector/starts-with     :selector/arg)
+(spec/def :selector/ends-with       :selector/arg)
+(spec/def :selector/equals          :selector/arg)
+(spec/def :selector/is-directory    boolean?)
+(spec/def :selector/matches-regexp  :selector/regexp-arg)
+(spec/def :selector/property        valid-selector-properties)
+(spec/def :selector/def             (spec/keys :req [(or :selector/starts-with
+                                                         :selector/ends-with
+                                                         :selector/equals
+                                                         :selector/is-directory
+                                                         :selector/matches-regexp)]
+                                               :opt [:selector/property]))
 
-(spec/def :type/name       :string/not-blank)
-(spec/def :type/selectors  (spec/coll-of :selector/def :min-count 1))
-(spec/def :type/action-ref (spec/keys :req [:action/name]))
-(spec/def :type/actions    (spec/coll-of  :type/action-ref :min-count 1))
-(spec/def :type/def        (spec/keys :req [:type/name
-                                            :type/selectors]
-                                      :opt [:type/actions]))
+(spec/def :type/name                :string/not-blank)
+(spec/def :type/selectors           (spec/coll-of :selector/def :min-count 1))
+(spec/def :type/action-ref          (spec/keys :req [:action/name]))
+(spec/def :type/actions             (spec/coll-of  :type/action-ref :min-count 1))
+(spec/def :type/def                 (spec/keys :req [:type/name
+                                                     :type/selectors]
+                                               :opt [:type/actions]))
 
-(spec/def :config/server-port    (spec/and int? #(< 0 % 65353)))
-(spec/def :config/root-dir-path  string?)
-(spec/def :config/open-browser   boolean?)
-(spec/def :config/browse-url     can-be-converted-to-url?)
-(spec/def :config/types          (spec/coll-of :type/def   :min-count 1))
-(spec/def :config/actions        (spec/coll-of :action/def :min-count 1))
+(spec/def :config/server-port        (spec/and int? #(< 0 % 65353)))
+(spec/def :config/root-dir-path      string?)
+(spec/def :config/open-browser       boolean?)
+(spec/def :config/browse-url         can-be-converted-to-url?)
+(spec/def :config/types              (spec/coll-of :type/def   :min-count 1))
+(spec/def :config/actions            (spec/coll-of :action/def :min-count 1))
+(spec/def :config/metadata-format    valid-metadata-format)
+(spec/def :config/metadata-extension :string/not-blank)
 
-(spec/def :config/map            (spec/keys :req [:config/server-port
-                                                  :config/root-dir-path
-                                                  :config/open-browser
-                                                  :config/browse-url]
-                                            :opt [:config/types
-                                                  :config/actions]))
+(spec/def :config/map                (spec/keys :req [:config/server-port
+                                                      :config/root-dir-path
+                                                      :config/open-browser
+                                                      :config/browse-url
+                                                      :config/metadata-format
+                                                      :config/metadata-extension]
+                                                :opt [:config/types
+                                                      :config/actions]))
 
-(spec/def :user-config/map       (spec/keys :opt [:config/server-port
-                                                  :config/root-dir-path
-                                                  :config/open-browser
-                                                  :config/browse-url
-                                                  :config/types
-                                                  :config/actions]))
+(spec/def :user-config/map           (spec/keys :opt [:config/server-port
+                                                      :config/root-dir-path
+                                                      :config/open-browser
+                                                      :config/browse-url
+                                                      :config/types
+                                                      :config/actions]))
 
 ;; default config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(def default-port 8890)
+(def default-port               8890)
+(def default-metadata-format    "json")
+(def default-metadata-extension "meta")
+
 (defn create-browse-url [port]
   (format "http://localhost:%d/" port))
 
-(def default-config #:config{:server-port   default-port
-                             :root-dir-path (str (fs/home))
-                             :open-browser  true
-                             :browse-url    (create-browse-url default-port)})
+(def default-config #:config{:server-port        default-port
+                             :root-dir-path      (str (fs/home))
+                             :open-browser       true
+                             :browse-url         (create-browse-url default-port)
+                             :metadata-format    default-metadata-format
+                             :metadata-extension default-metadata-extension})
 
 ;; getters ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defn server-port   [config] (:config/server-port   config))
-(defn root-dir-path [config] (:config/root-dir-path config))
-(defn open-broser?  [config] (:config/open-browser  config))
-(defn browse-url    [config] (:config/browse-url    config))
+(defn server-port        [config] (:config/server-port   config))
+(defn root-dir-path      [config] (:config/root-dir-path config))
+(defn open-broser?       [config] (:config/open-browser  config))
+(defn browse-url         [config] (:config/browse-url    config))
+
+(defn metadata-format    [config] (:config/metadata-format    config))
+(defn metadata-extension [config] (:config/metadata-extension    config))
 
 (defn types-definition   [config] (:config/types    config))
 (defn type-name          [type-m] (:type/name       type-m))

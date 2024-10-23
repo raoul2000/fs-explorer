@@ -7,11 +7,12 @@
   [{:keys [config]}]
   (fn [request]
     (let [dir-path         (get-in request [:params :dir])
-          root-dir-path    (config/root-dir-path config)
-          type-definitions (config/types-definition config)]
-      (tap> {:config        config
-             :dir-path      dir-path
-             :root-dir-path root-dir-path})
-      (response/ok (exp/explore (or dir-path "/") {:root-dir-path root-dir-path
-                                                   :types         type-definitions})))))
+          root-dir-path    (config/root-dir-path      config)
+          type-definitions (config/types-definition   config)
+          metadata-format  (config/metadata-format    config)
+          metadata-ext     (config/metadata-extension config)]
+      (response/ok (exp/explore (or dir-path "/") {:root-dir-path   root-dir-path
+                                                   :types           type-definitions
+                                                   :metadata-format metadata-format
+                                                   :metadata-ext    metadata-ext})))))
 

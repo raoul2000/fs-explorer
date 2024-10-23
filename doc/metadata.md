@@ -45,16 +45,12 @@ For example, the table below describe possible metadata filename for a the regul
  | *default*           | json             | json          | file.txt.meta          |
  | *default*           | mixed            | json          | file.txt.json.meta     |
  | *default*           | mixed            | yaml          | file.txt.yaml.meta     |
- | metainfo            | *default*        | json          | file.txt.metainfo      |
- | metainfo            | mixed            | json          | file.txt.json.metainfo |
-
+ 
 In case the item is a directory, the string "file.txt" should simply be removed. For example :  ".json.meta", ".metainfo", etc.
 
 ## Location
 
 Two possible cases:
 
-- When the item is a regular file, its associated metadata file must be located in the same directory.
-- When the item is a directory, the metadata file must be located in this directory.
-
-
+- When the item is a *regular file*, its associated metadata file must be located in the same directory.
+- When the item is a *directory*, the metadata file must be located in this directory.

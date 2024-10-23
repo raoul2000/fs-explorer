@@ -45,7 +45,7 @@ Accept: application/json
 
 ### GET /explore 2
 
-GET {{baseUrl}}/explore?type=file
+GET {{baseUrl}}/explore?dir=not_found
 Accept: application/json
 
 ### GET /download file

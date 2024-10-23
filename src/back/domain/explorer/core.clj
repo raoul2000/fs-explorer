@@ -32,14 +32,6 @@
   (->> (fs/relativize root-path fs-path)
        normalize-path-separator))
 
-(comment
-  (fs-path->db-path "c:\\a" "c:\\a\\b")
-  ;;
-  )
-
-(defn- read-file-content [file-path]
-  {:model/content (slurp file-path)})
-
 (defn create-file-item
   "Returns a map describing the file at *abs-path* given the *root-dir-path*. Returns `nil` if
    *abs-path* does not exist."
@@ -56,16 +48,6 @@
   {:model/content (->> (fs/list-dir dir-path)
                        (map #(create-file-item % root-dir-path)))})
 
-
-(comment
-  (fs/file-name "c:\\tmp\\folder\\README.md")
-  (fs/directory? "c:\\tmp\\folder\\README.md")
-  (fs/directory? "c:\\tmp")
-  (fs-path->db-path  "c:\\tmp" "c:\\tmp\\folder\\README.md")
-
-  (create-file-item "c:\\tmp" "c:\\tmp\\README.md")
-  ;;
-  )
 
 (defn absolutize-path
   "when *this-path* refers to a file or folder that is under *root-path* returns its absolute path 
@@ -92,21 +74,45 @@
 (defn add-types [type-def-xs result]
   (update result :model/content (fn [file-xs]
                                   (map #(infer-type type-def-xs %) file-xs))))
+
+;; meta ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn create-metadata-abs-path [content-path metadata-format metadata-extension]
+  ;; TODO: implement me
+  )
+
+(defn read-metadata [metadata-format metadata-extension file-item]
+  (let [metadata-asb-path (str (:file/path file-item))]
+    (assoc file-item :metadata {:sample "value"})))
+
+(defn add-meta [with-meta metadata-format metadata-ext result]
+  (if-not with-meta
+    result
+    (update result :model/content (fn [file-xs]
+                                    (map #(read-metadata metadata-format metadata-ext %) file-xs)))))
 ;; explore  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn explore [fs-path {:keys [root-dir-path types] :as options}]
+(defn explore [fs-path {:keys [root-dir-path
+                               types
+                               metadata-format
+                               metadata-ext] :as options}]
   {:post [(s/valid? :model/read-result %)]}
-  (let [abs-path (absolutize-path (or fs-path "") root-dir-path)]
+  (let [abs-path (absolutize-path (or fs-path "") root-dir-path)
+        with-meta true]
 
     (when-not (fs/exists? abs-path)
-      (throw (ex-info "file not found" {:dir       fs-path
-                                        :root-path root-dir-path
-                                        :abs-path  abs-path})))
+      (throw (ex-info "directory not found" {:dir       fs-path
+                                             :root-path root-dir-path
+                                             :abs-path  abs-path})))
 
-    (if (fs/regular-file? abs-path)
-      (read-file-content abs-path)
-      (->> (list-dir-content abs-path root-dir-path)
-           (add-types        types)))))
+    (when (fs/regular-file? abs-path)
+      (throw (ex-info "not a directory" {:dir       fs-path
+                                         :root-path root-dir-path
+                                         :abs-path  abs-path})))
+
+    (->> (list-dir-content abs-path root-dir-path)
+         (add-types        types)
+         (add-meta         with-meta metadata-format metadata-ext))))
 
 ;; index ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
