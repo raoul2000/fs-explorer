@@ -3,6 +3,7 @@
             [clojure.spec.alpha :as s]
             [model :as model]
             [domain.explorer.type :refer [infer-type]]
+            [domain.explorer.metadata :refer [read-metadata]]
             [clojure.string :refer [blank? join]]))
 
 ;; utils  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -72,18 +73,12 @@
 ;; type ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn add-types [type-def-xs result]
-  (update result :model/content (fn [file-xs]
-                                  (map #(infer-type type-def-xs %) file-xs))))
+  (if-not type-def-xs
+    result
+    (update result :model/content (fn [file-xs]
+                                    (map #(infer-type type-def-xs %) file-xs)))))
 
 ;; meta ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn create-metadata-abs-path [content-path metadata-format metadata-extension]
-  ;; TODO: implement me
-  )
-
-(defn read-metadata [metadata-format metadata-extension file-item]
-  (let [metadata-asb-path (str (:file/path file-item))]
-    (assoc file-item :metadata {:sample "value"})))
 
 (defn add-meta [with-meta metadata-format metadata-ext result]
   (if-not with-meta
