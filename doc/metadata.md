@@ -3,8 +3,7 @@
 
 ## Overview
 
-Each item, wether it is a directory or a regular file, can have extra information describing it: this infromatioons are called *metadata*.
-Metadata informations are stored as a regular file, in JSON or YAML format, and they follow a strict naming convention.
+Each item, wether it is a directory or a regular file, can have extra information describing it: this infromatioon is called *metadata*. Metadata informations are stored as a regular file, in JSON or YAML format, and they follow a strict naming convention.
 
 The data stored as metadata are entirely defined by you, and as long as the metadata document's format is valid and matches the file extension, the system will be able to handle it.
 
@@ -29,22 +28,21 @@ The metadata file associated with an item must follow the naming convention desc
 [related item's filename][".json" | ".yaml" | ".yml"].<metadata extension>
 ```
 
-Where :
 - **related item's filename** 
   - if the item is a *regular file*, this field is the filename **including its extension** 
   - if the item is a *directory* then this field remains blank.
 - **[".json" | ".yaml" | ".yml"]**  defines the format of the metadata file. It is only required in *mixed* metadata format mode
 - **\<metadata extension>** : metadata file extension. Default value is *meta*, but it can be modified via the `metadataExtension` configuration parameter. 
 
-For example, the table below describe possible metadata filename for a the regular file **file.txt** depending on configuration.
+For example, the table below describes possible metadata filename for a the regular file **file.txt** depending on configuration.
 
- | `metadataExtension` | `metadataFormat` | actual format | metadata's filename    |
- | :------------------ | :--------------- | :------------ | :--------------------- |
- | *default*           | *default*        | json          | file.txt.meta          |
- | *default*           | yaml             | yaml          | file.txt.meta          |
- | *default*           | json             | json          | file.txt.meta          |
- | *default*           | mixed            | json          | file.txt.json.meta     |
- | *default*           | mixed            | yaml          | file.txt.yaml.meta     |
+ | `metadataExtension` | `metadataFormat` | actual format | metadata's filename  |
+ | :------------------ | :--------------- | :------------ | :------------------- |
+ | *default*           | *default*        | json          | `file.txt.meta`      |
+ | *default*           | yaml             | yaml          | `file.txt.meta`      |
+ | *default*           | json             | json          | `file.txt.meta`      |
+ | *default*           | mixed            | json          | `file.txt.json.meta` |
+ | *default*           | mixed            | yaml          | `file.txt.yaml.meta` |
  
 In case the item is a directory, the string "file.txt" should simply be removed. For example :  ".json.meta", ".metainfo", etc.
 
