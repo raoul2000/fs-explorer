@@ -4,7 +4,8 @@
 
 (defn format-token [metadata-format]
   (case metadata-format
-    "mixed"   [{:token ".json", :format "json"} {:token ".yaml" :format "yaml"}]
+    "mixed"   [{:token ".json", :format "json"}
+               {:token ".yaml"  :format "yaml"}]
     "json"    [{:token "", :format "json"}]
     "yaml"    [{:token "", :format "yaml"}]
     (throw (ex-info "invalid metadata format" {:metadata-format metadata-format}))))
@@ -35,18 +36,28 @@
   ;;
   )
 
+
 (comment
+
+  (def fpath-token "c:\\tmp\\")
   (->> (format-token "mixed")
-       (map #(format "file.txt%s%s" % ".meta")))
-
-
+       (map (fn [token]
+              (format "%s%s.%s"
+                      fpath-token
+                      (:token token)
+                      "meta"))))
 
   ;;
   )
 
-(defn create-abs-path [content-path metadata-format metadata-extension]
-  ;; TODO: implement me
-  content-path)
+(defn create-abs-path [file-m  metadata-format metadata-extension]
+  (let [file-path (file-path-token file-m)]
+    (->> (format-token metadata-format)
+         (map (fn [token]
+                (format "%s%s.%s"
+                        file-path
+                        (:token token)
+                        metadata-extension))))))
 
 (defn metadata-file-info [file-item metadata-format metadata-extension]
 
