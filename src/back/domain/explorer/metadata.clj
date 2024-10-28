@@ -29,23 +29,24 @@
                                            (:token token)
                                            metadata-extension)))))))
 
-(defn metadata-file-exists? [{metadata-file-path :path}]
+(defn file-exists? [{metadata-file-path :path}]
   (when metadata-file-path
     (fs/regular-file? metadata-file-path)))
 
 
 (defn read-metadata [metadata-format metadata-extension file-item]
-  (let [candidates    (create-metadata-candidates file-item metadata-format metadata-extension)
-        metadata-info (some metadata-file-exists? candidates)]
+  (let [metadata-candidates    (create-metadata-candidates file-item metadata-format metadata-extension)
+        metadata-info          (first (filter file-exists? metadata-candidates))]
 
     (when metadata-info
-      (try
-        (let [metadata-reader (io/reader (fs/file (:path metadata-info)))]
+
+      (with-open [metadata-reader (io/reader (fs/file (:path metadata-info)))]
+        (try
           (case (:format metadata-info)
             :json (json/read         metadata-reader :key-fn keyword)
-            :yaml (yaml/parse-stream metadata-reader)))
-        (catch Exception e
-          (throw (ex-info "failed to parse metadata file " {:metadata-info metadata-info
-                                                            :msg          (.getMessage e)})))))))
+            :yaml (yaml/parse-stream metadata-reader))
+          (catch Exception e
+            (throw (ex-info "failed to parse metadata file " {:metadata-info metadata-info
+                                                              :msg          (.getMessage e)}))))))))
 
 
