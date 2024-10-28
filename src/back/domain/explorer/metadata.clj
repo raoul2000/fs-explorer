@@ -1,5 +1,8 @@
 (ns domain.explorer.metadata
-  (:require [babashka.fs :as fs]))
+  (:require [babashka.fs :as fs]
+            [clojure.data.json :as json]
+            [clj-yaml.core :as yaml]
+            [clojure.java.io :as io]))
 
 
 (def metadata-format-info {"mixed" [{:token ".json", :format :json}
@@ -25,39 +28,24 @@
                                            file-path
                                            (:token token)
                                            metadata-extension)))))))
-(comment
 
-
-  (defn metadata-file-exists? [{metadata-file-path :path}]
-    (when metadata-file-path
-      (and
-       (fs/regular-file? metadata-file-path)
-       (fs/exists? metadata-file-path))))
-
-  (metadata-file-exists? {:path "c:\\tmp\\file.txt"})
-
-
-  (some metadata-file-exists? (create-metadata-candidates #:file{:path "c:\\tmp\\file.txt"
-                                                                 :dir false}
-                                                          "mixed"
-                                                          "meta"))
-
-
-;;
-  )
-
-
-(defn metadata-file-info [file-item metadata-format metadata-extension]
-
-  (let [format-part (if (= metadata-format "mixed") [".json" ".yaml"] [])]))
-
-(comment
-  (def metadata-format "mixed")
-
-  ;;
-  )
+(defn metadata-file-exists? [{metadata-file-path :path}]
+  (when metadata-file-path
+    (fs/regular-file? metadata-file-path)))
 
 
 (defn read-metadata [metadata-format metadata-extension file-item]
-  (let [metadata-asb-path (str (:file/path file-item))]
-    (assoc file-item :metadata {:sample "value"})))
+  (let [candidates    (create-metadata-candidates file-item metadata-format metadata-extension)
+        metadata-info (some metadata-file-exists? candidates)]
+
+    (when metadata-info
+      (try
+        (let [metadata-reader (io/reader (fs/file (:path metadata-info)))]
+          (case (:format metadata-info)
+            :json (json/read         metadata-reader :key-fn keyword)
+            :yaml (yaml/parse-stream metadata-reader)))
+        (catch Exception e
+          (throw (ex-info "failed to parse metadata file " {:metadata-info metadata-info
+                                                            :msg          (.getMessage e)})))))))
+
+
