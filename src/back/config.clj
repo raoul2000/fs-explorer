@@ -172,7 +172,7 @@
       (println (format "Loading user configuration from %s ..." abs-file-path))
 
       (let [ext           (s/lower-case (fs/extension abs-file-path))
-            config-reader (io/reader    (fs/file      abs-file-path))]
+            config-reader (io/reader    (fs/file      abs-file-path))] ;; TODO: replace with-open (see metadata)
 
         (cond
           (#{"yml" "yaml"} ext)  (yaml/parse-stream config-reader)

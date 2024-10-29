@@ -4,7 +4,8 @@
             [model :as model]
             [domain.explorer.type :refer [infer-type]]
             [domain.explorer.metadata :refer [read-metadata]]
-            [clojure.string :refer [blank? join]]))
+            [clojure.string :refer [blank? join]]
+            [clojure.string :as str]))
 
 ;; utils  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -45,10 +46,13 @@
      :file/path (str abs-path)
      :file/id   (fs-path->db-path root-dir-path abs-path)}))
 
-(defn- list-dir-content [dir-path root-dir-path]
+(defn- list-dir-content
+  "creates and returns a seq of file items stored under the given *dir-path* and recursively. 
+   Note that all files identified as **metadata files** are ignored."
+  [dir-path root-dir-path metadata-ext]
   {:model/content (->> (fs/list-dir dir-path)
-                       (map #(create-file-item % root-dir-path)))})
-
+                       (map #(create-file-item % root-dir-path))
+                       (filter #(not (str/ends-with? (:file/path %) (str "." metadata-ext)))))})
 
 (defn absolutize-path
   "when *this-path* refers to a file or folder that is under *root-path* returns its absolute path 
@@ -84,7 +88,10 @@
   (if-not with-meta
     result
     (update result :model/content (fn [file-xs]
-                                    (map #(read-metadata metadata-format metadata-ext %) file-xs)))))
+                                    (map #(read-metadata metadata-format metadata-ext %) file-xs)))
+    #_(->> (:model/content result)
+         (map #(read-metadata metadata-format metadata-ext %))
+         (assoc result :model/metadata))))
 ;; explore  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn explore [fs-path {:keys [root-dir-path
@@ -105,7 +112,7 @@
                                          :root-path root-dir-path
                                          :abs-path  abs-path})))
 
-    (->> (list-dir-content abs-path root-dir-path)
+    (->> (list-dir-content abs-path root-dir-path metadata-ext)
          (add-types        types)
          (add-meta         with-meta metadata-format metadata-ext))))
 
