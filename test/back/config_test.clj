@@ -146,6 +146,9 @@
                     :root-dir-path "c:\\tmp",
                     :open-browser  true,
                     :browse-url    "http://localhost:7777/",
+                    :metadata      #:metadata{:enable         false, 
+                                              :format         "json", 
+                                              :file-extension "meta"}
                     :actions       '(#:action{:name "action1",
                                               :exec "notepad.exe",
                                               :args ("arg1")}
