@@ -113,28 +113,33 @@
 (deftest read-metadata-test
   (testing "Read metadata file related to a given file item"
     (is (= {:prop "value"}
-           (md/read-metadata "json" "meta" #:file{:path file-1
-                                                  :dir? false}))
+           (:file/metadata (md/read-metadata #:metadata{:format         "json"
+                                                        :file-extension "meta"} #:file{:path file-1
+                                                                                       :dir? false})))
         "returns metadata from JSON file for file related metadata")
 
     (is (= {:prop "value"}
-           (md/read-metadata "yaml" "mdinfo" #:file{:path file-2
-                                                    :dir? false}))
+           (:file/metadata (md/read-metadata #:metadata{:format         "yaml"
+                                                        :file-extension "mdinfo"}  #:file{:path file-2
+                                                                                          :dir? false})))
         "returns metadata from YAML file for file related metadata")
 
     (is (= {:prop "JSON value"}
-           (md/read-metadata "mixed" "meta" #:file{:path file-3
-                                                   :dir? false}))
+           (:file/metadata (md/read-metadata #:metadata{:format         "mixed"
+                                                        :file-extension "meta"}  #:file{:path file-3
+                                                                                        :dir? false})))
         "guess metadata from mixed (json) file for file related metadata")
 
     (is (= {:prop "YAML value"}
-           (md/read-metadata "mixed" "meta" #:file{:path file-4
-                                                   :dir? false}))
+           (:file/metadata (md/read-metadata #:metadata{:format         "mixed"
+                                                        :file-extension "meta"} #:file{:path file-4
+                                                                                       :dir? false})))
         "guess  metadata from mixed (json) file for file related metadata")
 
     (is (= {:prop "JSON value"}
-           (md/read-metadata "mixed" "meta" #:file{:path file-5
-                                                   :dir? false}))
+           (:file/metadata (md/read-metadata  #:metadata{:format         "mixed"
+                                                         :file-extension "meta"} #:file{:path file-5
+                                                                                        :dir? false})))
         "when both format exist, use JSON")))
 
 

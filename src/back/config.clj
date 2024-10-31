@@ -219,9 +219,10 @@
   (map #(into {} (map (fn [[k v]]
                         (vector (add-ns "action" k) v)) %)) actions-xs))
 
-(defn process-config-metadata [actions-xs]
-  (map #(into {} (map (fn [[k v]]
-                        (vector (add-ns "metadata" k) v)) %)) actions-xs))
+(defn process-config-metadata [metadata-m]
+  (->> metadata-m
+       (map (fn [[k v]] [(add-ns "metadata" k) v]))
+       (into {})))
 
 (defn add-ns-to-user-config
   "Given *m* a user config map with no namespace, returns a new map where keywords
@@ -320,7 +321,7 @@
 
 (comment
 
-  (def cfg (read-from-file "./test/back/fixtures/config-1.yaml"))
+  (def cfg (read-from-file "./test/fixture/config/config-1.yaml"))
   (def cfg (read-from-file "./test/back/fixtures/config_test-1.yaml"))
 
   (def cfg-ns (add-ns-to-user-config cfg))

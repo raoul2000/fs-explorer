@@ -5,7 +5,6 @@
 Each item is a directory or a regular file, that's the **base type**. On top of it, a **custom type** can be configured so to bring extra meaning to items.
 
 
-
 ## Selectors
 
 To configure a *custom type* for a given item, you must describe this item in terms of **selectors** : when all selectors configured for a type match an item, then the type is assigned to the item.
@@ -13,13 +12,13 @@ To configure a *custom type* for a given item, you must describe this item in te
 Let's see that on a simplified example : the configuration below defines 2 custom types, each one using a single selector that matches based on the last characters of the item *name*.
 
 ```yaml
-- types
-    - name: "JPG Image"
-      selectors:
-        - ends-with: ".jpg"
-    - name: "PNG Image"
-      selectors:
-        - ends-with: ".png"
+types
+  - name: "JPG Image"
+    selectors:
+      - ends-with: ".jpg"
+  - name: "PNG Image"
+    selectors:
+      - ends-with: ".png"
 ```
 
 Let's consider an example where the *root directory* is `c:\My Data\root`.

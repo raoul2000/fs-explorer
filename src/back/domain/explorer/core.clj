@@ -4,8 +4,7 @@
             [model :as model]
             [domain.explorer.type :refer [infer-type]]
             [domain.explorer.metadata :refer [read-metadata]]
-            [clojure.string :refer [blank? join]]
-            [clojure.string :as str]))
+            [clojure.string :refer [blank? join ends-with?]]))
 
 ;; utils  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -48,16 +47,19 @@
 
 (defn- list-dir-content
   "creates and returns a seq of file items stored under the given *dir-path* and recursively. 
-   Note that all files identified as **metadata files** are ignored."
-  [dir-path root-dir-path metadata-ext]
+   When metadata is enabled, files ending with metadata extension are ignored."
+  [dir-path root-dir-path {metadata-enabled :metadata/enable
+                           metadata-file-ext :metadata/file-extension}]
   {:model/content (->> (fs/list-dir dir-path)
                        (map #(create-file-item % root-dir-path))
-                       (filter #(not (str/ends-with? (:file/path %) (str "." metadata-ext)))))})
+                       (filter #(or (not metadata-enabled)
+                                    (not (ends-with? (:file/path %) (str "." metadata-file-ext))))))})
 
 (defn absolutize-path
   "when *this-path* refers to a file or folder that is under *root-path* returns its absolute path 
    form as string otherwise throws. 
-   Does not check if *this-path* refers to an existing file or folder."
+
+   Does not check if *this-path* exists."
   [^String this-path ^String root-path]
   (if (blank? this-path)
     (fs/normalize root-path)
@@ -84,20 +86,20 @@
 
 ;; meta ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn add-meta [with-meta metadata-format metadata-ext result]
-  (if-not with-meta
-    result
+(defn add-meta [with-meta {:keys [:metadata/enable]
+                           :as metadata-conf} result]
+  (if (and with-meta
+           enable)
     (update result :model/content (fn [file-xs]
-                                    (map #(read-metadata metadata-format metadata-ext %) file-xs)))
-    #_(->> (:model/content result)
-         (map #(read-metadata metadata-format metadata-ext %))
-         (assoc result :model/metadata))))
+                                    (map #(read-metadata metadata-conf %) file-xs)))
+    result))
+
+
 ;; explore  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn explore [fs-path {:keys [root-dir-path
                                types
-                               metadata-format
-                               metadata-ext] :as options}]
+                               metadata]}]
   {:post [(s/valid? :model/read-result %)]}
   (let [abs-path (absolutize-path (or fs-path "") root-dir-path)
         with-meta true]
@@ -112,9 +114,9 @@
                                          :root-path root-dir-path
                                          :abs-path  abs-path})))
 
-    (->> (list-dir-content abs-path root-dir-path metadata-ext)
+    (->> (list-dir-content abs-path root-dir-path metadata)
          (add-types        types)
-         (add-meta         with-meta metadata-format metadata-ext))))
+         (add-meta         with-meta metadata))))
 
 ;; index ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

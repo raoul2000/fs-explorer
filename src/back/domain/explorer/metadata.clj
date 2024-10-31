@@ -31,7 +31,7 @@
   (let [file-path (:file/path file-m)]
     (format "%s%s" file-path (if (:file/dir? file-m) fs/file-separator ""))))
 
-(defn create-metadata-candidates 
+(defn create-metadata-candidates
   "Returns a map describing all possible metadata file info for the given *file-m* descriptor.
    
    Keys :
@@ -51,7 +51,6 @@
   (when metadata-file-path
     (fs/regular-file? metadata-file-path)))
 
-
 (defn parse-metadata [metadata-info]
   (with-open [metadata-reader (io/reader (fs/file (:path metadata-info)))]
     (tap> {:metadata-info       metadata-info})
@@ -64,8 +63,10 @@
         (throw (ex-info "failed to parse metadata file " {:metadata-info metadata-info
                                                           :msg          (.getMessage e)}))))))
 
-(defn read-metadata [metadata-format metadata-extension file-item]
-  (let [metadata-candidates (create-metadata-candidates file-item metadata-format metadata-extension)]
+(defn read-metadata [{:keys [:metadata/file-extension
+                             :metadata/format]} 
+                     file-item]
+  (let [metadata-candidates  (create-metadata-candidates file-item format file-extension)]
     (if-let [metadata-info (first (filter file-exists? metadata-candidates))]
       (assoc file-item :file/metadata (parse-metadata metadata-info))
       file-item)))
