@@ -83,3 +83,9 @@
     (assoc file-m :file/type (:type/name infered-type))
     file-m))
 
+
+(defn ignored-type [type-def-xs file-m]
+  (when-let [file-type (get file-m :file/type)]
+    (some #(and (= file-type (:type/name %))
+                (get % :type/ignore)) type-def-xs)))
+

@@ -2,7 +2,7 @@
   (:require [babashka.fs :as fs]
             [clojure.spec.alpha :as s]
             [model :as model]
-            [domain.explorer.type :refer [infer-type]]
+            [domain.explorer.type :refer [infer-type ignored-type]]
             [domain.explorer.metadata :refer [read-metadata]]
             [clojure.string :refer [blank? join ends-with?]]))
 
@@ -84,6 +84,12 @@
     (update result :model/content (fn [file-xs]
                                     (map #(infer-type type-def-xs %) file-xs)))))
 
+(defn remove-ignored-types [type-def-xs result]
+  (if-not type-def-xs
+    result
+    (update result :model/content (fn [file-xs]
+                                    (remove #(ignored-type type-def-xs %) file-xs)))))
+
 ;; meta ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn add-meta [with-meta {:keys [:metadata/enable]
@@ -93,7 +99,6 @@
     (update result :model/content (fn [file-xs]
                                     (map #(read-metadata metadata-conf %) file-xs)))
     result))
-
 
 ;; explore  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -115,8 +120,9 @@
                                          :abs-path  abs-path})))
 
     (->> (list-dir-content abs-path root-dir-path metadata)
-         (add-types        types)
-         (add-meta         with-meta metadata))))
+         (add-types            types)
+         (remove-ignored-types types)
+         (add-meta             with-meta metadata))))
 
 ;; index ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -139,6 +145,8 @@
            (map (fn [path]
                   (fs-path->db-path root-dir-path path)))
            (map normalize-path-separator)))))
+
+;; TODO: index on dir should NOT return dir with an 'ingored' type
 
 (defn index
   "Builds and returns the list of all files or folders under *root-dir-path*"

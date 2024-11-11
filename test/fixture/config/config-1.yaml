@@ -118,4 +118,7 @@ types:
       - name: Open File
       - name: View
       - name: Download File
-      
+  - name: HIDE_DIR
+    ignore: true
+    selectors:
+      - is-directory: false

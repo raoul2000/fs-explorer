@@ -95,7 +95,6 @@ is-directory: true
 is-directory: false
 ```
 
-
 ### matches-regexp
 
 Selects the file item if it **matches** a single regular expression or one of the configured regular expressions.
@@ -109,4 +108,22 @@ matches-regexp: "\d+"
 matches-regexp: 
 - "\w[0-9]+\.txt"
 - "[a-zA-Z]+"
+```
+
+## ingore
+
+When a type definition includes the `ignore` property with a value set to *true*, then all items with this type a ignored.
+
+
+For example, the configuration below defines the type "Temporary dir" to all directories with the name "tmp" or "temp". All directories with this type will be ignored.
+
+```yaml
+types
+  - name: "Temporary dir"
+    selectors:
+      - is-directory: true
+      - equals: 
+        - "tmp"
+        - "temp"
+    ignore : true
 ```

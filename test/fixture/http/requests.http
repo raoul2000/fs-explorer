@@ -40,7 +40,7 @@ Accept: application/json
 
 ### GET /explore 1
 
-GET {{baseUrl}}/explore?dir=
+GET {{baseUrl}}/explore?dir=logseq-online/static/img
 Accept: application/json
 
 ### GET /explore 2

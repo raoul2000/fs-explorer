@@ -74,11 +74,13 @@
 
 (spec/def :type/name                :string/not-blank)
 (spec/def :type/selectors           (spec/coll-of :selector/def :min-count 1))
+(spec/def :type/ignore              boolean?)
 (spec/def :type/action-ref          (spec/keys :req [:action/name]))
 (spec/def :type/actions             (spec/coll-of  :type/action-ref :min-count 1))
 (spec/def :type/def                 (spec/keys  :req [:type/name
                                                       :type/selectors]
-                                                :opt [:type/actions]))
+                                                :opt [:type/actions
+                                                      :type/ignore]))
 
 (spec/def :metadata/enable           boolean?)
 (spec/def :metadata/format           valid-metadata-format)
@@ -140,6 +142,7 @@
 
 (defn types-definition    [config] (:config/types    config))
 (defn type-name           [type-m] (:type/name       type-m))
+(defn type-ignore         [type-m] (:type/ignore     type-m))
 (defn actions-definition  [config] (:config/actions  config))
 
 (defn metadata-definition [config] (:config/metadata         config))

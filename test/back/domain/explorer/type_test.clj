@@ -268,6 +268,23 @@
     (is (nil? (t/select-type {:config.type/name "file.txt"} nil)))
     (is (nil? (t/select-type {:config.type/name "file.txt"} [])))))
 
+
+
+(deftest ignored-type-test
+  (testing "predicate for ignored type"
+    (is (= nil
+         (t/ignored-type [#:type{:name      "type1"}
+                          #:type{:name      "type2"}]
+                         #:file{:type     "type1"}))
+        "returns falsy (nil) when file-m type is not ignored")
+
+    (is (= true
+           (t/ignored-type [#:type{:name      "type1"}
+                            #:type{:name      "type2"
+                                   :ignore   true}]
+                           #:file{:type "type2"}))
+        "returns true when file-m type is ignored"))) 
+
 (deftest infer-type-test
   (testing "Infer type for file map"
     (is (= {:file/name "file_to_test.txt"
@@ -287,4 +304,4 @@
                           #:type{:name      "type2"
                                  :selectors [#:selector{:equals "file.txt"}]}]
                          #:file{:name "no_match.txt"}))
-        "does not modify the file map"))) 
+        "does not modify the file map")))
