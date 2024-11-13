@@ -9,17 +9,12 @@ Each item is a directory or a regular file, that's the **base type**. On top of 
 
 To configure a *custom type* for a given item, you must describe this item in terms of **selectors** : when all selectors configured for a type match an item, then the type is assigned to the item.
 
-Let's see that on a simplified example : the configuration below defines 2 custom types, each one using a single selector that matches based on the last characters of the item *name*.
+All items are descibed by following properties : 
 
-```yaml
-types
-  - name: "JPG Image"
-    selectors:
-      - ends-with: ".jpg"
-  - name: "PNG Image"
-    selectors:
-      - ends-with: ".png"
-```
+- **name** : the name of the file or directory
+- **path** : the absolute path of the file or directory. Its format depends on the underlying file system (Windows/Unix)
+- **id** : canonical id built as a relative path in unix style
+- **dir?** : *true* when the file is a directory
 
 Let's consider an example where the *root directory* is `c:\My Data\root`.
 
@@ -30,6 +25,22 @@ Let's consider an example where the *root directory* is `c:\My Data\root`.
 | `c:\My Data\root\doc`                    | doc        | c:\My Data\root\doc                    | doc                    | true  |
 | `c:\My Data\root\doc\photos\home`        | home       | c:\My Data\root\doc\photos\home        | doc/photos/home        | true  |
 
+By default, all selectors that involve string matching, are applied to the **name** property. This can be changed by configuring the property to be used, via the `property` property.
+
+Let's see that on a the commented example below : 
+
+```yaml
+types
+  # some comments
+  - name: "JPG Image"
+    selectors:
+      - ends-with: ".jpg"
+  - name: "PNG Image"
+    selectors:
+      - ends-with: ".png"
+```
+
+
 
 - **name** : the name of the file or directory
 - **path** : the absolute path of the file or directory. Its format depends on the underlying file system
@@ -39,6 +50,8 @@ Let's consider an example where the *root directory* is `c:\My Data\root`.
 ### ends-with
 
 Selects the file item if it **ends with** a string or with one of the configured strings.
+
+By default, the item's **id** is used 
 
 Example:
 ```yaml
