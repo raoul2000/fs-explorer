@@ -2,14 +2,13 @@
 
 ## Overview
 
-Each item is a directory or a regular file, that's the **base type**. On top of it, a **custom type** can be configured so to bring extra meaning to items.
-
+Each object handled by the system is a directory or a regular file, that's the **base type**. On top of it, a **custom type** can be configured to bring extra meaning to an object.
 
 ## Selectors
 
-To configure a *custom type* for a given item, you must describe this item in terms of **selectors** : when all selectors configured for a type match an item, then the type is assigned to the item.
+To configure a *custom type* for a given object, you must describe this object in terms of **selectors** : when all selectors configured for a type match an object, then the type is assigned to the object.
 
-All items are descibed by following properties : 
+All objects are descibed by following properties : 
 
 - **name** : the name of the file or directory
 - **path** : the absolute path of the file or directory. Its format depends on the underlying file system (Windows/Unix)
@@ -27,31 +26,42 @@ Let's consider an example where the *root directory* is `c:\My Data\root`.
 
 By default, all selectors that involve string matching, are applied to the **name** property. This can be changed by configuring the property to be used, via the `property` property.
 
-Let's see that on a the commented example below : 
+For example : 
+
+- the type "JPG Image" is assigned to all objects with a `name` that ends with ".jpg". 
 
 ```yaml
 types
-  # some comments
   - name: "JPG Image"
     selectors:
       - ends-with: ".jpg"
-  - name: "PNG Image"
-    selectors:
-      - ends-with: ".png"
 ```
 
+- the type "readme file" is assigned to all objects with a `name` that equals to "readme.txt" or "README.md". 
 
+```yaml
+types
+  - name: "readme file"
+    selectors:
+      - is-directory: false
+      - equals: 
+        - readme.txt
+        - README.md
+```
+- the type "backup file" is assigned to all objects with a `id` that starts with "bck" (eg: "bck/file.txt", "bck/image/img.jpg", etc ...)  
 
-- **name** : the name of the file or directory
-- **path** : the absolute path of the file or directory. Its format depends on the underlying file system
-- **id** : canonical id built as a relative path in unix style
-- **dir?** : *true* when the file is a directory
+```yaml
+types
+  - name: "backup file"
+    selectors:
+      - is-directory: false
+      - property: id
+      - starts-with: "bck" 
+```
 
 ### ends-with
 
-Selects the file item if it **ends with** a string or with one of the configured strings.
-
-By default, the item's **id** is used 
+Selects the object if its **`name` ends with** a string or with one of the configured strings.
 
 Example:
 ```yaml
@@ -66,7 +76,7 @@ ends-with:
 
 ### starts-with
 
-Selects the file item if it **starts with** a string or with one of the configured strings.
+Selects the object if its **`name` starts with** a string or with one of the configured strings.
 
 Example:
 ```yaml
@@ -81,7 +91,7 @@ ends-with:
 
 ### equals
 
-Selects the file item if it **equals** to a string or to one of the configured strings.
+Selects the object if its **`name` is equals** to a string or to one of the configured strings.
 
 Example:
 ```yaml
@@ -94,10 +104,9 @@ equals:
 - "img.jpg"
 ```
 
-
 ### is-directory
 
-Selects the file item if it **is a directory or not**.
+Selects the object if it **is a directory**  or if it a **regular file**.
 
 Example:
 ```yaml
@@ -110,7 +119,7 @@ is-directory: false
 
 ### matches-regexp
 
-Selects the file item if it **matches** a single regular expression or one of the configured regular expressions.
+Selects the object if it **matches** a single regular expression or one of the configured regular expressions.
 
 Example:
 ```yaml
@@ -125,8 +134,7 @@ matches-regexp:
 
 ## ingore
 
-When a type definition includes the `ignore` property with a value set to *true*, then all items with this type a ignored.
-
+When a type definition includes the `ignore` property with a value set to *true*, then all objects with this type a ignored.
 
 For example, the configuration below defines the type "Temporary dir" to all directories with the name "tmp" or "temp". All directories with this type will be ignored.
 
