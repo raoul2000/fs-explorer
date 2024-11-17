@@ -8,7 +8,7 @@ Each object handled by the system is a directory or a regular file, that's the *
 
 To configure a *custom type* for a given object, you must describe this object in terms of **selectors** : when all selectors configured for a type match an object, then the type is assigned to the object.
 
-All objects are descibed by following properties : 
+All objects are descibed by the following properties : 
 
 - **name** : the name of the file or directory
 - **path** : the absolute path of the file or directory. Its format depends on the underlying file system (Windows/Unix)
@@ -17,27 +17,28 @@ All objects are descibed by following properties :
 
 Let's consider an example where the *root directory* is `c:\My Data\root`.
 
-| source file                              | name       | path                                   | id                     | dir?  |
-| ---------------------------------------- | ---------- | -------------------------------------- | ---------------------- | ----- |
-| `c:\My Data\root\readme.txt`             | readme.txt | c:\My Data\root\readme.txt             | readme.txt             | false |
-| `c:\My Data\root\category\blue\file.txt` | file.txt   | c:\My Data\root\category\blue\file.txt | category/blue/file.txt | false |
-| `c:\My Data\root\doc`                    | doc        | c:\My Data\root\doc                    | doc                    | true  |
-| `c:\My Data\root\doc\photos\home`        | home       | c:\My Data\root\doc\photos\home        | doc/photos/home        | true  |
+| source file                              | `name`     | `path`                                 | `id`                   | `dir`? |
+| ---------------------------------------- | ---------- | -------------------------------------- | ---------------------- | ------ |
+| `c:\My Data\root\readme.txt`             | readme.txt | c:\My Data\root\readme.txt             | readme.txt             | false  |
+| `c:\My Data\root\category\blue\file.txt` | file.txt   | c:\My Data\root\category\blue\file.txt | category/blue/file.txt | false  |
+| `c:\My Data\root\doc`                    | doc        | c:\My Data\root\doc                    | doc                    | true   |
+| `c:\My Data\root\doc\photos\home`        | home       | c:\My Data\root\doc\photos\home        | doc/photos/home        | true   |
 
 By default, all selectors that involve string matching, are applied to the **name** property. This can be changed by configuring the property to be used, via the `property` property.
 
 For example : 
 
-- the type "JPG Image" is assigned to all objects with a `name` that ends with ".jpg". 
+- the type "JPG Image" is assigned to all regular files with a `name` that ends with ".jpg". 
 
 ```yaml
 types
   - name: "JPG Image"
     selectors:
+      - is-directory: false
       - ends-with: ".jpg"
 ```
 
-- the type "readme file" is assigned to all objects with a `name` that equals to "readme.txt" or "README.md". 
+- the type "readme file" is assigned to all regular files with a `name` that equals to "readme.txt" or "README.md". 
 
 ```yaml
 types
@@ -48,7 +49,7 @@ types
         - readme.txt
         - README.md
 ```
-- the type "backup file" is assigned to all objects with a `id` that starts with "bck" (eg: "bck/file.txt", "bck/image/img.jpg", etc ...)  
+- the type "backup file" is assigned to all regulat files with a `id` that starts with "bck", so basically all files under the *bck* folder (eg: "bck/file.txt", "bck/image/img.jpg", etc ...)  
 
 ```yaml
 types
@@ -62,6 +63,8 @@ types
 ### ends-with
 
 Selects the object if its **`name` ends with** a string or with one of the configured strings.
+
+Optional property : `property`
 
 Example:
 ```yaml
@@ -78,6 +81,8 @@ ends-with:
 
 Selects the object if its **`name` starts with** a string or with one of the configured strings.
 
+Optional property : `property`
+
 Example:
 ```yaml
 # must start with "file"
@@ -92,6 +97,8 @@ ends-with:
 ### equals
 
 Selects the object if its **`name` is equals** to a string or to one of the configured strings.
+
+Optional property : `property`
 
 Example:
 ```yaml
@@ -120,6 +127,8 @@ is-directory: false
 ### matches-regexp
 
 Selects the object if it **matches** a single regular expression or one of the configured regular expressions.
+
+Optional property : `property`
 
 Example:
 ```yaml
