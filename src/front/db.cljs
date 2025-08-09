@@ -83,7 +83,7 @@
  ::load-index
  (fn [_cofx _event]
    {:fx [[:http-xhrio {:method          :get
-                       :uri             (str "/index?type=dir")
+                       :uri             "/index?type=dir"
                        :format          (json-request-format)
                        :response-format (json-response-format {:keywords? true})
                        :on-success      [::load-index-success]
@@ -108,7 +108,7 @@
  ::load-config
  (fn [_cofx _event]
    {:fx [[:http-xhrio {:method          :get
-                       :uri             (str "/config")
+                       :uri             "/config"
                        :format          (json-request-format)
                        :response-format (json-response-format {:keywords? true})
                        :on-success      [::load-config-success]
