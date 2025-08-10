@@ -69,6 +69,7 @@
  ::load-index-success
  [check-spec-interceptor]
  (fn [db [_ success-response]]
+   (tap> success-response)
    (-> db
        (assoc-in [:search :dir-index] (vec (:index success-response))))))
 
